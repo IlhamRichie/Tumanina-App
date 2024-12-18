@@ -1,0 +1,18 @@
+{
+    "sujud": {
+      "head": {"x": 0.5, "y": 2.0},
+      "hip": {"x": 0.5, "y": 3.0},
+      "deviation_threshold": 0.5
+    },
+    "ruku": {
+      "head": {"x": 0.5, "y": 1.5},
+      "hip": {"x": 0.5, "y": 2.5},
+      "deviation_threshold": 0.4
+    },
+    "takbir": {
+      "head": {"x": 0.5, "y": 3.5},
+      "shoulder": {"x": 0.5, "y": 3.0},
+      "deviation_threshold": 0.3
+    }
+  }
+  
