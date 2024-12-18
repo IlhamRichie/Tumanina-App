@@ -217,17 +217,17 @@ class PrayerChart extends StatelessWidget {
     }).toList();
 
     return SfCartesianChart(
-      primaryXAxis: CategoryAxis(),
-      title: ChartTitle(text: 'Jumlah Sholat Harian'),
-      series: <ChartSeries>[
-        ColumnSeries<_ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (_ChartData data, _) => data.date,
-          yValueMapper: (_ChartData data, _) => data.completedPrayers,
-          dataLabelSettings: const DataLabelSettings(isVisible: true),
-        ),
-      ],
-    );
+  primaryXAxis: CategoryAxis(),
+  title: ChartTitle(text: 'Jumlah Sholat Harian'),
+  series: <CartesianSeries>[
+    ColumnSeries<_ChartData, String>(
+      dataSource: chartData,
+      xValueMapper: (_ChartData data, _) => data.date,
+      yValueMapper: (_ChartData data, _) => data.completedPrayers,
+      dataLabelSettings: const DataLabelSettings(isVisible: true),
+    ),
+  ],
+);
   }
 }
 

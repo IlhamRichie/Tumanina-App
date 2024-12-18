@@ -45,6 +45,8 @@ dependencies:
   tflite_flutter: ^0.11.0
   permission_handler: ^11.3.1
   syncfusion_flutter_charts: ^28.1.3 
+  provider: ^6.0.5 # For state management (optional)
+  google_fonts: ^5.0.0
 
   
 
@@ -82,9 +84,10 @@ flutter:
     - assets/kiblat/
     - assets/pose_references.json
     - assets/sounds/
-    - assets/splash/splash1.png
-    - assets/splash/splash2.png
-    - assets/splash/splash3.png
+    - assets/splash/1 (7).png
+    - assets/splash/2 (6).png
+    - assets/splash/3 (7).png
+    - assets/splash/Logo1 1.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
