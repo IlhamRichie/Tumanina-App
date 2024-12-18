@@ -65,15 +65,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Nama lengkap',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green, width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                 ),
                 style: const TextStyle(fontSize: 16),
@@ -84,15 +84,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green, width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                 ),
                 style: const TextStyle(fontSize: 16),
@@ -104,15 +104,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: InputDecoration(
                   labelText: 'Kata sandi',
                   border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green, width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -143,10 +143,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.green,
+                    backgroundColor: Color(0xFF2DDCBE),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 5,
                   ),
@@ -174,10 +174,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black87,
                     backgroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.black26),
+                    side: const BorderSide(color: Color(0xFF2DDCBE)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   icon: Image.asset(
@@ -197,7 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: const Text(
                     'Sudah punya akun? Masuk',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Color(0xFF004C7E),
                       fontSize: 14,
                     ),
                   ),

@@ -202,7 +202,7 @@ Widget build(BuildContext context) {
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Semangat para penghuni surga',
+                    'Perdalam Sholat Anda Dengan Tumanina',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 20),
@@ -376,7 +376,7 @@ Widget _buildMenuItem(
         children: [
           Icon(
             entry.value ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: entry.value ? Colors.green : Colors.grey,
+            color: entry.value ? Color(0xFF2DDCBE) : Colors.grey,
           ),
           const SizedBox(height: 8),
           Text(
@@ -384,7 +384,7 @@ Widget _buildMenuItem(
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: entry.value ? Colors.green : Colors.black,
+              color: entry.value ? Color(0xFF2DDCBE) : Colors.black,
             ),
           ),
         ],
@@ -512,6 +512,7 @@ Widget _buildMenuItem(
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Beranda',
+          backgroundColor: Color(0xFF004C7E)
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.article),

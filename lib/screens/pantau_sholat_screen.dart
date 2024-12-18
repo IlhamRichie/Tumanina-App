@@ -6,7 +6,10 @@ import 'dart:convert';
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate; // Menambahkan parameter callback
 
-  const PantauSholatScreen({super.key, required this.onUpdate, required Map<String, bool> sholatMilestones});
+  const PantauSholatScreen(
+      {super.key,
+      required this.onUpdate,
+      required Map<String, bool> sholatMilestones});
 
   @override
   _PantauSholatScreenState createState() => _PantauSholatScreenState();
@@ -94,39 +97,38 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     });
   }
 
- void updateLog(String prayer, bool value) {
-  final today = DateTime.now().toString().split(' ')[0];
+  void updateLog(String prayer, bool value) {
+    final today = DateTime.now().toString().split(' ')[0];
 
-  setState(() {
-    todayLog[prayer] = value;
+    setState(() {
+      todayLog[prayer] = value;
 
-    // Perbarui atau tambahkan entri hari ini ke prayerLog
-    final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
-    if (todayIndex != -1) {
-      prayerLog[todayIndex] = {
-        'date': today,
-        ...todayLog,
-      };
-    } else {
-      prayerLog.add({
-        'date': today,
-        ...todayLog,
-      });
-    }
-  });
+      // Perbarui atau tambahkan entri hari ini ke prayerLog
+      final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
+      if (todayIndex != -1) {
+        prayerLog[todayIndex] = {
+          'date': today,
+          ...todayLog,
+        };
+      } else {
+        prayerLog.add({
+          'date': today,
+          ...todayLog,
+        });
+      }
+    });
 
-  // Kirim data kembali ke HomeScreen
-  widget.onUpdate({
-    'Shubuh': todayLog['shubuh'] ?? false,
-    'Dzuhur': todayLog['dzuhur'] ?? false,
-    'Ashar': todayLog['ashar'] ?? false,
-    'Maghrib': todayLog['maghrib'] ?? false,
-    'Isya': todayLog['isya'] ?? false,
-  });
+    // Kirim data kembali ke HomeScreen
+    widget.onUpdate({
+      'Shubuh': todayLog['shubuh'] ?? false,
+      'Dzuhur': todayLog['dzuhur'] ?? false,
+      'Ashar': todayLog['ashar'] ?? false,
+      'Maghrib': todayLog['maghrib'] ?? false,
+      'Isya': todayLog['isya'] ?? false,
+    });
 
-  saveProgress(); // Simpan progres
-}
-
+    saveProgress(); // Simpan progres
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +148,8 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         centerTitle: true,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator()) // Indikator loading
+          ? const Center(
+              child: CircularProgressIndicator()) // Indikator loading
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -158,16 +161,30 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Checklist Sholat Hari Ini',
+                          'Pantau Sholat Hari Ini',
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         ...todayLog.entries.map((entry) {
                           return CheckboxListTile(
-                            title: Text(entry.key.capitalize()),
+                            title: Text(
+                              entry.key[0].toUpperCase() +
+                                  entry.key.substring(1), // Kapitalisasi manual
+                            ),
+                            checkColor: Colors.white, // Warna centang
+                            fillColor:
+                                MaterialStateProperty.resolveWith((states) {
+                              if (states.contains(MaterialState.selected)) {
+                                return Color(
+                                    0xFF2DDCBE); // Warna jika dicentang
+                              }
+                              return Colors.grey[300]; // Warna default
+                            }),
                             value: entry.value,
                             onChanged: (value) {
-                              updateLog(entry.key, value!);
+                              if (value != null) {
+                                updateLog(entry.key, value);
+                              }
                             },
                           );
                         }),
@@ -217,20 +234,19 @@ class PrayerChart extends StatelessWidget {
     }).toList();
 
     return SfCartesianChart(
-  primaryXAxis: CategoryAxis(),
-  title: ChartTitle(text: 'Jumlah Sholat Harian'),
-  series: <CartesianSeries>[
-    ColumnSeries<_ChartData, String>(
-      dataSource: chartData,
-      xValueMapper: (_ChartData data, _) => data.date,
-      yValueMapper: (_ChartData data, _) => data.completedPrayers,
-      dataLabelSettings: const DataLabelSettings(isVisible: true),
-    ),
-  ],
-);
+      primaryXAxis: CategoryAxis(),
+      title: ChartTitle(text: 'Jumlah Sholat Harian'),
+      series: <CartesianSeries>[
+        ColumnSeries<_ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (_ChartData data, _) => data.date,
+          yValueMapper: (_ChartData data, _) => data.completedPrayers,
+          dataLabelSettings: const DataLabelSettings(isVisible: true),
+        ),
+      ],
+    );
   }
 }
-
 
 class _ChartData {
   final String date;

@@ -140,7 +140,7 @@ class _IntroScreenState extends State<IntroScreen> {
                     );
                   },
                   child: const Text(
-                    "Lewati",
+                    "",
                     style: TextStyle(color: Color(0xFF2DDCBE)),
                   ),
                 ),
@@ -158,7 +158,7 @@ class _IntroScreenState extends State<IntroScreen> {
                     );
                   },
                   child: const Text(
-                    "Selanjutnya",
+                    "",
                     style: TextStyle(color: Color(0xFF2DDCBE)),
                   ),
                 ),
@@ -170,12 +170,12 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget _buildDot(bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 3),
-      height: 8,
-      width: isActive ? 12 : 8,
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      height: 16,
+      width: isActive ? 16 : 16,
       decoration: BoxDecoration(
         color: isActive ? const Color(0xFF2DDCBE) : Colors.grey,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(16),
       ),
     );
   }

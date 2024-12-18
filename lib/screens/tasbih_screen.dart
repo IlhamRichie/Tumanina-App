@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasbih Mualaf'),
-        backgroundColor: Colors.green.shade700,
+        backgroundColor: Color(0xFF004C7E),
       ),
       body: Center(
         child: IconButton(
@@ -52,11 +52,32 @@ class TasbihScreen extends StatefulWidget {
 class _TasbihScreenState extends State<TasbihScreen>
     with SingleTickerProviderStateMixin {
   int counter = 0;
+  String dropdownValue = 'Tasbih';
+
   late AnimationController _controller;
   late Animation<double> _rotationAnimation;
 
   String displayedText = "";
   String displayedLatin = "";
+
+  final Map<String, Map<String, String>> dzikirText = {
+    'Tasbih': {
+      'arab': "سُبْحَانَ اللَّهِ",
+      'latin': "Subhanallah (Maha Suci Allah)",
+    },
+    'Tahmid': {
+      'arab': "الْحَمْدُ لِلَّهِ",
+      'latin': "Alhamdulillah (Segala Puji bagi Allah)",
+    },
+    'Takbir': {
+      'arab': "اللَّهُ أَكْبَرُ",
+      'latin': "Allahu Akbar (Allah Maha Besar)",
+    },
+    'Tauhid': {
+      'arab': "لَا إِلٰهَ إِلَّا اللَّهُ",
+      'latin': "Laa ilaaha illallah (Tiada Tuhan selain Allah)",
+    }
+  };
 
   @override
   void initState() {
@@ -68,6 +89,8 @@ class _TasbihScreenState extends State<TasbihScreen>
 
     _rotationAnimation = Tween<double>(begin: 0, end: 2 * pi)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    updateDzikirText();
   }
 
   @override
@@ -85,39 +108,15 @@ class _TasbihScreenState extends State<TasbihScreen>
 
   void resetCounter() {
     setState(() {
-      if (counter > 0) counter = 0;
-      displayedText = "";
-      displayedLatin = "";
+      counter = 0;
     });
   }
 
-  void showText(String type) {
+  void updateDzikirText() {
     setState(() {
-      if (type == "tasbih") {
-        displayedText = "سُبْحَانَ اللَّهِ";
-        displayedLatin = "Subhanallah (Maha Suci Allah)";
-      } else if (type == "tahmid") {
-        displayedText = "الْحَمْدُ لِلَّهِ";
-        displayedLatin = "Alhamdulillah (Segala Puji bagi Allah)";
-      } else if (type == "takbir") {
-        displayedText = "اللَّهُ أَكْبَرُ";
-        displayedLatin = "Allahu Akbar (Allah Maha Besar)";
-      }
+      displayedText = dzikirText[dropdownValue]!['arab']!;
+      displayedLatin = dzikirText[dropdownValue]!['latin']!;
     });
-  }
-
-  Widget _buildButton(String label, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green.shade600,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 18, color: Colors.white),
-      ),
-    );
   }
 
   @override
@@ -125,93 +124,118 @@ class _TasbihScreenState extends State<TasbihScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasbih Online'),
-        backgroundColor: Colors.green.shade700,
+        backgroundColor: Color(0xFF2DDCBE),
       ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Hitungan: $counter',
-              style: const TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-            ),
-            const SizedBox(height: 20),
-            AnimatedBuilder(
-              animation: _rotationAnimation,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: (_rotationAnimation.value / (33)) * 2 * pi,
-                  child: child,
-                );
-              },
-              child: Image.asset(
-                'assets/tasbih/tasbih_bead.png',
-                width: 120,
-                height: 120,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.error_outline,
-                  size: 120,
-                  color: Colors.red,
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: incrementCounter,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade800,
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(20),
-              ),
-              child: const Icon(Icons.add, size: 40, color: Colors.white),
-            ),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildButton('Tasbih', () => showText("tasbih")),
-                _buildButton('Tahmid', () => showText("tahmid")),
-                _buildButton('Takbir', () => showText("takbir")),
-              ],
-            ),
-            const SizedBox(height: 40),
-            if (displayedText.isNotEmpty) ...[
+      body: Center(
+        // Membuat konten tetap di tengah
+        child: SingleChildScrollView(
+          // Menghindari overflow jika layar kecil
+          child: Column(
+            mainAxisAlignment:
+                MainAxisAlignment.center, // Konten di tengah secara vertikal
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Konten di tengah secara horizontal
+            mainAxisSize: MainAxisSize.min, // Ukuran column mengikuti konten
+            children: [
+              // Hitungan
               Text(
-                displayedText,
+                'Hitungan: $counter',
                 style: const TextStyle(
-                  fontSize: 30,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Color(0xFF004C7E),
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                displayedLatin,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
+              const SizedBox(height: 20),
+
+              // Dropdown untuk memilih dzikir
+              DropdownButton<String>(
+                value: dropdownValue,
+                icon: const Icon(Icons.arrow_drop_down),
+                elevation: 16,
+                style: const TextStyle(color: Color(0xFF004C7E), fontSize: 18),
+                underline: Container(
+                  height: 2,
+                  color: Colors.greenAccent,
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    dropdownValue = newValue!;
+                    updateDzikirText();
+                  });
+                },
+                items: dzikirText.keys
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 40),
+
+              // Gambar Tasbih untuk menghitung
+              GestureDetector(
+                onTap: incrementCounter,
+                child: AnimatedBuilder(
+                  animation: _rotationAnimation,
+                  builder: (context, child) {
+                    return Transform.rotate(
+                      angle: _rotationAnimation.value,
+                      child: child,
+                    );
+                  },
+                  child: Image.asset(
+                    'assets/tasbih/tasbih3.png',
+                    width: 270,
+                    height: 270,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.error_outline,
+                      size: 120,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Teks Dzikir berdasarkan pilihan dropdown
+              if (displayedText.isNotEmpty) ...[
+                Text(
+                  displayedText,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF004C7E),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  displayedLatin,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontStyle: FontStyle.italic,
+                    color: Color(0xFF2DDCBE),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 40),
+
+              // Tombol Reset
+              ElevatedButton(
+                onPressed: resetCounter,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF004C7E),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                ),
+                child: const Text(
+                  'Reset',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: resetCounter,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-              ),
-              child: const Text(
-                'Reset',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
