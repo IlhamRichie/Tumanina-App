@@ -22,6 +22,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   final AudioPlayer audioPlayer = AudioPlayer();
   String surahAudioUrl = '';
   bool isLoading = true;
+  bool isPlaying = false;
 
   @override
   void initState() {
@@ -64,11 +65,59 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
 
     try {
       await audioPlayer.play(UrlSource(surahAudioUrl));
+      setState(() {
+        isPlaying = true;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error playing audio: $e')),
       );
     }
+  }
+
+  Future<void> pauseSurahAudio() async {
+    try {
+      await audioPlayer.pause();
+      setState(() {
+        isPlaying = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error pausing audio: $e')),
+      );
+    }
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.teal,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            widget.surahName,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Surah Number: ${widget.surahNumber}',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAyatList() {
@@ -89,9 +138,12 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
               ayat['idn'], // Terjemahan
               style: const TextStyle(fontSize: 16, color: Colors.black87),
             ),
-            leading: Text(
-              '${ayat['nomor']}', // Nomor ayat
-              style: const TextStyle(color: Colors.grey),
+            leading: CircleAvatar(
+              backgroundColor: Colors.teal,
+              child: Text(
+                '${ayat['nomor']}', // Nomor ayat
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ),
         );
@@ -118,24 +170,40 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () => playSurahAudio(),
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Play Surah Audio'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                    ),
+                  child: _buildHeader(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: isPlaying ? null : playSurahAudio,
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Play'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: isPlaying ? pauseSurahAudio : null,
+                        icon: const Icon(Icons.pause),
+                        label: const Text('Pause'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 16),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: _buildAyatList(),
                   ),
-                
-                
-                
                 ),
               ],
             ),

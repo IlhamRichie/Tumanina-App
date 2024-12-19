@@ -13,7 +13,7 @@ import 'tasbih_screen.dart';
 import 'ayat_al_quran_screen.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
-
+import 'fitur_doa/doa_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -163,70 +163,73 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Tumanina', style: TextStyle(color: Colors.black)),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const Icon(Icons.logout, color: Colors.black),
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        },
-      ),
-      actions: const [
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Icon(Icons.notifications, color: Colors.black),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tumanina', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.logout, color: Colors.black),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+            );
+          },
         ),
-      ],
-    ),
-    body: isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildImageSlider(),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Assalamu\'alaikum',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Perdalam Sholat Anda Dengan Tumanina',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildMenuRow(context),
-                  const SizedBox(height: 20),
-                  _buildNextPrayerCard(),
-                  const SizedBox(height: 20),
-                  const Text('Sudah Sholat?', style: TextStyle(fontSize: 18)),
-                  const SizedBox(height: 10),
-                  _buildPrayerChecklist(sholatMilestones), // Gunakan data disini
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Daftar Surah Al-Qur\'an',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildSurahBox(),
-                ],
+        actions: const [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(Icons.notifications, color: Colors.black),
+          ),
+        ],
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildImageSlider(),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Assalamu\'alaikum',
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Perdalam Sholat Anda Dengan Tumanina',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildMenuRow(context),
+                    const SizedBox(height: 20),
+                    _buildNextPrayerCard(),
+                    const SizedBox(height: 20),
+                    const Text('Sudah Sholat?', style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 10),
+                    _buildPrayerChecklist(
+                        sholatMilestones), // Gunakan data disini
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Daftar Surah Al-Qur\'an',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildSurahBox(),
+                  ],
+                ),
               ),
             ),
-          ),
-    bottomNavigationBar: _buildBottomNavigationBar(),
-  );
-}
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
 
   Widget _buildImageSlider() {
     return SizedBox(
@@ -242,7 +245,7 @@ Widget build(BuildContext context) {
     );
   }
 
- Widget _buildMenuRow(BuildContext context) {
+  Widget _buildMenuRow(BuildContext context) {
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: Row(
@@ -271,12 +274,12 @@ Widget build(BuildContext context) {
           );
         }),
         _buildMenuItem(context, Icons.access_time, 'Waktu\nSholat', () {
-        Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => WaktuSholatScreen(client: http.Client()), // Berikan client di sini
-  ),
-);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WaktuSholatScreen(client: http.Client()),
+            ),
+          );
         }),
         _buildMenuItem(context, Icons.chat, 'Chatbot', () {
           Navigator.push(
@@ -284,7 +287,7 @@ Widget build(BuildContext context) {
             MaterialPageRoute(builder: (context) => ChatScreen()),
           );
         }),
-         _buildMenuItem(context, Icons.chat, 'Kiblat', () {
+        _buildMenuItem(context, Icons.chat, 'Kiblat', () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const KiblatScreen()),
@@ -304,53 +307,60 @@ Widget build(BuildContext context) {
             ),
           );
         }),
+        _buildMenuItem(context, Icons.calendar_today, 'Doa Harian', () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DoaScreen()),
+          );
+        }),
       ],
     ),
   );
 }
 
-Widget _buildMenuItem(
-    BuildContext context, IconData icon, String label, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 70, // Tinggi dan lebar tetap untuk lingkaran
-            width: 70,
-            child: CircleAvatar(
-              backgroundColor: Colors.teal.shade100,
-              child: Icon(
-                icon,
-                size: 32,
-                color: Colors.teal,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: 70, // Lebar tetap untuk teks
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-              maxLines: 2, // Maksimum 2 baris
-              overflow: TextOverflow.ellipsis, // Tambahkan ellipsis jika terlalu panjang
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
+  Widget _buildMenuItem(
+      BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 70, // Tinggi dan lebar tetap untuk lingkaran
+              width: 70,
+              child: CircleAvatar(
+                backgroundColor: Colors.teal.shade100,
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: Colors.teal,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 70, // Lebar tetap untuk teks
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                maxLines: 2, // Maksimum 2 baris
+                overflow: TextOverflow
+                    .ellipsis, // Tambahkan ellipsis jika terlalu panjang
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildNextPrayerCard() {
     return Card(
@@ -360,39 +370,37 @@ Widget _buildMenuItem(
         title: Text(nextPrayer.isNotEmpty ? nextPrayer : 'Mengambil data...'),
         subtitle: Text(
             timeRemaining.isNotEmpty ? timeRemaining : 'Menghitung waktu...'),
-        trailing: nextPrayer.isNotEmpty
-            ? Text(prayerTimes[nextPrayer] ?? '')
-            : null,
+        trailing:
+            nextPrayer.isNotEmpty ? Text(prayerTimes[nextPrayer] ?? '') : null,
       ),
     );
   }
 
-    // Tambahkan metode untuk checklist sholat yang dapat diubah
- Widget _buildPrayerChecklist(Map<String, bool> sholatMilestones) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: sholatMilestones.entries.map((entry) {
-      return Column(
-        children: [
-          Icon(
-            entry.value ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: entry.value ? Color(0xFF2DDCBE) : Colors.grey,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            entry.key,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: entry.value ? Color(0xFF2DDCBE) : Colors.black,
+  // Tambahkan metode untuk checklist sholat yang dapat diubah
+  Widget _buildPrayerChecklist(Map<String, bool> sholatMilestones) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: sholatMilestones.entries.map((entry) {
+        return Column(
+          children: [
+            Icon(
+              entry.value ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: entry.value ? Color(0xFF2DDCBE) : Colors.grey,
             ),
-          ),
-        ],
-      );
-    }).toList(),
-  );
-}
-
+            const SizedBox(height: 8),
+            Text(
+              entry.key,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: entry.value ? Color(0xFF2DDCBE) : Colors.black,
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
 
   Widget _buildSurahBox() {
     return Container(
@@ -510,10 +518,9 @@ Widget _buildMenuItem(
       },
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Beranda',
-          backgroundColor: Color(0xFF004C7E)
-        ),
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+            backgroundColor: Color(0xFF004C7E)),
         BottomNavigationBarItem(
           icon: Icon(Icons.article),
           label: 'Artikel',
@@ -526,8 +533,6 @@ Widget _buildMenuItem(
     );
   }
 }
-
-
 
 // Kelas Surah
 class Surah {
