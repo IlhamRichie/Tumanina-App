@@ -30,7 +30,7 @@ class _IntroScreenState extends State<IntroScreen> {
     },
     {
       "title": "Belajar dengan Tumanina",
-      "description": "Mulai belajar sholat dengan tumaninah yang dilengkapi AI.",
+      "description": "Mulai belajar sholat dengan tumanina yang dilengkapi AI.",
       "image": "assets/splash/Logo1 1.png"
     },
   ];

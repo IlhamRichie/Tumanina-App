@@ -42,11 +42,12 @@ dependencies:
   shared_preferences: ^2.1.0
   geolocator: ^13.0.2
   flutter_compass: ^0.8.1
-  tflite_flutter: ^0.11.0
   permission_handler: ^11.3.1
   syncfusion_flutter_charts: ^28.1.3 
   provider: ^6.0.5 # For state management (optional)
   google_fonts: ^5.0.0
+  
+  flutter_secure_storage: ^9.2.2
 
   
 
@@ -88,6 +89,8 @@ flutter:
     - assets/splash/2 (6).png
     - assets/splash/3 (7).png
     - assets/splash/Logo1 1.png
+    - assets/TUMABOT.tflite
+    - assets/pp.jpeg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

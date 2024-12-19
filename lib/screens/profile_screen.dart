@@ -26,13 +26,13 @@ class ProfileScreen extends StatelessWidget {
             const Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/profile_placeholder.png'), // Tambahkan gambar profil placeholder
+                backgroundImage: AssetImage('assets/pp.jpeg'), // Tambahkan gambar profil placeholder
               ),
             ),
             const SizedBox(height: 20),
             const Center(
               child: Text(
-                'Nama Pengguna',
+                'Ilham Rigan',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 5),
             Center(
               child: Text(
-                'email@example.com',
+                'ilhamrigan22@gmail.com',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
