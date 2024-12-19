@@ -173,8 +173,8 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                             ),
                             checkColor: Colors.white, // Warna centang
                             fillColor:
-                                MaterialStateProperty.resolveWith((states) {
-                              if (states.contains(MaterialState.selected)) {
+                                WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
                                 return Color(
                                     0xFF2DDCBE); // Warna jika dicentang
                               }
