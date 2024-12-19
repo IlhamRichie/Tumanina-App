@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -41,7 +40,8 @@ class _KiblatScreenState extends State<KiblatScreen> {
     _compassStreamSubscription = FlutterCompass.events!.listen((event) {
       if (mounted) {
         setState(() {
-          _compassDirection = event.heading;
+          // Mengonversi heading kompas dari -180 hingga 180 ke 0 hingga 360
+          _compassDirection = (event.heading! + 360) % 360;
         });
       }
     });
@@ -61,17 +61,17 @@ class _KiblatScreenState extends State<KiblatScreen> {
 
   void _calculateKiblatDirection() {
     if (_latitude != null && _longitude != null) {
-      const double kaabaLatitude = 21.4225; // Latitude Kaaba
-      const double kaabaLongitude = 39.8262; // Longitude Kaaba
+      const double kaabaLatitude = 21.4225;
+      const double kaabaLongitude = 39.8262;
 
       double deltaLongitude = kaabaLongitude - _longitude!;
-      double y = sin(deltaLongitude) * cos(kaabaLatitude);
-      double x = cos(_latitude!) * sin(kaabaLatitude) -
-          sin(_latitude!) * cos(kaabaLatitude) * cos(deltaLongitude);
+      double y = sin(deltaLongitude * pi / 180) * cos(kaabaLatitude * pi / 180);
+      double x = cos(_latitude! * pi / 180) * sin(kaabaLatitude * pi / 180) -
+          sin(_latitude! * pi / 180) * cos(kaabaLatitude * pi / 180) * cos(deltaLongitude * pi / 180);
       double angle = atan2(y, x);
 
       setState(() {
-        _kiblatDirection = (angle * 180 / pi).toDouble();
+        _kiblatDirection = (angle * 180 / pi + 360) % 360; // Mengubah sudut menjadi 0-360
       });
     }
   }
@@ -87,7 +87,7 @@ class _KiblatScreenState extends State<KiblatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Arah Kiblat'),
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFF2DDCBE),
       ),
       body: _latitude == null || _longitude == null
           ? const Center(child: CircularProgressIndicator())
@@ -96,39 +96,55 @@ class _KiblatScreenState extends State<KiblatScreen> {
   }
 
   Widget _buildCompassScreen() {
-    return Center(
+    bool isAligned = false;
+    if (_compassDirection != null && _kiblatDirection != null) {
+      double diff = (_compassDirection! - _kiblatDirection!).abs();
+      if (diff < 5) {
+        isAligned = true;
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Expanded(
+            child: Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Transform.rotate(
+                    angle: (_kiblatDirection! - (_compassDirection ?? 0)) * pi / 180,
+                    child: Image.asset(
+                      'assets/kiblat/k.png',
+                      width: 500,
+                      height: 500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           if (_compassDirection != null && _kiblatDirection != null)
-            Stack(
-              alignment: Alignment.center,
+            Column(
               children: [
-                // Gambar Kiblat yang bisa diputar
-                Transform.rotate(
-                  angle: (_kiblatDirection! - _compassDirection!) * pi / 180,
-                  child: Image.asset(
-                    'assets/kiblat/compass.png', // Pastikan gambar kiblat ada di folder assets
-                    width: 100,
-                    height: 100,
+                Text(
+                  'Arah Kompas: ${_compassDirection!.toStringAsFixed(0)}°',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isAligned ? Colors.green : Colors.black,
                   ),
                 ),
-                // Teks untuk menunjukkan arah kompas dan Kiblat
-                Column(
-                  children: [
-                    Text(
-                      'Arah Kompas: ${_compassDirection!.toStringAsFixed(0)}°',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Arah Kiblat: ${_kiblatDirection!.toStringAsFixed(0)}°',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 10),
+                Text(
+                  'Arah Kiblat: ${_kiblatDirection!.toStringAsFixed(0)}°',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: isAligned ? Colors.green : Colors.black,
+                  ),
                 ),
               ],
             ),
