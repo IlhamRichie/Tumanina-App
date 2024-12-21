@@ -54,8 +54,8 @@ class DoaScreen extends StatelessWidget {
     ),
     Doa(
       title: "Doa Sebelum Makan",
-      arabic: "بِسْمِ اللّٰهِ وَبِسْمِكَ نَأْكُلُ",
-      latin: "Bismillah wa bismika na'kulu",
+      arabic: "اَللّٰهُمَّ بَارِكْ لَنَا فِيْمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ",
+      latin: "Allahumma baarik lanaa fiimaa rozaqtanaa wa qinaa 'adzaa bannaar",
       translation: "Dengan nama Allah, dan atas nama-Mu kami makan.",
       timeToRead: "Sebelum makan",
     ),
