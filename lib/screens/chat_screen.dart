@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
       backgroundColor: Color(0xFFF8F1E2),
       appBar: AppBar(
         title: Text(
-          'Chat Bot AI',
+          'Tumabot AI',
           style: GoogleFonts.roboto(color: Color(0xFF004C7E)),
         ),
         centerTitle: true,

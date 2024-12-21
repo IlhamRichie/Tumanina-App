@@ -25,8 +25,19 @@ class DoaDetailScreen extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               doa.arabic,
-              style: TextStyle(fontSize: 24, fontFamily: 'Amiri'), // Pilih font Arab
+              style: TextStyle(
+                  fontSize: 24, fontFamily: 'Amiri'), // Pilih font Arab
               textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Bacaan Latin:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Text(
+              doa.latin,
+              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
             ),
             SizedBox(height: 16),
             Text(

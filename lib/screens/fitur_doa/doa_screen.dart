@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class Doa {
   final String title;
   final String arabic;
+  final String latin;
   final String translation;
   final String timeToRead;
 
   Doa(
       {required this.title,
       required this.arabic,
+      required this.latin,
       required this.translation,
       required this.timeToRead});
 }
@@ -20,115 +22,221 @@ class DoaScreen extends StatelessWidget {
   final List<Doa> doaList = [
     Doa(
       title: "Doa Sebelum Tidur",
-      arabic: "بِسْمِكَ اللهم أَمُوتُ وَأَحْيَا",
-      translation: "Dengan nama-Mu Ya Allah, aku mati dan aku hidup.",
+      arabic: "بِسْمِكَ اللّٰهُمَّ أَمُوتُ وَأَحْيَا",
+      latin: "Bismika Allahumma amutu wa ahya",
+      translation: "Dengan nama-Mu, ya Allah, aku mati dan aku hidup.",
       timeToRead: "Sebelum tidur",
     ),
     Doa(
       title: "Doa Bangun Tidur",
       arabic:
-          "الحَمْدُ لِلّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+          "الحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+      latin:
+          "Alhamdu lillahi alladzi ahyana ba'da ma amatana wa ilaihin nushur",
       translation:
-          "Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami kembali.",
+          "Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan hanya kepada-Nya kami akan kembali.",
       timeToRead: "Setelah bangun tidur",
     ),
     Doa(
       title: "Doa Masuk WC",
-      arabic:
-          "بِسْمِ اللّهِ اللّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ",
+      arabic: "اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبْثِ وَالْخَبَائِثِ",
+      latin: "Allahumma inni a'udzu bika minal khubutsi wal khaba'its",
       translation:
-          "Dengan nama Allah, Ya Allah, aku berlindung kepada-Mu dari keburukan dan keburukan makhluk-Mu.",
-      timeToRead: "Sebelum masuk WC",
+          "Ya Allah, aku berlindung kepada-Mu dari kejahatan makhluk jin dan setan.",
+      timeToRead: "Saat masuk WC",
     ),
     Doa(
       title: "Doa Keluar WC",
       arabic: "غُفْرَانَكَ",
-      translation: "Ampunan-Mu ya Allah.",
-      timeToRead: "Setelah keluar WC",
+      latin: "Ghufranaka",
+      translation: "Aku memohon ampunan-Mu ya Allah.",
+      timeToRead: "Saat keluar WC",
     ),
     Doa(
       title: "Doa Sebelum Makan",
-      arabic: "بِسْمِ اللّهِ وَعَلَىٰ بَرَكَةِ اللّهِ",
-      translation: "Dengan nama Allah dan atas berkah Allah.",
+      arabic: "بِسْمِ اللّٰهِ وَبِسْمِكَ نَأْكُلُ",
+      latin: "Bismillah wa bismika na'kulu",
+      translation: "Dengan nama Allah, dan atas nama-Mu kami makan.",
       timeToRead: "Sebelum makan",
     ),
     Doa(
       title: "Doa Sesudah Makan",
       arabic:
-          "الحَمْدُ لِلّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
+          "الحَمْدُ لِلّٰهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مِنَ المُسْلِمِينَ",
+      latin:
+          "Alhamdu lillahi alladzi ath'amana wa saqana wa ja'alna minal muslimin",
       translation:
-          "Segala puji bagi Allah yang telah memberi makan dan minum kami, serta menjadikan kami sebagai umat Islam.",
+          "Segala puji bagi Allah yang telah memberi makan dan minum kepada kami, serta menjadikan kami sebagai orang-orang Muslim.",
       timeToRead: "Sesudah makan",
     ),
     Doa(
-      title: "Doa Perjalanan",
-      arabic:
-          "اللّهُ أكْبَرُ اللّهُ أكْبَرُ اللّهُ أكْبَرُ سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ",
-      translation:
-          "Allah Maha Besar, Allah Maha Besar, Allah Maha Besar. Maha Suci Allah yang telah menundukkan bagi kami kendaraan ini, padahal kami sebelumnya tidak mampu mengendalikannya.",
-      timeToRead: "Sebelum berpergian",
-    ),
-    Doa(
-      title: "Doa Saat Hujan",
-      arabic: "اللّهُمَّ صَيِّبًا نَافِعًا",
-      translation: "Ya Allah, turunkan hujan yang bermanfaat.",
+      title: "Doa Ketika Hujan Turun",
+      arabic: "اللّٰهُمَّ صَيِّبًا نَافِعًا",
+      latin: "Allahumma shayyiban nafi'an",
+      translation: "Ya Allah, turunkanlah hujan yang bermanfaat.",
       timeToRead: "Saat hujan turun",
     ),
     Doa(
-      title: "Doa Masuk Rumah",
+      title: "Doa Ketika Ada Petir",
       arabic:
-          "بِسْمِ اللّهِ وَلَجْنَا وَبِسْمِ اللّهِ خَرَجْنَا وَعَلَى اللّهِ رَبِّنَا تَوَكَّلْنَا",
+          "سُبْحَانَ الَّذِي يُسَبِّحُ الرَّعْدُ بِحَمْدِهِ وَالْمَلَائِكَةُ مِنْ خِيفَتِهِ",
+      latin:
+          "Subhanalladzi yusabbihur ra'du bihamdihi wal malaikatu min khifatihi",
       translation:
-          "Dengan nama Allah kami masuk dan dengan nama Allah kami keluar, dan hanya kepada Allah, Tuhan kami, kami bertawakal.",
-      timeToRead: "Saat masuk rumah",
+          "Maha Suci Allah yang guruh bertasbih dengan memuji-Nya, begitu pula para malaikat karena takut kepada-Nya.",
+      timeToRead: "Saat mendengar petir",
     ),
     Doa(
-      title: "Doa Ketika Mendengar Azan",
+      title: "Doa Ketika Hendak Bepergian",
       arabic:
-          "اللّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ وَابْعَثْهُ مَقَامًا مَّحْمُودًا الَّذِي وَعَدتَّهُ",
+          "اللّٰهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هٰذَا البِرَّ وَالتَّقْوَىٰ وَمِنَ العَمَلِ مَا تَرْضَىٰ",
+      latin:
+          "Allahumma inna nas'aluka fi safarina hadzal birra wat-taqwa wa minal 'amali ma tardha",
       translation:
-          "Ya Allah, Tuhan pemilik seruan yang sempurna ini dan shalat yang didirikan, berikanlah kepada Nabi Muhammad wasilah dan keutamaan, serta tempat yang terpuji yang telah Engkau janjikan padanya.",
-      timeToRead: "Ketika mendengar azan",
+          "Ya Allah, kami memohon kepada-Mu kebaikan dan ketakwaan dalam perjalanan ini, serta amal yang Engkau ridai.",
+      timeToRead: "Saat hendak bepergian",
     ),
     Doa(
-      title: "Doa Ketika Sakit",
+      title: "Doa Ketika Sampai di Tujuan",
       arabic:
-          "اللّهُمَّ رَبَّ النَّاسِ أَذْهِبْ الْبَاسَ اشْفِهِ أَنْتَ الشَّافِي لَا شِفَاءَ إِلَّا شِفَاؤُكَ شِفَاءً لَا يُغَادِرُ سَقَمًا",
+          "اللّٰهُمَّ أَنْزِلْنِي مُنْزَلًا مُبَارَكًا وَأَنْتَ خَيْرُ المُنْزِلِينَ",
+      latin: "Allahumma anzilni munzalan mubarakan wa anta khairul munzilin",
       translation:
-          "Ya Allah, Tuhan seluruh umat manusia, hilangkan penyakit ini, sembuhkanlah dia, Engkaulah yang Maha Penyembuh, tidak ada kesembuhan kecuali kesembuhan dari-Mu, kesembuhan yang tidak meninggalkan penyakit.",
-      timeToRead: "Saat sakit",
+          "Ya Allah, turunkan aku di tempat yang penuh berkah, dan Engkau adalah sebaik-baik pemberi tempat.",
+      timeToRead: "Saat sampai di tujuan",
     ),
     Doa(
-      title: "Doa Untuk Anak",
-      arabic:
-          "رَبِّ هَبْ لِي مِن لَّدُنكَ ذُرِّيَّةً طَيِّبَةً إِنَّكَ سَمِيعُ الدُّعَاء",
+      title: "Doa Sebelum Belajar",
+      arabic: "رَبِّ زِدْنِي عِلْمًا وَارْزُقْنِي فَهْمًا",
+      latin: "Rabbi zidni 'ilman warzuqni fahman",
       translation:
-          "Ya Tuhanku, anugerahkanlah kepadaku keturunan yang baik, sesungguhnya Engkau Maha Mendengar doa.",
-      timeToRead: "Untuk anak",
+          "Ya Tuhanku, tambahkanlah aku ilmu, dan berilah aku pemahaman.",
+      timeToRead: "Sebelum belajar",
     ),
     Doa(
-      title: "Doa Untuk Orang Tua",
+      title: "Doa Sesudah Belajar",
       arabic:
-          "رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَاب",
+          "اللّٰهُمَّ انْفَعْنِي بِمَا عَلَّمْتَنِي وَعَلِّمْنِي مَا يَنْفَعُنِي وَزِدْنِي عِلْمًا",
+      latin:
+          "Allahumma anfa'ni bima 'allamtani wa 'allimni ma yanfa'uni wa zidni 'ilman",
       translation:
-          "Ya Tuhanku, ampunilah aku, kedua orang tuaku, dan orang-orang yang beriman pada hari terjadinya perhitungan amal.",
-      timeToRead: "Untuk orang tua",
+          "Ya Allah, manfaatkanlah ilmu yang telah Engkau ajarkan kepadaku, ajarkanlah aku ilmu yang bermanfaat, dan tambahkanlah aku ilmu.",
+      timeToRead: "Sesudah belajar",
     ),
     Doa(
-      title: "Doa Untuk Meminta Rizki",
-      arabic:
-          "اللّهُمَّ إِنِّي أَسْأَلُكَ رَحْمَتَكَ وَالْفَجْرَ وَالْخَيْرَ وَالْعَافِيَةَ وَالْغِنَى وَالرَّحْمَةَ",
+      title: "Doa Ketika Menyusui",
+      arabic: "اللّٰهُمَّ اجْعَلْنِي وَذُرِّيَتِي مِنَ الصَّالِحِينَ",
+      latin: "Allahumma aj'alni wa dzurriyati minash shalihin",
       translation:
-          "Ya Allah, aku memohon rahmat-Mu, keberkahan, kebaikan, kesehatan, kekayaan, dan kasih sayang.",
-      timeToRead: "Saat membutuhkan rizki",
+          "Ya Allah, jadikanlah aku dan keturunanku termasuk golongan orang-orang yang saleh.",
+      timeToRead: "Saat menyusui",
     ),
     Doa(
-      title: "Doa Agar Terhindar Dari Fitnah",
+      title: "Doa Ketika Menggendong Anak",
       arabic:
-          "اللّهُمَّ إِنَّا نَعُوذُ بِكَ مِنْ فِتْنَةِ الدُّنْيَا وَمَا فِيهَا وَمِنْ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ",
+          "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+      latin:
+          "Rabbana hablana min azwajina wa dzurriyatina qurrata a'yunin waj'alna lil muttaqina imama",
       translation:
-          "Ya Allah, kami berlindung kepada-Mu dari fitnah dunia dan segala isinya serta dari fitnah Dajjal.",
-      timeToRead: "Untuk menghindari fitnah",
+          "Ya Tuhan kami, anugerahkanlah kepada kami pasangan dan keturunan sebagai penyejuk hati kami, dan jadikanlah kami pemimpin bagi orang-orang yang bertakwa.",
+      timeToRead: "Saat menggendong anak",
+    ),
+    Doa(
+      title: "Doa Ketika Akan Tidur Siang",
+      arabic:
+          "اللّٰهُمَّ اجْعَلْ نَوْمَنَا رَاحَةً لِبَدَنِنَا وَقُوَّةً لِعَمَلِنَا",
+      latin:
+          "Allahumma aj'al naumana rahatan libadanina wa quwwatan li'amalina",
+      translation:
+          "Ya Allah, jadikanlah tidur siang kami sebagai istirahat untuk badan kami dan kekuatan untuk amal kami.",
+      timeToRead: "Saat akan tidur siang",
+    ),
+    Doa(
+      title: "Doa Ketika Masuk Masjid",
+      arabic: "اللّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+      latin: "Allahummaftah lii abwaaba rahmatika.",
+      translation: "Ya Allah, bukakanlah untukku pintu-pintu rahmat-Mu.",
+      timeToRead: "Saat masuk masjid",
+    ),
+    Doa(
+      title: "Doa Ketika Keluar Masjid",
+      arabic: "اللّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
+      latin: "Allahumma innii as-aluka min fadhlika.",
+      translation:
+          "Ya Allah, sesungguhnya aku memohon kepada-Mu keutamaan dari-Mu.",
+      timeToRead: "Saat keluar masjid",
+    ),
+    Doa(
+      title: "Doa Ketika Memakai Pakaian Baru",
+      arabic:
+          "اللّهُمَّ لَكَ الْحَمْدُ كَمَا كَسَوْتَنِيهِ أَسْأَلُكَ خَيْرَهُ وَخَيْرَ مَا صُنِعَ لَهُ وَأَعُوذُ بِكَ مِنْ شَرِّهِ وَشَرِّ مَا صُنِعَ لَهُ",
+      latin:
+          "Allahumma lakal hamdu kama kasautaniihi as-aluka khairahu wa khaira ma shuni’a lahu wa a’udzu bika min syarrihi wa syarri ma shuni’a lahu.",
+      translation:
+          "Ya Allah, segala puji hanya untuk-Mu sebagaimana Engkau telah memakaikan pakaian ini kepadaku. Aku memohon kebaikannya dan kebaikan dari apa yang dibuat untuknya, serta aku berlindung kepada-Mu dari kejelekannya dan kejelekan dari apa yang dibuat untuknya.",
+      timeToRead: "Saat memakai pakaian baru",
+    ),
+    Doa(
+      title: "Doa Ketika Bercermin",
+      arabic: "اللّهُمَّ كَمَا أَحْسَنْتَ خَلْقِي فَحَسِّنْ خُلُقِي",
+      latin: "Allahumma kamaa ahsanta kholqii fahassin khuluqii.",
+      translation:
+          "Ya Allah, sebagaimana Engkau telah memperindah kejadianku, maka perindahlah akhlakku.",
+      timeToRead: "Saat bercermin",
+    ),
+    Doa(
+      title: "Doa Ketika Mendengar Petir",
+      arabic:
+          "سُبْحَانَ الَّذِي يُسَبِّحُ الرَّعْدُ بِحَمْدِهِ وَالْمَلَائِكَةُ مِنْ خِيفَتِهِ",
+      latin:
+          "Subhaanal ladzi yusabbihur ra’du bihamdihi wal malaa-ikatu min khifatihi.",
+      translation:
+          "Maha Suci Allah yang petir bertasbih dengan memuji-Nya, begitu pula para malaikat karena takut kepada-Nya.",
+      timeToRead: "Ketika mendengar petir",
+    ),
+    Doa(
+      title: "Doa Ketika Melihat Hilal",
+      arabic:
+          "اللّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْأَمْنِ وَالْإِيمَانِ وَالسَّلَامَةِ وَالإِسْلاَمِ وَالتَّوْفِيقِ لِمَا تُحِبُّ وَتَرْضَى",
+      latin:
+          "Allahumma ahillahu ‘alaynaa bil amni wal iimaan, wassalaamati wal islaam, wat tawfiiqi limaa tuhibbu wa tardhaa.",
+      translation:
+          "Ya Allah, munculkanlah hilal kepada kami dengan keamanan, iman, keselamatan, Islam, dan taufik kepada apa yang Engkau cintai dan ridhai.",
+      timeToRead: "Saat melihat hilal",
+    ),
+    Doa(
+      title: "Doa Ketika Bersin",
+      arabic: "الحَمْدُ لِلّهِ",
+      latin: "Alhamdulillah.",
+      translation: "Segala puji bagi Allah.",
+      timeToRead: "Setelah bersin",
+    ),
+    Doa(
+      title: "Doa Ketika Mendengar Orang Bersin",
+      arabic: "يَرْحَمُكَ اللَّهُ",
+      latin: "Yarhamukallah.",
+      translation: "Semoga Allah merahmatimu.",
+      timeToRead: "Ketika mendengar orang bersin",
+    ),
+    Doa(
+      title: "Doa Ketika Melihat Orang Sakit",
+      arabic:
+          "الحَمْدُ لِلّهِ الَّذِي عَافَانِي مِمَّا ابْتَلَاكَ بِهِ وَفَضَّلَنِي عَلَى كَثِيرٍ مِمَّنْ خَلَقَ تَفْضِيلًا",
+      latin:
+          "Alhamdulillahil ladzi ‘aafaani mimmaab talaaka bihi wa fadh-dholanii ‘ala katsiirin mimman kholaq tafdhiilaa.",
+      translation:
+          "Segala puji bagi Allah yang telah menyelamatkan aku dari apa yang menimpamu dan yang telah memberikan keutamaan kepadaku atas kebanyakan makhluk-Nya.",
+      timeToRead: "Ketika melihat orang sakit",
+    ),
+    Doa(
+      title: "Doa Ketika Melihat Orang Mendapat Musibah",
+      arabic:
+          "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ، اللّهُمَّ أْجُرْنِي فِي مُصِيبَتِي وَاخْلُفْ لِي خَيْرًا مِنْهَا",
+      latin:
+          "Innalillahi wa inna ilaihi raaji’uun, Allahumma ajurnii fii mushiibatii wakhluf lii khairan minhaa.",
+      translation:
+          "Sesungguhnya kami milik Allah dan kepada-Nya kami kembali. Ya Allah, berilah aku ganjaran dalam musibahku ini dan gantikanlah untukku yang lebih baik darinya.",
+      timeToRead: "Ketika melihat orang mendapat musibah",
     ),
   ];
 
