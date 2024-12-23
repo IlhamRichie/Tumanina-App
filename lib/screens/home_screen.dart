@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _validateMilestones();
     fetchPrayerTimes();
     fetchSurahList();
     _loadSholatMilestones();
@@ -49,9 +50,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _setNotificationShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notificationShown', true);
+  }
+
+  Future<bool> _getNotificationShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('notificationShown') ?? false;
+  }
+
   // Fungsi untuk menyimpan milestones ke SharedPreferences
   Future<void> _saveSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
+    print('Saving milestones: $sholatMilestones');
     await prefs.setString('sholatMilestones', json.encode(sholatMilestones));
   }
 
@@ -145,8 +157,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void showNextPrayerNotification() {
-    if (nextPrayer.isNotEmpty) {
+  void _validateMilestones() {
+    for (var key in sholatMilestones.keys) {
+      if (!sholatMilestones.containsKey(key)) {
+        sholatMilestones[key] = false;
+      }
+    }
+  }
+
+  void showNextPrayerNotification() async {
+    final hasShownNotification = await _getNotificationShown();
+    if (nextPrayer.isNotEmpty && !hasShownNotification) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Apakah kamu sudah sholat $nextPrayer?'),
@@ -156,10 +177,12 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 sholatMilestones[nextPrayer] = true;
               });
+              _saveSholatMilestones();
             },
           ),
         ),
       );
+      _setNotificationShown();
     }
   }
 
@@ -246,78 +269,78 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMenuRow(BuildContext context) {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [
-        _buildMenuItem(context, Icons.book, 'Belajar\nSholat', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const BelajarSholatScreen(),
-            ),
-          );
-        }),
-        _buildMenuItem(context, Icons.monitor, 'Pantau\nSholat', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PantauSholatScreen(
-                sholatMilestones: Map<String, bool>.from(sholatMilestones),
-                onUpdate: (updatedMilestones) {
-                  setState(() {
-                    sholatMilestones.addAll(updatedMilestones);
-                  });
-                },
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildMenuItem(context, Icons.book, 'Belajar\nSholat', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BelajarSholatScreen(),
               ),
-            ),
-          );
-        }),
-        _buildMenuItem(context, Icons.access_time, 'Waktu\nSholat', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WaktuSholatScreen(client: http.Client()),
-            ),
-          );
-        }),
-        _buildMenuItem(context, Icons.chat, 'Chatbot', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ChatScreen()),
-          );
-        }),
-        _buildMenuItem(context, Icons.chat, 'Kiblat', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const KiblatScreen()),
-          );
-        }),
-        _buildMenuItem(context, Icons.auto_awesome_mosaic, 'Tasbih', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TasbihScreen()),
-          );
-        }),
-        _buildMenuItem(context, Icons.book, 'Ayat-Ayat\nAl-Qur\'an', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AyatAlQuranScreen(),
-            ),
-          );
-        }),
-        _buildMenuItem(context, Icons.calendar_today, 'Doa Harian', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => DoaScreen()),
-          );
-        }),
-      ],
-    ),
-  );
-}
-
+            );
+          }),
+          _buildMenuItem(context, Icons.monitor, 'Pantau\nSholat', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PantauSholatScreen(
+                  sholatMilestones: Map<String, bool>.from(sholatMilestones),
+                  onUpdate: (updatedMilestones) {
+                    setState(() {
+                      sholatMilestones = updatedMilestones;
+                    });
+                    _saveSholatMilestones();
+                  },
+                ),
+              ),
+            );
+          }),
+          _buildMenuItem(context, Icons.access_time, 'Waktu\nSholat', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WaktuSholatScreen(client: http.Client()),
+              ),
+            );
+          }),
+          _buildMenuItem(context, Icons.chat, 'Chatbot', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChatScreen()),
+            );
+          }),
+          _buildMenuItem(context, Icons.chat, 'Kiblat', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const KiblatScreen()),
+            );
+          }),
+          _buildMenuItem(context, Icons.auto_awesome_mosaic, 'Tasbih', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TasbihScreen()),
+            );
+          }),
+          _buildMenuItem(context, Icons.book, 'Ayat-Ayat\nAl-Qur\'an', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AyatAlQuranScreen(),
+              ),
+            );
+          }),
+          _buildMenuItem(context, Icons.calendar_today, 'Doa Harian', () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => DoaScreen()),
+            );
+          }),
+        ],
+      ),
+    );
+  }
 
   Widget _buildMenuItem(
       BuildContext context, IconData icon, String label, VoidCallback onTap) {

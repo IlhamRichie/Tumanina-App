@@ -14,6 +14,41 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
 
+  Widget _buildTextField({
+    required String labelText,
+    required TextEditingController controller,
+    bool isPassword = false,
+    void Function()? toggleVisibility,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword && !isPasswordVisible,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF2DDCBE)),
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: toggleVisibility,
+              )
+            : null,
+      ),
+      style: const TextStyle(fontSize: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,59 +95,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              TextField(
+              _buildTextField(
+                labelText: 'Email',
                 controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                ),
-                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 20),
-              TextField(
+              _buildTextField(
+                labelText: 'Kata sandi',
                 controller: passwordController,
-                obscureText: !isPasswordVisible,
-                decoration: InputDecoration(
-                  labelText: 'Kata sandi',
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isPasswordVisible = !isPasswordVisible;
-                      });
-                    },
-                  ),
-                ),
-                style: const TextStyle(fontSize: 16),
+                isPassword: true,
+                toggleVisibility: () {
+                  setState(() {
+                    isPasswordVisible = !isPasswordVisible;
+                  });
+                },
               ),
               const SizedBox(height: 30),
               SizedBox(
-                width: double.infinity, // Lebar penuh sesuai dengan kotak input
+                width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     // Logika login dengan emailController dan passwordController
@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Color(0xFF2DDCBE),
+                    backgroundColor: const Color(0xFF2DDCBE),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -149,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 10),
               SizedBox(
-                width: double.infinity, // Lebar penuh sesuai dengan kotak input
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(

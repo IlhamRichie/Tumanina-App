@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:adhan/adhan.dart';
 import 'dart:convert';
 
 class PantauSholatScreen extends StatefulWidget {
@@ -127,7 +128,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
       'Isya': todayLog['isya'] ?? false,
     });
 
-    saveProgress(); // Simpan progres
+    saveProgress();
   }
 
   @override
@@ -181,9 +182,43 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                               return Colors.grey[300]; // Warna default
                             }),
                             value: entry.value,
-                            onChanged: (value) {
+                            onChanged: (value) async {
                               if (value != null) {
-                                updateLog(entry.key, value);
+                                // Lokasi pengguna
+                                final coordinates = Coordinates(37.7749,
+                                    -122.4194); // Ganti dengan lokasi pengguna
+                                final params = CalculationMethod
+                                    .muslim_world_league
+                                    .getParameters();
+                                final prayerTimes =
+                                    PrayerTimes.today(coordinates, params);
+
+                                // Waktu sekarang
+                                final now = DateTime.now();
+                                final prayerKeyToTime = {
+                                  'shubuh': prayerTimes.fajr,
+                                  'dzuhur': prayerTimes.dhuhr,
+                                  'ashar': prayerTimes.asr,
+                                  'maghrib': prayerTimes.maghrib,
+                                  'isya': prayerTimes.isha,
+                                };
+
+                                // Periksa apakah waktu saat ini cocok dengan waktu sholat
+                                final prayerTime = prayerKeyToTime[entry.key];
+                                if (prayerTime != null &&
+                                    now.isAfter(prayerTime.subtract(
+                                        const Duration(minutes: 15))) &&
+                                    now.isBefore(prayerTime
+                                        .add(const Duration(minutes: 15)))) {
+                                  updateLog(entry.key, value);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Waktu untuk ${entry.key.capitalize()} belum tiba'),
+                                    ),
+                                  );
+                                }
                               }
                             },
                           );

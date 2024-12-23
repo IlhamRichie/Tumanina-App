@@ -13,7 +13,7 @@ class WaktuSholatScreen extends StatefulWidget {
 
 class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Map<String, String> prayerTimes = {};
-  String errorMessage = ''; // Tambahkan variabel untuk menampilkan pesan error
+  String errorMessage = '';
 
   @override
   void initState() {
@@ -37,18 +37,16 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
             'Maghrib': data['data']['timings']['Maghrib'],
             'Isya': data['data']['timings']['Isha'],
           };
-          errorMessage = ''; // Hapus pesan error jika berhasil
+          errorMessage = '';
         });
       } else {
-        // Jika API gagal, tampilkan pesan error
         setState(() {
-          errorMessage = 'Failed to load prayer times';
+          errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
         });
       }
     } catch (e) {
-      // Tangkap exception dan tampilkan pesan error
       setState(() {
-        errorMessage = 'Failed to load prayer times';
+        errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
       });
     }
   }
@@ -59,6 +57,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       appBar: AppBar(
         title: const Text('Waktu Sholat Tegal'),
         centerTitle: true,
+        backgroundColor: const Color(0xFF2DDCBE),
       ),
       body: errorMessage.isNotEmpty
           ? Center(
@@ -69,18 +68,55 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
             )
           : prayerTimes.isNotEmpty
               ? ListView(
+                  padding: const EdgeInsets.all(16),
                   children: prayerTimes.entries.map((entry) {
                     return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
                       child: ListTile(
-                        title: Text(entry.key),
-                        trailing: Text(entry.value),
+                        leading: Icon(
+                          _getPrayerIcon(entry.key),
+                          color: const Color(0xFF004C7E),
+                        ),
+                        title: Text(
+                          entry.key,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        trailing: Text(
+                          entry.value,
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black54),
+                        ),
                       ),
                     );
                   }).toList(),
                 )
-              : const Center(child: CircularProgressIndicator()),
+              : const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF004C7E)),
+                  ),
+                ),
     );
+  }
+
+  IconData _getPrayerIcon(String prayerName) {
+    switch (prayerName) {
+      case 'Subuh':
+        return Icons.wb_twilight;
+      case 'Dzuhur':
+        return Icons.wb_sunny;
+      case 'Ashar':
+        return Icons.cloud;
+      case 'Maghrib':
+        return Icons.nights_stay;
+      case 'Isya':
+        return Icons.brightness_3;
+      default:
+        return Icons.access_time;
+    }
   }
 }
