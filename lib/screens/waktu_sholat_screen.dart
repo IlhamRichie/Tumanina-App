@@ -29,6 +29,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print(data); // Debugging untuk memeriksa data
         setState(() {
           prayerTimes = {
             'Subuh': data['data']['timings']['Fajr'],

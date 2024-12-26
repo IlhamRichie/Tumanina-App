@@ -5,12 +5,9 @@ import 'package:adhan/adhan.dart';
 import 'dart:convert';
 
 class PantauSholatScreen extends StatefulWidget {
-  final Function(Map<String, bool>) onUpdate; // Menambahkan parameter callback
+  final Function(Map<String, bool>) onUpdate; // Callback function
 
-  const PantauSholatScreen(
-      {super.key,
-      required this.onUpdate,
-      required Map<String, bool> sholatMilestones});
+  const PantauSholatScreen({super.key, required this.onUpdate, required Map<String, bool> sholatMilestones});
 
   @override
   _PantauSholatScreenState createState() => _PantauSholatScreenState();
@@ -49,7 +46,6 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         prayerLog = List<Map<String, dynamic>>.from(json.decode(jsonLog));
       });
 
-      // Periksa apakah hari ini ada di prayerLog, jika tidak, tambahkan
       final todayEntry = prayerLog.firstWhere(
         (log) => log['date'] == today,
         orElse: () => {
@@ -104,7 +100,6 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     setState(() {
       todayLog[prayer] = value;
 
-      // Perbarui atau tambahkan entri hari ini ke prayerLog
       final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
       if (todayIndex != -1) {
         prayerLog[todayIndex] = {
@@ -119,7 +114,6 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
       }
     });
 
-    // Kirim data kembali ke HomeScreen
     widget.onUpdate({
       'Shubuh': todayLog['shubuh'] ?? false,
       'Dzuhur': todayLog['dzuhur'] ?? false,
@@ -150,12 +144,11 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
       ),
       body: isLoading
           ? const Center(
-              child: CircularProgressIndicator()) // Indikator loading
+              child: CircularProgressIndicator()) 
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Checklist sholat hari ini
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -163,62 +156,46 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       children: [
                         const Text(
                           'Pantau Sholat Hari Ini',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         ...todayLog.entries.map((entry) {
+                          IconData? icon;
+                          switch (entry.key) {
+                            case 'shubuh':
+                              icon = Icons.sunny;
+                              break;
+                            case 'dzuhur':
+                              icon = Icons.access_time;
+                              break;
+                            case 'ashar':
+                              icon = Icons.access_time_filled;
+                              break;
+                            case 'maghrib':
+                              icon = Icons.nights_stay;
+                              break;
+                            case 'isya':
+                              icon = Icons.brightness_2;
+                              break;
+                          }
                           return CheckboxListTile(
-                            title: Text(
-                              entry.key[0].toUpperCase() +
-                                  entry.key.substring(1), // Kapitalisasi manual
+                            title: Row(
+                              children: [
+                                Icon(icon, color: Colors.teal),
+                                const SizedBox(width: 8),
+                                Text(entry.key.capitalize(), style: TextStyle(fontSize: 16)),
+                              ],
                             ),
-                            checkColor: Colors.white, // Warna centang
-                            fillColor:
-                                WidgetStateProperty.resolveWith((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return Color(
-                                    0xFF2DDCBE); // Warna jika dicentang
+                            checkColor: Colors.white,
+                            fillColor: MaterialStateProperty.resolveWith((states) {
+                              if (states.contains(MaterialState.selected)) {
+                                return const Color(0xFF2DDCBE);
                               }
-                              return Colors.grey[300]; // Warna default
+                              return Colors.grey[300];
                             }),
                             value: entry.value,
-                            onChanged: (value) async {
+                            onChanged: (value) {
                               if (value != null) {
-                                // Lokasi pengguna
-                                final coordinates = Coordinates(37.7749,
-                                    -122.4194); // Ganti dengan lokasi pengguna
-                                final params = CalculationMethod
-                                    .muslim_world_league
-                                    .getParameters();
-                                final prayerTimes =
-                                    PrayerTimes.today(coordinates, params);
-
-                                // Waktu sekarang
-                                final now = DateTime.now();
-                                final prayerKeyToTime = {
-                                  'shubuh': prayerTimes.fajr,
-                                  'dzuhur': prayerTimes.dhuhr,
-                                  'ashar': prayerTimes.asr,
-                                  'maghrib': prayerTimes.maghrib,
-                                  'isya': prayerTimes.isha,
-                                };
-
-                                // Periksa apakah waktu saat ini cocok dengan waktu sholat
-                                final prayerTime = prayerKeyToTime[entry.key];
-                                if (prayerTime != null &&
-                                    now.isAfter(prayerTime.subtract(
-                                        const Duration(minutes: 15))) &&
-                                    now.isBefore(prayerTime
-                                        .add(const Duration(minutes: 15)))) {
-                                  updateLog(entry.key, value);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Waktu untuk ${entry.key.capitalize()} belum tiba'),
-                                    ),
-                                  );
-                                }
+                                updateLog(entry.key, value);
                               }
                             },
                           );
@@ -226,22 +203,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       ],
                     ),
                   ),
-
-                  // Grafik log sholat
-                  if (prayerLog.isNotEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Grafik Sholat Harian',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  if (prayerLog.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: PrayerChart(prayerLog: prayerLog),
-                    ),
+                  PrayerChart(prayerLog: prayerLog), // This is where the chart is added
                 ],
               ),
             ),
@@ -249,7 +211,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   }
 }
 
-// Komponen Grafik
+// Prayer log chart component
 class PrayerChart extends StatelessWidget {
   final List<Map<String, dynamic>> prayerLog;
 
@@ -257,7 +219,6 @@ class PrayerChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Konversi data untuk grafik
     List<_ChartData> chartData = prayerLog.map((data) {
       int completedPrayers = 0;
       if (data['shubuh'] == true) completedPrayers++;
@@ -268,17 +229,47 @@ class PrayerChart extends StatelessWidget {
       return _ChartData(data['date'], completedPrayers);
     }).toList();
 
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(),
-      title: ChartTitle(text: 'Jumlah Sholat Harian'),
-      series: <CartesianSeries>[
-        ColumnSeries<_ChartData, String>(
-          dataSource: chartData,
-          xValueMapper: (_ChartData data, _) => data.date,
-          yValueMapper: (_ChartData data, _) => data.completedPrayers,
-          dataLabelSettings: const DataLabelSettings(isVisible: true),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SfCartesianChart(
+        primaryXAxis: CategoryAxis(
+          majorGridLines: MajorGridLines(width: 0),
+          axisLine: AxisLine(width: 0),
         ),
-      ],
+        primaryYAxis: NumericAxis(
+          axisLine: AxisLine(width: 0),
+          majorTickLines: MajorTickLines(size: 0),
+          isVisible: false,
+        ),
+        title: ChartTitle(
+          text: 'Jumlah Sholat Harian',
+          textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+        ),
+        series: <CartesianSeries>[
+          ColumnSeries<_ChartData, String>(
+            dataSource: chartData,
+            xValueMapper: (_ChartData data, _) => data.date,
+            yValueMapper: (_ChartData data, _) => data.completedPrayers,
+            dataLabelSettings: const DataLabelSettings(isVisible: true),
+            borderRadius: BorderRadius.circular(10),
+            color: const Color(0xFF4CAF50),
+            gradient: LinearGradient(
+              colors: [Color(0xFF81C784), Color(0xFF388E3C)],
+              stops: [0.0, 1.0],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            trackBorderWidth: 0,
+            width: 0.8,
+          ),
+        ],
+        tooltipBehavior: TooltipBehavior(
+          enable: true,
+          header: 'Sholat Count',
+          textStyle: TextStyle(color: Colors.white),
+          color: Colors.black.withOpacity(0.7),
+        ),
+      ),
     );
   }
 }
