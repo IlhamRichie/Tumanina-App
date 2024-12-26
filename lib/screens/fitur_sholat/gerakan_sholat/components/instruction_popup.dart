@@ -5,7 +5,7 @@ class InstructionPopup extends StatelessWidget {
   const InstructionPopup({super.key});
 
   // URL tujuan
-  final String praktekUrl = 'https://3ac5-2404-c0-7040-00-f7c9-bf94.ngrok-free.app';
+  final String praktekUrl = 'https://f36b-2404-c0-7140-00-f8cd-45ae.ngrok-free.app';
 
   // Fungsi untuk membuka URL
   Future<void> _launchPraktekUrl(BuildContext context) async {

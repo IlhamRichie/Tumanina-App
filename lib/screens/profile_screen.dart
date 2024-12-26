@@ -26,7 +26,8 @@ class ProfileScreen extends StatelessWidget {
             const Center(
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/pp.jpeg'), // Tambahkan gambar profil placeholder
+                backgroundImage: AssetImage(
+                    'assets/pp.jpeg'), // Tambahkan gambar profil placeholder
               ),
             ),
             const SizedBox(height: 20),
@@ -62,6 +63,20 @@ class ProfileScreen extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
+              leading: const Icon(Icons.feedback, color: Colors.green),
+              title: const Text('Feedback'),
+              onTap: () {
+                // Aksi untuk memberikan feedback
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FeedbackScreen(),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
               leading: const Icon(Icons.lock, color: Colors.blue),
               title: const Text('Ubah Kata Sandi'),
               onTap: () {
@@ -81,6 +96,26 @@ class ProfileScreen extends StatelessWidget {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class FeedbackScreen extends StatelessWidget {
+  const FeedbackScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Feedback'),
+        backgroundColor: Colors.green,
+      ),
+      body: const Center(
+        child: Text(
+          'Halaman Feedback',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
     );

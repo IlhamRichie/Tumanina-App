@@ -50,12 +50,13 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   fl_chart: ^0.69.2 
   adhan: ^2.0.0
+  mockito: ^5.1.0
+  build_runner: ^2.4.10
 
   
 
 
 dev_dependencies:
-  mockito: ^5.1.0
   flutter_test:
     sdk: flutter
 
