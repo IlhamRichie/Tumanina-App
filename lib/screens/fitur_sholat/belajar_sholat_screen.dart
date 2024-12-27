@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'gerakan_sholat/sholat_screen.dart';
 import 'mengenal_sholat_screen.dart';
+import 'rukun_sholat_screen.dart';
 import 'syarat_sholat_screen.dart';
+import 'niat_sholat_screen.dart'; // Add this import statement
 import '../home_screen.dart';
 
 class BelajarSholatScreen extends StatelessWidget {
@@ -34,6 +36,31 @@ class BelajarSholatScreen extends StatelessWidget {
           );
         },
       },
+      
+      {
+        'title': 'Niat Sholat Wajib', // New menu item
+        'icon': Icons.assignment_turned_in,
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NiatSholatScreen(), // Navigate to NiatSholatScreen
+            ),
+          );
+        },
+      },
+      {
+        'title': 'Rukun Sholat', // New menu item
+        'icon': Icons.check_circle,
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const RukunSholatScreen(), // Navigate to RukunSholatScreen
+            ),
+          );
+        },
+      },
       {
         'title': 'Gerakan dan Bacaan Sholat',
         'icon': Icons.directions_walk,
@@ -49,8 +76,12 @@ class BelajarSholatScreen extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Belajar Sholat', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'Belajar Sholat',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -65,59 +96,59 @@ class BelajarSholatScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.lightBlue.shade50, Colors.blue.shade100],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: ListView.builder(
-          itemCount: belajarSholatItems.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: belajarSholatItems[index]['action'],
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          belajarSholatItems[index]['icon'],
-                          size: 32,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          belajarSholatItems[index]['title'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                    ],
+      body: ListView.builder(
+        itemCount: belajarSholatItems.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: belajarSholatItems[index]['action'],
+            child: Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        belajarSholatItems[index]['icon'],
+                        size: 28,
+                        color: const Color(0xFF004C7E),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        belajarSholatItems[index]['title'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

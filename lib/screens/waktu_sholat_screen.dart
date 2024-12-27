@@ -29,42 +29,53 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(data); // Debugging untuk memeriksa data
-        setState(() {
-          prayerTimes = {
-            'Subuh': data['data']['timings']['Fajr'],
-            'Dzuhur': data['data']['timings']['Dhuhr'],
-            'Ashar': data['data']['timings']['Asr'],
-            'Maghrib': data['data']['timings']['Maghrib'],
-            'Isya': data['data']['timings']['Isha'],
-          };
-          errorMessage = '';
-        });
+        if (mounted) {
+          setState(() {
+            prayerTimes = {
+              'Subuh': data['data']['timings']['Fajr'],
+              'Dzuhur': data['data']['timings']['Dhuhr'],
+              'Ashar': data['data']['timings']['Asr'],
+              'Maghrib': data['data']['timings']['Maghrib'],
+              'Isya': data['data']['timings']['Isha'],
+            };
+            errorMessage = '';
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
           errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
         });
       }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Waktu Sholat Tegal'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF2DDCBE),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        elevation: 0,
       ),
       body: errorMessage.isNotEmpty
           ? Center(
-              child: Text(
-                errorMessage,
-                style: const TextStyle(color: Colors.red, fontSize: 18),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red, fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
               ),
             )
           : prayerTimes.isNotEmpty
@@ -73,23 +84,41 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   children: prayerTimes.entries.map((entry) {
                     return Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 4,
-                      child: ListTile(
-                        leading: Icon(
-                          _getPrayerIcon(entry.key),
-                          color: const Color(0xFF004C7E),
+                      elevation: 5,
+                      shadowColor: Colors.black.withOpacity(0.2),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        title: Text(
-                          entry.key,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        trailing: Text(
-                          entry.value,
-                          style: const TextStyle(
-                              fontSize: 16, color: Colors.black54),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: Icon(
+                            _getPrayerIcon(entry.key),
+                            size: 32,
+                            color: Colors.white,
+                          ),
+                          title: Text(
+                            entry.key,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                          trailing: Text(
+                            entry.value,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
                     );

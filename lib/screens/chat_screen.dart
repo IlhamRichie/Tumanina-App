@@ -35,20 +35,22 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF8F1E2),
+      backgroundColor: Color(0xFFF0F2F5), // Soft background for a modern feel
       appBar: AppBar(
         title: Text(
           'Tumabot AI',
-          style: GoogleFonts.roboto(color: Color(0xFF004C7E)),
+          style: GoogleFonts.poppins(color: Color(0xFF2B2D42), fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Color(0xFF004C7E)),
+        iconTheme: IconThemeData(color: Color(0xFF2B2D42)),
+        elevation: 2, // Adding a subtle shadow for modern depth
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
+              padding: EdgeInsets.symmetric(vertical: 10),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
@@ -61,23 +63,42 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12.0),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your message...',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _controller,
+                      style: GoogleFonts.roboto(fontSize: 16),
+                      decoration: InputDecoration(
+                        hintText: 'Enter your message...',
+                        hintStyle: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.send, color: Color(0xFF004C7E)),
-                  onPressed: _sendMessage,
+                SizedBox(width: 10),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: CircleAvatar(
+                    radius: 25,
+                    backgroundColor: Color(0xFF2B2D42),
+                    child: Icon(Icons.send, color: Colors.white),
+                  ),
                 ),
               ],
             ),

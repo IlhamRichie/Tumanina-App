@@ -85,6 +85,7 @@ class _KiblatScreenState extends State<KiblatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Arah Kiblat'),
         backgroundColor: Color(0xFF2DDCBE),

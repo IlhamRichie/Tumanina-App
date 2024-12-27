@@ -12,6 +12,9 @@ class ApiService {
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
   final String groqModel = 'llama3-groq-8b-8192-tool-use-preview';
 
+  // URL API Artikel
+  final String artikelBaseUrl = 'hhttps://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
+
   /// Fungsi untuk mengirim frame ke server Flask
   Future<Map<String, dynamic>> sendFrame(File imageFile) async {
     try {
@@ -73,6 +76,24 @@ class ApiService {
       return "Maaf, sepertinya Anda sedang offline. Pastikan koneksi internet Anda aktif untuk menggunakan Tumabot.";
     } on Exception catch (e) {
       return "Maaf, terjadi masalah teknis: $e. Silakan coba lagi nanti.";
+    }
+  }
+
+  /// Fungsi untuk mengambil artikel dari API Artikel
+  Future<List<Map<String, dynamic>>> fetchArticles() async {
+    final url = Uri.parse(artikelBaseUrl);
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      
+      if (data.containsKey('data') && data['data'] is List) {
+        return List<Map<String, dynamic>>.from(data['data']);
+      } else {
+        throw Exception('Data articles tidak ditemukan atau tidak dalam format yang diharapkan');
+      }
+    } else {
+      throw Exception('Failed to load articles');
     }
   }
 }

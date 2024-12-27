@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'artikel/artikel_screen.dart';
 import 'pantau_sholat_screen.dart';
 import 'surat_detail_screen.dart';
 import 'waktu_sholat_screen.dart';
@@ -12,7 +13,7 @@ import 'chat_screen.dart';
 import 'tasbih_screen.dart';
 import 'ayat_al_quran_screen.dart';
 import 'login_screen.dart';
-import 'profile_screen.dart';
+import 'profil/profile_screen.dart';
 import 'fitur_doa/doa_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -39,6 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    setState(() {
+      _getReadingHistory(); // Memuat ulang data setiap kali halaman diakses
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     _validateMilestones();
@@ -48,6 +57,51 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNextPrayerNotification();
     });
+  }
+
+  Future<List<Surah>> _getReadingHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final List<String> historyData =
+          prefs.getStringList('readingHistory') ?? [];
+
+      return historyData.map((item) {
+        final Map<String, dynamic> jsonData = json.decode(item);
+        return Surah(
+          id: jsonData['id'] ?? 0,
+          name: jsonData['name'] ?? 'Tidak diketahui',
+          translation: jsonData['translation'] ?? 'Terjemahan tidak tersedia',
+          ayatCount: jsonData['ayatCount'] ?? 0,
+        );
+      }).toList();
+    } catch (e) {
+      print('Error loading reading history: $e');
+      return [];
+    }
+  }
+
+// Function untuk menyimpan riwayat bacaan
+  Future<void> _saveReadingHistory(Surah surah) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      List<String> history = prefs.getStringList('readingHistory') ?? [];
+
+      // Data surah yang akan disimpan
+      final String surahData = json.encode({
+        'id': surah.id,
+        'name': surah.name,
+        'translation': surah.translation,
+        'ayatCount': surah.ayatCount,
+      });
+
+      // Cek apakah surah sudah ada dalam riwayat
+      if (!history.any((item) => json.decode(item)['id'] == surah.id)) {
+        history.add(surahData);
+        await prefs.setStringList('readingHistory', history);
+      }
+    } catch (e) {
+      print('Error saving reading history: $e');
+    }
   }
 
   Future<void> _setNotificationShown() async {
@@ -246,8 +300,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 20),
                     _buildPrayerChecklist(sholatMilestones),
                     const SizedBox(height: 20),
-                    
                     _buildSurahBox(),
+                    const SizedBox(height: 20),
+                    FutureBuilder<List<Surah>>(
+                      future: _getReadingHistory(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                            child:
+                                Text('Belum ada riwayat membaca Al-Qur\'an.'),
+                          );
+                        }
+
+                        final historyList = snapshot.data!;
+                        return ListView.builder(
+                          itemCount: historyList.length,
+                          itemBuilder: (context, index) {
+                            final surah = historyList[index];
+                            String latinName =
+                                latinNames[surah.id] ?? surah.name;
+                            // Build your list item here
+                          },
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -377,8 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 child: Icon(icon,
                     size: 40,
-                    color: const Color(
-                        0xFF004C7E)), // Icon size adjusted for a cleaner look
+                    color: const Color(0xFF2DDCBE)), // Icon size adjusted for a cleaner look
               ),
               const SizedBox(height: 8), // More space between icon and label
               Text(
@@ -398,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-   Widget _buildNextPrayerCard() {
+  Widget _buildNextPrayerCard() {
     return Container(
       width: double.infinity, // Set width to full screen width
       padding: const EdgeInsets.all(20),
@@ -423,7 +506,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            timeRemaining.isNotEmpty ? timeRemaining : 'Menghitung waktu sholat...',
+            timeRemaining.isNotEmpty
+                ? timeRemaining
+                : 'Menghitung waktu sholat...',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -499,102 +584,101 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSurahBox() {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [const Color(0xFF2DDCBE)!, const Color(0xFF004C7E)!],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(18),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.15),
-          blurRadius: 12,
-          offset: const Offset(0, 6),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [const Color(0xFF2DDCBE)!, const Color(0xFF004C7E)!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-      ],
-    ),
-    height: 300,  // Menyesuaikan tinggi untuk tampilan yang lebih elegan
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Daftar Surah Al-Qur\'an',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 255, 255, 255),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
-        ),
-        const SizedBox(height: 10), // Memberi ruang antara judul dan list
-        isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Expanded(
-                child: ListView.builder(
-                  itemCount: surahList.length,
-                  itemBuilder: (context, index) {
-                    final surah = surahList[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SurahDetailScreen(
-                              surahNumber: surah.id,
-                              surahName: surah.name,
+        ],
+      ),
+      height: 300, // Menyesuaikan tinggi untuk tampilan yang lebih elegan
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Daftar Surah Al-Qur\'an',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 255, 255, 255),
+            ),
+          ),
+          const SizedBox(height: 10), // Memberi ruang antara judul dan list
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Expanded(
+                  child: ListView.builder(
+                    itemCount: surahList.length,
+                    itemBuilder: (context, index) {
+                      final surah = surahList[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SurahDetailScreen(
+                                surahNumber: surah.id,
+                                surahName: surah.name,
+                              ),
                             ),
+                          );
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        );
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 6,
-                        color: Colors.white,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(12),
-                          leading: Icon(
-                            Icons.book,
-                            color: Colors.teal.shade600,
-                            size: 28,
-                          ),
-                          title: Text(
-                            surah.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                              color: Colors.teal.shade800,
-                            ),
-                          ),
-                          subtitle: Text(
-                            surah.translation,
-                            style: TextStyle(
-                              color: Colors.teal.shade400,
-                            ),
-                          ),
-                          trailing: Text(
-                            '${surah.ayatCount} Ayat',
-                            style: TextStyle(
-                              fontSize: 16,
+                          elevation: 6,
+                          color: Colors.white,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: Icon(
+                              Icons.book,
                               color: Colors.teal.shade600,
-                              fontWeight: FontWeight.w500,
+                              size: 28,
+                            ),
+                            title: Text(
+                              surah.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 18,
+                                color: Colors.teal.shade800,
+                              ),
+                            ),
+                            subtitle: Text(
+                              surah.translation,
+                              style: TextStyle(
+                                color: Colors.teal.shade400,
+                              ),
+                            ),
+                            trailing: Text(
+                              '${surah.ayatCount} Ayat',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.teal.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   Widget _buildMenuButton() {
     return Container(
@@ -629,9 +713,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         onTap: (index) {
-          if (index == 2) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()));
+          if (index == 0) {
+            // Tetap di HomeScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else if (index == 1) {
+            // Navigasi ke ArtikelScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ArtikelScreen()),
+            );
+          } else if (index == 2) {
+            // Navigasi ke ProfilScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
           }
         },
       ),
@@ -664,21 +763,36 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
           );
         } else if (index == 1) {
-          // Tambahkan aksi untuk Pengaturan jika diperlukan
+          // Navigate to ArtikelScreen when 'Artikel' is tapped
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ArtikelScreen()),
+          );
         }
       },
+      selectedItemColor: Color(0xFF004C7E), // Warna item terpilih
+      unselectedItemColor: Colors.grey, // Warna item yang tidak terpilih
+      backgroundColor: Colors.white, // Background untuk navigation bar
+      showSelectedLabels: true, // Menampilkan label
+      showUnselectedLabels: true, // Menampilkan label tidak terpilih
+      elevation: 10, // Menambahkan bayangan untuk efek depth
+      type: BottomNavigationBarType
+          .fixed, // Menambahkan jenis fixed untuk menghindari efek perubahan ukuran
       items: const [
         BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
-            backgroundColor: Color(0xFF004C7E)),
+          icon: Icon(Icons.home),
+          label: 'Beranda',
+          backgroundColor: Color(0xFF004C7E),
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.article),
           label: 'Artikel',
+          backgroundColor: Colors.blueAccent,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profil',
+          backgroundColor: Colors.greenAccent,
         ),
       ],
     );

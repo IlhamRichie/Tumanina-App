@@ -22,23 +22,18 @@ class MengenalSholatScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.lightBlue.shade50, Colors.blue.shade100],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        color: Colors.white, // Set the background color to white
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
               Card(
-                elevation: 4,
+                elevation: 3,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 margin: const EdgeInsets.only(bottom: 16),
+                color: Colors.white, // Set card color to white
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -49,13 +44,13 @@ class MengenalSholatScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
+                              color: Color(0xFF2DDCBE), // Set the box color
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.book,
                               size: 32,
-                              color: Colors.blue,
+                              color: Colors.white,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -64,7 +59,7 @@ class MengenalSholatScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Color(0xFF004C7E), // Font color updated
                             ),
                           ),
                         ],
@@ -72,7 +67,10 @@ class MengenalSholatScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       const Text(
                         'Sholat adalah ibadah wajib yang harus dilaksanakan oleh umat Muslim. Sholat terbagi menjadi beberapa jenis, seperti:',
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF004C7E), // Font color updated
+                        ),
                       ),
                     ],
                   ),
@@ -91,18 +89,19 @@ class MengenalSholatScreen extends StatelessWidget {
                 icon: Icons.stars,
               ),
               Card(
-                elevation: 4,
+                elevation: 3,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 margin: const EdgeInsets.only(top: 16),
+                color: Colors.white, // Set card color to white
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: const Text(
                     'Dengan mengenal jenis-jenis sholat, diharapkan kita dapat lebih memahami pentingnya menjaga sholat dalam kehidupan sehari-hari.',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: Color(0xFF004C7E), // Font color updated
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -130,11 +129,12 @@ class _SholatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       margin: const EdgeInsets.symmetric(vertical: 8),
+      color: Colors.white, // Set card color to white
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -143,10 +143,10 @@ class _SholatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.lightBlue.withOpacity(0.1),
+                color: Color(0xFF2DDCBE), // Set the box color
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 32, color: Colors.blue),
+              child: Icon(icon, size: 32, color: Colors.white),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -158,13 +158,16 @@ class _SholatCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Color(0xFF004C7E), // Font color updated
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     description,
-                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF004C7E), // Font color updated
+                    ),
                   ),
                 ],
               ),

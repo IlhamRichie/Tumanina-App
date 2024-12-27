@@ -1,5 +1,5 @@
-import 'package:MyApp/screens/fitur_doa/doa_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:MyApp/screens/fitur_doa/doa_detail_screen.dart';
 
 // Data Doa
 class Doa {
@@ -243,24 +243,59 @@ class DoaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Doa Sehari-hari')),
-      body: ListView.builder(
-        itemCount: doaList.length,
-        itemBuilder: (context, index) {
-          final doa = doaList[index];
-          return ListTile(
-            title: Text(doa.title),
-            onTap: () {
-              // Arahkan ke layar detail doa
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DoaDetailScreen(doa: doa),
+      appBar: AppBar(
+        title: Text(
+          'Doa Sehari-hari',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
+        backgroundColor: Colors.teal,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView.builder(
+          itemCount: doaList.length,
+          itemBuilder: (context, index) {
+            final doa = doaList[index];
+            return Card(
+              margin: EdgeInsets.symmetric(vertical: 8),
+              elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ListTile(
+                contentPadding: EdgeInsets.all(16),
+                title: Text(
+                  doa.title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              );
-            },
-          );
-        },
+                subtitle: Text(
+                  doa.timeToRead,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.teal,
+                ),
+                onTap: () {
+                  // Navigate to the Doa Detail Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DoaDetailScreen(doa: doa),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -11,55 +11,122 @@ class DoaDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(doa.title),
+        title: Text(
+          doa.title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
+        elevation: 4,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Doa dalam Bahasa Arab:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              doa.arabic,
-              style: TextStyle(
-                  fontSize: 24, fontFamily: 'Amiri'), // Pilih font Arab
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Bacaan Latin:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              doa.latin,
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Terjemahan:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              doa.translation,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Waktu Membaca Doa:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              doa.timeToRead,
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Arabic Doa
+              Text(
+                "Doa dalam Bahasa Arab:",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                doa.arabic,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontFamily: 'Amiri', // Arabic font style
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+
+              // Latin Bacaan
+              Text(
+                "Bacaan Latin:",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                doa.latin,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.black54,
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Translation
+              Text(
+                "Terjemahan:",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                doa.translation,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 16),
+
+              // Waktu Membaca Doa
+              Text(
+                "Waktu Membaca Doa:",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                doa.timeToRead,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 32),
+
+              // Action Button (Optional, you can add actions like saving or sharing)
+              ElevatedButton(
+                onPressed: () {
+                  // Optional: Define an action, like bookmarking or sharing
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent, // Button color
+                  padding: EdgeInsets.symmetric(vertical: 14.0),
+                ),
+                child: Text(
+                  'Simpan Doa Ini',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

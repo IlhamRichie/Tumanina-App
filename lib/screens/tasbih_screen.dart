@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      debugShowCheckedModeBanner: false, // Menghilangkan banner debug
+      debugShowCheckedModeBanner: false,
       home: HomeScreen(),
     );
   }
@@ -23,9 +23,20 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF9F9F9), // Light modern background
       appBar: AppBar(
-        title: const Text('Tasbih Mualaf'),
+        title: const Text(
+          'Tasbih Mualaf',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            fontSize: 22,
+          ),
+        ),
         backgroundColor: Color(0xFF004C7E),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Center(
         child: IconButton(
@@ -49,8 +60,7 @@ class TasbihScreen extends StatefulWidget {
   _TasbihScreenState createState() => _TasbihScreenState();
 }
 
-class _TasbihScreenState extends State<TasbihScreen>
-    with SingleTickerProviderStateMixin {
+class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderStateMixin {
   int counter = 0;
   String dropdownValue = 'Tasbih';
 
@@ -122,59 +132,75 @@ class _TasbihScreenState extends State<TasbihScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF9F9F9),
       appBar: AppBar(
-        title: const Text('Tasbih Online'),
+        title: const Text(
+          'Tasbih Online',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+            fontSize: 22,
+          ),
+        ),
         backgroundColor: Color(0xFF2DDCBE),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Center(
-        // Membuat konten tetap di tengah
         child: SingleChildScrollView(
-          // Menghindari overflow jika layar kecil
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Konten di tengah secara vertikal
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Konten di tengah secara horizontal
-            mainAxisSize: MainAxisSize.min, // Ukuran column mengikuti konten
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Hitungan
               Text(
                 'Hitungan: $counter',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: Color(0xFF004C7E),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Dropdown untuk memilih dzikir
-              DropdownButton<String>(
-                value: dropdownValue,
-                icon: const Icon(Icons.arrow_drop_down),
-                elevation: 16,
-                style: const TextStyle(color: Color(0xFF004C7E), fontSize: 18),
-                underline: Container(
-                  height: 2,
-                  color: Colors.greenAccent,
+              // Modernized Dropdown
+              Container(
+                width: 250,
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                    ),
+                  ],
                 ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownValue = newValue!;
-                    updateDzikirText();
-                  });
-                },
-                items: dzikirText.keys
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                child: DropdownButton<String>(
+                  value: dropdownValue,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF004C7E)),
+                  style: TextStyle(color: Color(0xFF004C7E), fontSize: 18),
+                  underline: const SizedBox(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue!;
+                      updateDzikirText();
+                    });
+                  },
+                  items: dzikirText.keys
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
               ),
               const SizedBox(height: 40),
 
-              // Gambar Tasbih untuk menghitung
+              // Animated Tasbih Image with GestureDetector
               GestureDetector(
                 onTap: incrementCounter,
                 child: AnimatedBuilder(
@@ -199,13 +225,13 @@ class _TasbihScreenState extends State<TasbihScreen>
               ),
               const SizedBox(height: 20),
 
-              // Teks Dzikir berdasarkan pilihan dropdown
+              // Dzikir Text Display
               if (displayedText.isNotEmpty) ...[
                 Text(
                   displayedText,
                   style: const TextStyle(
                     fontSize: 30,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xFF004C7E),
                   ),
                 ),
@@ -221,13 +247,15 @@ class _TasbihScreenState extends State<TasbihScreen>
               ],
               const SizedBox(height: 40),
 
-              // Tombol Reset
+              // Reset Button with Modern Styling
               ElevatedButton(
                 onPressed: resetCounter,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF004C7E),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
                 child: const Text(
                   'Reset',

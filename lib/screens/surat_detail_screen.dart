@@ -32,7 +32,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
 
   Future<void> fetchSurahDetail() async {
     try {
-      final url = Uri.parse('https://equran.id/api/surat/${widget.surahNumber}');
+      final url =
+          Uri.parse('https://equran.id/api/surat/${widget.surahNumber}');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -160,6 +161,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF9F9F9), // Light modern background
+
       appBar: AppBar(
         title: Text(widget.surahName),
         backgroundColor: Colors.teal,
