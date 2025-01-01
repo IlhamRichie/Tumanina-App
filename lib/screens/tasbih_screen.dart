@@ -1,57 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Light modern background
-      appBar: AppBar(
-        title: const Text(
-          'Tasbih Mualaf',
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            fontSize: 22,
-          ),
-        ),
-        backgroundColor: Color(0xFF004C7E),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Center(
-        child: IconButton(
-          icon: const Icon(Icons.arrow_forward, size: 40, color: Colors.white),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const TasbihScreen()),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
+import 'package:google_fonts/google_fonts.dart';
+import 'package:vibration/vibration.dart'; // Import vibration package
 
 class TasbihScreen extends StatefulWidget {
   const TasbihScreen({super.key});
@@ -60,12 +9,9 @@ class TasbihScreen extends StatefulWidget {
   _TasbihScreenState createState() => _TasbihScreenState();
 }
 
-class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderStateMixin {
+class _TasbihScreenState extends State<TasbihScreen> {
   int counter = 0;
   String dropdownValue = 'Tasbih';
-
-  late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
 
   String displayedText = "";
   String displayedLatin = "";
@@ -89,31 +35,15 @@ class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderSt
     }
   };
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _rotationAnimation = Tween<double>(begin: 0, end: 2 * pi)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
-    updateDzikirText();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   void incrementCounter() {
     setState(() {
       counter++;
     });
-    _controller.forward(from: 0);
+
+    // Trigger vibration only if counter reaches 33 or 99
+    if (counter == 33 || counter == 66 || counter == 99) {
+      Vibration.vibrate(duration: 500); // Vibration for 500ms
+    }
   }
 
   void resetCounter() {
@@ -132,48 +62,43 @@ class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Tasbih Online',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-            fontSize: 22,
+        title: Text(
+          'Tasbih Digital',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Color(0xFF2DDCBE),
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         centerTitle: true,
-        elevation: 0,
       ),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Hitungan: $counter',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF004C7E),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Modernized Dropdown
+              // Modernized and extended Dropdown
               Container(
-                width: 250,
+                width: 300, // Increased width of the dropdown
                 padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.1),
                       spreadRadius: 1,
-                      blurRadius: 5,
+                      blurRadius: 8,
+                      offset: Offset(0, 3), // Shadow position
                     ),
                   ],
                 ),
@@ -198,30 +123,41 @@ class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderSt
                   }).toList(),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
-              // Animated Tasbih Image with GestureDetector
-              GestureDetector(
-                onTap: incrementCounter,
-                child: AnimatedBuilder(
-                  animation: _rotationAnimation,
-                  builder: (context, child) {
-                    return Transform.rotate(
-                      angle: _rotationAnimation.value,
-                      child: child,
-                    );
-                  },
-                  child: Image.asset(
-                    'assets/tasbih/tasbih3.png',
-                    width: 270,
-                    height: 270,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
-                      Icons.error_outline,
-                      size: 120,
-                      color: Colors.red,
-                    ),
-                  ),
+              Text(
+                'Hitungan: $counter',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF004C7E),
                 ),
+              ),
+              const SizedBox(height: 10),
+
+              // Image with rotation animation
+              TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: counter % 2 == 0 ? 360.0 : 0),
+                duration: Duration(milliseconds: 500),
+                builder: (context, double angle, child) {
+                  return Transform.rotate(
+                    angle: angle * 3.1415927 / 360,
+                    child: GestureDetector(
+                      onTap: incrementCounter,
+                      child: Image.asset(
+                        'assets/tasbih/tasbih3.png',
+                        width: 270,
+                        height: 270,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.error_outline,
+                          size: 120,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
@@ -245,21 +181,34 @@ class _TasbihScreenState extends State<TasbihScreen> with SingleTickerProviderSt
                   ),
                 ),
               ],
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
-              // Reset Button with Modern Styling
+              // Gradient Reset Button
               ElevatedButton(
                 onPressed: resetCounter,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF004C7E),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), backgroundColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
-                  ),
+                  ), // Make the button background transparent
+                  shadowColor: Colors.transparent, // Remove shadow
                 ),
-                child: const Text(
-                  'Reset',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    child: const Text(
+                      'Reset',
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
             ],

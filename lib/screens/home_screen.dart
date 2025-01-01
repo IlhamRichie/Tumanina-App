@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'artikel/artikel_screen.dart';
 import 'pantau_sholat_screen.dart';
 import 'surat_detail_screen.dart';
@@ -26,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, String> prayerTimes = {};
   String nextPrayer = '';
+  List articles = [];
   String timeRemaining = '';
   List<Surah> surahList = [];
   bool isLoading = false;
@@ -52,11 +54,37 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _validateMilestones();
     fetchPrayerTimes();
+    fetchArticles();
     fetchSurahList();
     _loadSholatMilestones();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNextPrayerNotification();
     });
+  }
+
+  Future<void> fetchArticles() async {
+    final url =
+        Uri.parse('https://api-berita-indonesia.vercel.app/sindonews/kalam/');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          articles = data['data']['posts']; // Ambil data artikel dari API
+          isLoading = false;
+        });
+        // Debug: Print artikel untuk memastikan ada 'thumbnail'
+        print(articles); // Periksa struktur artikel di sini
+      } else {
+        throw Exception('Gagal memuat artikel');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error: $e');
+    }
   }
 
   Future<List<Surah>> _getReadingHistory() async {
@@ -244,13 +272,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0x00FFFFFF),
+        backgroundColor: const Color.fromRGBO(255, 255, 255, 0),
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 0, // Tinggi AppBar
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.notifications, color: Colors.black),
+            child: Icon(Icons.notifications, color: Color(0xFF2DDCBE)),
           ),
         ],
       ),
@@ -262,46 +291,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Stack(
-                      children: [
-                        _buildImageSlider(),
-                        Positioned(
-                          top: 20,
-                          left: 16,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Assalamu\'alaikum',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                  color: Colors.white, // Warna teks putih
-                                ),
-                              ),
-                              Text(
-                                'Perdalam Sholat Anda',
-                                style: TextStyle(
-                                  color:
-                                      Colors.white70, // Warna teks lebih terang
-                                  fontSize: 16,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                            ],
+                    // Tambahkan teks Assalamualaikum di bawah AppBar
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Assalamu\'alaikum Rigan',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                              color: Color(0xFF2DDCBE), // Warna teks hitam
+                            ),
                           ),
-                        ),
-                      ],
+                          SizedBox(height: 4), // Beri jarak antara teks
+                          Text(
+                            'Perdalam Sholat Anda dengan Tumanina',
+                            style: TextStyle(
+                              color:
+                                  Color(0xFF2DDCBE), // Warna teks lebih gelap
+                              fontSize: 14,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    // Image Slider
+                    _buildImageSlider(),
+                    const SizedBox(height: 10),
                     _buildMenuRow(context),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 10),
                     _buildNextPrayerCard(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     _buildPrayerChecklist(sholatMilestones),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     _buildSurahBox(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     FutureBuilder<List<Surah>>(
                       future: _getReadingHistory(),
                       builder: (context, snapshot) {
@@ -342,18 +370,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildImageSlider() {
-    return SizedBox(
-      height: 150,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: [
-          _buildImageCard('assets/assetsHome/image1.png'),
-          _buildImageCard('assets/assetsHome/image2.png'),
-          _buildImageCard('assets/assetsHome/image3.png'),
-        ],
-      ),
-    );
-  }
+  return SizedBox(
+    height: 150,
+    child: articles.isNotEmpty
+        ? ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: articles.length,
+            itemBuilder: (context, index) {
+              final article = articles[index];
+              final thumbnail = article['thumbnail'] ?? ''; // Ambil thumbnail dari API
+              final title = article['title'] ?? 'Judul Tidak Tersedia'; // Ambil judul dari artikel
+
+              if (thumbnail.isEmpty) {
+                return const Center(child: Text('Thumbnail tidak tersedia'));
+              }
+
+              return _buildImageCard(thumbnail, title); // Menggunakan metode baru untuk judul
+            },
+          )
+        : const Center(child: Text('Gambar tidak tersedia')),
+  );
+}
+
 
   Widget _buildMenuRow(BuildContext context) {
     return Container(
@@ -461,7 +499,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 child: Icon(icon,
                     size: 40,
-                    color: const Color(0xFF2DDCBE)), // Icon size adjusted for a cleaner look
+                    color: const Color(
+                        0xFF2DDCBE)), // Icon size adjusted for a cleaner look
               ),
               const SizedBox(height: 8), // More space between icon and label
               Text(
@@ -737,21 +776,51 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildImageCard(String imagePath) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: 250,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
+  Widget _buildImageCard(String imageUrl, String title) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+    child: Stack(
+      children: [
+        // Gambar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            imageUrl,
+            width: 250, // Atur lebar gambar sesuai kebutuhan
+            height: 150,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 250,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, size: 50),
+            ),
           ),
         ),
-      ),
-    );
-  }
+        // Judul di atas gambar
+        Positioned(
+          bottom: 10, // Posisi teks di bagian bawah gambar
+          left: 10,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFF004C7E).withOpacity(0.5), // Latar belakang semi-transparan
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white, // Warna teks putih
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   BottomNavigationBar _buildBottomNavigationBar() {
     return BottomNavigationBar(

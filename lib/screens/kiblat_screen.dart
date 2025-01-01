@@ -4,6 +4,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'dart:math';
 
+import 'package:google_fonts/google_fonts.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -67,11 +69,14 @@ class _KiblatScreenState extends State<KiblatScreen> {
       double deltaLongitude = kaabaLongitude - _longitude!;
       double y = sin(deltaLongitude * pi / 180) * cos(kaabaLatitude * pi / 180);
       double x = cos(_latitude! * pi / 180) * sin(kaabaLatitude * pi / 180) -
-          sin(_latitude! * pi / 180) * cos(kaabaLatitude * pi / 180) * cos(deltaLongitude * pi / 180);
+          sin(_latitude! * pi / 180) *
+              cos(kaabaLatitude * pi / 180) *
+              cos(deltaLongitude * pi / 180);
       double angle = atan2(y, x);
 
       setState(() {
-        _kiblatDirection = (angle * 180 / pi + 360) % 360; // Mengubah sudut menjadi 0-360
+        _kiblatDirection =
+            (angle * 180 / pi + 360) % 360; // Mengubah sudut menjadi 0-360
       });
     }
   }
@@ -87,8 +92,21 @@ class _KiblatScreenState extends State<KiblatScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Arah Kiblat'),
-        backgroundColor: Color(0xFF2DDCBE),
+        title: Text(
+          'Arah Kiblat',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
       ),
       body: _latitude == null || _longitude == null
           ? const Center(child: CircularProgressIndicator())
@@ -116,7 +134,9 @@ class _KiblatScreenState extends State<KiblatScreen> {
                 alignment: Alignment.center,
                 children: [
                   Transform.rotate(
-                    angle: (_kiblatDirection! - (_compassDirection ?? 0)) * pi / 180,
+                    angle: (_kiblatDirection! - (_compassDirection ?? 0)) *
+                        pi /
+                        180,
                     child: Image.asset(
                       'assets/kiblat/k.png',
                       width: 500,

@@ -1,5 +1,6 @@
 import 'package:MyApp/screens/surat_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -181,9 +182,22 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Daftar Surah Al-Quran'),
-        backgroundColor: Colors.teal,
+        title: Text(
+          'Alquran Digital',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         centerTitle: true,
       ),
       body: isLoading
@@ -192,54 +206,113 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search surah...',
-                      prefixIcon: Icon(Icons.search),
+                  // Modernized Search Field
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF004C7E),
+                          const Color(0xFF2DDCBE)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    onChanged: _filterSurahList,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search surah...',
+                        hintStyle: GoogleFonts.poppins(color: Colors.white70),
+                        prefixIcon: Icon(Icons.search, color: Colors.white),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      ),
+                      onChanged: _filterSurahList,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 16),
                   Expanded(
                     child: ListView.builder(
                       itemCount: filteredSurahList.length,
                       itemBuilder: (context, index) {
                         var surah = filteredSurahList[index];
                         String latinName = latinNames[surah.id] ?? surah.name;
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(16.0),
-                            title: Text(
-                              latinName, // Nama surah dalam tulisan latin
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 5.0),
+                          decoration: BoxDecoration(
+                            // Apply gradient border here
+                            border: Border.all(
+                              width: 2.0,
+                              color: Colors
+                                  .transparent, // transparent to make it a border effect
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  surah.translation, // Terjemahan surah
-                                  style: const TextStyle(
-                                      fontSize: 16, fontStyle: FontStyle.italic),
-                                ),
-                                Text(
-                                  surah.name, // Nama Arab
-                                  style: const TextStyle(
-                                      fontSize: 14, color: Colors.grey),
-                                ),
-                              ],
+                            borderRadius: BorderRadius.circular(16.0),
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SurahDetailScreen(
-                                    surahNumber: surah.id,
-                                    surahName: latinName,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors
+                                  .white, // Set the background color inside the card
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(10.0),
+                              title: Text(
+                                latinName, // Nama surah dalam tulisan latin
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF004C7E),
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    surah.translation, // Terjemahan surah
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontStyle: FontStyle.italic,
+                                      color: const Color(0xFF757575),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                  Text(
+                                    surah.name, // Nama Arab
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 24,
+                                      color: const Color(0xFF2DDCBE),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SurahDetailScreen(
+                                      surahNumber: surah.id,
+                                      surahName: latinName,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         );
                       },

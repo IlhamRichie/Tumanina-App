@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:MyApp/screens/fitur_doa/doa_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-// Kelas Doa dari file sebelumnya
 class DoaDetailScreen extends StatelessWidget {
   final Doa doa;
 
@@ -10,17 +10,23 @@ class DoaDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           doa.title,
-          style: TextStyle(
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
             fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -31,7 +37,7 @@ class DoaDetailScreen extends StatelessWidget {
               // Arabic Doa
               Text(
                 "Doa dalam Bahasa Arab:",
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.blueAccent,
@@ -40,9 +46,8 @@ class DoaDetailScreen extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 doa.arabic,
-                style: TextStyle(
+                style: GoogleFonts.amiri(
                   fontSize: 32,
-                  fontFamily: 'Amiri', // Arabic font style
                   fontWeight: FontWeight.w400,
                   color: Colors.black87,
                 ),
@@ -53,16 +58,16 @@ class DoaDetailScreen extends StatelessWidget {
               // Latin Bacaan
               Text(
                 "Bacaan Latin:",
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: const Color(0xFF448AFF),
                 ),
               ),
               SizedBox(height: 8),
               Text(
                 doa.latin,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontStyle: FontStyle.italic,
                   color: Colors.black54,
@@ -73,7 +78,7 @@ class DoaDetailScreen extends StatelessWidget {
               // Translation
               Text(
                 "Terjemahan:",
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.blueAccent,
@@ -82,7 +87,7 @@ class DoaDetailScreen extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 doa.translation,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Colors.black87,
                 ),
@@ -92,7 +97,7 @@ class DoaDetailScreen extends StatelessWidget {
               // Waktu Membaca Doa
               Text(
                 "Waktu Membaca Doa:",
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.blueAccent,
@@ -101,27 +106,44 @@ class DoaDetailScreen extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 doa.timeToRead,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Colors.black87,
                 ),
               ),
               SizedBox(height: 32),
 
-              // Action Button (Optional, you can add actions like saving or sharing)
-              ElevatedButton(
-                onPressed: () {
-                  // Optional: Define an action, like bookmarking or sharing
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent, // Button color
-                  padding: EdgeInsets.symmetric(vertical: 14.0),
-                ),
-                child: Text(
-                  'Simpan Doa Ini',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
+              // Gradient Button (centered)
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF448AFF),
+                        const Color(0xFF009688)
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      // Optional: Define an action, like bookmarking or sharing
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.0),
+                    ),
+                    child: Text(
+                      'Simpan Doa Ini',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),

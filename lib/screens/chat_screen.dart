@@ -35,22 +35,25 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF0F2F5), // Soft background for a modern feel
+      backgroundColor: const Color(0xFFF0F2F5), // Soft background for a modern feel
       appBar: AppBar(
         title: Text(
           'Tumabot AI',
-          style: GoogleFonts.poppins(color: Color(0xFF2B2D42), fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Color(0xFF2B2D42)),
+        iconTheme: const IconThemeData(color: Color(0xFF2B2D42)),
         elevation: 2, // Adding a subtle shadow for modern depth
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
@@ -82,22 +85,39 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     child: TextField(
                       controller: _controller,
-                      style: GoogleFonts.roboto(fontSize: 16),
+                      style: GoogleFonts.poppins(fontSize: 16),
                       decoration: InputDecoration(
-                        hintText: 'Enter your message...',
-                        hintStyle: GoogleFonts.roboto(fontSize: 16, color: Colors.grey),
+                        hintText: 'Tulis pesan Anda...',
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 GestureDetector(
                   onTap: _sendMessage,
-                  child: CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Color(0xFF2B2D42),
-                    child: Icon(Icons.send, color: Colors.white),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF004C7E).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: const Icon(Icons.send, color: Colors.white),
                   ),
                 ),
               ],

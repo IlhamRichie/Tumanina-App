@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:MyApp/screens/fitur_doa/doa_detail_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // Data Doa
 class Doa {
@@ -54,7 +55,8 @@ class DoaScreen extends StatelessWidget {
     ),
     Doa(
       title: "Doa Sebelum Makan",
-      arabic: "اَللّٰهُمَّ بَارِكْ لَنَا فِيْمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ",
+      arabic:
+          "اَللّٰهُمَّ بَارِكْ لَنَا فِيْمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ",
       latin: "Allahumma baarik lanaa fiimaa rozaqtanaa wa qinaa 'adzaa bannaar",
       translation: "Dengan nama Allah, dan atas nama-Mu kami makan.",
       timeToRead: "Sebelum makan",
@@ -243,15 +245,23 @@ class DoaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Doa Sehari-hari',
-          style: TextStyle(
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
             fontWeight: FontWeight.bold,
-            fontSize: 24,
           ),
         ),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -259,39 +269,59 @@ class DoaScreen extends StatelessWidget {
           itemCount: doaList.length,
           itemBuilder: (context, index) {
             final doa = doaList[index];
-            return Card(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 5.0),
+              decoration: BoxDecoration(
+                // Apply gradient border here
+                border: Border.all(
+                  width: 2.0,
+                  color: Colors
+                      .transparent, // transparent to make it a border effect
+                ),
+                borderRadius: BorderRadius.circular(16.0),
+                gradient: LinearGradient(
+                  colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(16),
-                title: Text(
-                  doa.title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      Colors.white, // Set the background color inside the card
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
-                subtitle: Text(
-                  doa.timeToRead,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: Colors.teal,
-                ),
-                onTap: () {
-                  // Navigate to the Doa Detail Screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DoaDetailScreen(doa: doa),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Text(
+                    doa.title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF004C7E),
                     ),
-                  );
-                },
+                  ),
+                  subtitle: Text(
+                    doa.timeToRead,
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.teal,
+                  ),
+                  onTap: () {
+                    // Navigate to the Doa Detail Screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DoaDetailScreen(doa: doa),
+                      ),
+                    );
+                  },
+                ),
               ),
             );
           },

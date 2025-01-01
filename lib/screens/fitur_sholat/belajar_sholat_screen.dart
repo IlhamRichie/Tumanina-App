@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'gerakan_sholat/sholat_screen.dart';
 import 'mengenal_sholat_screen.dart';
 import 'rukun_sholat_screen.dart';
@@ -36,7 +37,6 @@ class BelajarSholatScreen extends StatelessWidget {
           );
         },
       },
-      
       {
         'title': 'Niat Sholat Wajib', // New menu item
         'icon': Icons.assignment_turned_in,
@@ -44,7 +44,8 @@ class BelajarSholatScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NiatSholatScreen(), // Navigate to NiatSholatScreen
+              builder: (context) =>
+                  const NiatSholatScreen(), // Navigate to NiatSholatScreen
             ),
           );
         },
@@ -56,7 +57,8 @@ class BelajarSholatScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const RukunSholatScreen(), // Navigate to RukunSholatScreen
+              builder: (context) =>
+                  const RukunSholatScreen(), // Navigate to RukunSholatScreen
             ),
           );
         },
@@ -78,9 +80,12 @@ class BelajarSholatScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Belajar Sholat',
-          style: TextStyle(color: Colors.black),
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -135,8 +140,9 @@ class BelajarSholatScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         belajarSholatItems[index]['title'],
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: GoogleFonts.poppins(
+                          // Apply Poppins font here
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),

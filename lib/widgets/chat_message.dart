@@ -21,7 +21,7 @@ class ChatMessage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: isSentByMe ? Colors.blue : Colors.grey[300],
+              color: isSentByMe ? const Color(0xFF2DDCBE) : Colors.grey[300],
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

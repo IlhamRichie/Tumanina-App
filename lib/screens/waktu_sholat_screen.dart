@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -62,7 +63,13 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Waktu Sholat Tegal'),
+        title: Text(
+          'Waktu Sholat Tegal',
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
@@ -73,7 +80,10 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   errorMessage,
-                  style: const TextStyle(color: Colors.red, fontSize: 18),
+                  style: GoogleFonts.poppins(
+                    color: Colors.red, 
+                    fontSize: 18
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -106,7 +116,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                           ),
                           title: Text(
                             entry.key,
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
                               color: Colors.white,
@@ -114,7 +124,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                           ),
                           trailing: Text(
                             entry.value,
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
                               fontSize: 18,
                               color: Colors.white,
                             ),

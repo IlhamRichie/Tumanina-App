@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:adhan/adhan.dart';
@@ -7,7 +8,10 @@ import 'dart:convert';
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate; // Callback function
 
-  const PantauSholatScreen({super.key, required this.onUpdate, required Map<String, bool> sholatMilestones});
+  const PantauSholatScreen(
+      {super.key,
+      required this.onUpdate,
+      required Map<String, bool> sholatMilestones});
 
   @override
   _PantauSholatScreenState createState() => _PantauSholatScreenState();
@@ -128,11 +132,14 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: Colors.white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Pantau Sholat',
-          style: TextStyle(color: Colors.black),
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         leading: IconButton(
@@ -144,8 +151,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         centerTitle: true,
       ),
       body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator()) 
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -155,9 +161,12 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Pantau Sholat Hari Ini',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         ...todayLog.entries.map((entry) {
                           IconData? icon;
@@ -183,11 +192,15 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                               children: [
                                 Icon(icon, color: Colors.teal),
                                 const SizedBox(width: 8),
-                                Text(entry.key.capitalize(), style: TextStyle(fontSize: 16)),
+                                Text(
+                                  entry.key.capitalize(),
+                                  style: GoogleFonts.poppins(fontSize: 16),
+                                ),
                               ],
                             ),
                             checkColor: Colors.white,
-                            fillColor: MaterialStateProperty.resolveWith((states) {
+                            fillColor:
+                                MaterialStateProperty.resolveWith((states) {
                               if (states.contains(MaterialState.selected)) {
                                 return const Color(0xFF2DDCBE);
                               }
@@ -204,7 +217,8 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       ],
                     ),
                   ),
-                  PrayerChart(prayerLog: prayerLog), // This is where the chart is added
+                  PrayerChart(
+                      prayerLog: prayerLog), // This is where the chart is added
                 ],
               ),
             ),
@@ -230,45 +244,56 @@ class PrayerChart extends StatelessWidget {
       return _ChartData(data['date'], completedPrayers);
     }).toList();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SfCartesianChart(
-        primaryXAxis: CategoryAxis(
-          majorGridLines: MajorGridLines(width: 0),
-          axisLine: AxisLine(width: 0),
-        ),
-        primaryYAxis: NumericAxis(
-          axisLine: AxisLine(width: 0),
-          majorTickLines: MajorTickLines(size: 0),
-          isVisible: false,
-        ),
-        title: ChartTitle(
-          text: 'Jumlah Sholat Harian',
-          textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
-        ),
-        series: <CartesianSeries>[
-          ColumnSeries<_ChartData, String>(
-            dataSource: chartData,
-            xValueMapper: (_ChartData data, _) => data.date,
-            yValueMapper: (_ChartData data, _) => data.completedPrayers,
-            dataLabelSettings: const DataLabelSettings(isVisible: true),
-            borderRadius: BorderRadius.circular(10),
-            color: const Color(0xFF4CAF50),
-            gradient: LinearGradient(
-              colors: [Color(0xFF81C784), Color(0xFF388E3C)],
-              stops: [0.0, 1.0],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0), // Add padding on the left and right
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 8.0), // Extra padding around the chart
+          child: SfCartesianChart(
+            primaryXAxis: CategoryAxis(
+              majorGridLines: MajorGridLines(width: 0),
+              axisLine: AxisLine(width: 0),
             ),
-            trackBorderWidth: 0,
-            width: 0.8,
+            primaryYAxis: NumericAxis(
+              axisLine: AxisLine(width: 0),
+              majorTickLines: MajorTickLines(size: 0),
+              isVisible: false,
+            ),
+            title: ChartTitle(
+              text: 'Jumlah Sholat Harian',
+              textStyle: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF004C7E)),
+            ),
+            series: <CartesianSeries>[
+              ColumnSeries<_ChartData, String>(
+                dataSource: chartData,
+                xValueMapper: (_ChartData data, _) => data.date,
+                yValueMapper: (_ChartData data, _) => data.completedPrayers,
+                dataLabelSettings: const DataLabelSettings(isVisible: true),
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFF004C7E),
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                  stops: [0.0, 1.0],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                trackBorderWidth: 0,
+                width: 0.6, // Adjusted the width for a more balanced look
+              ),
+            ],
+            tooltipBehavior: TooltipBehavior(
+              enable: true,
+              header: 'Sholat Count',
+              textStyle: TextStyle(color: Colors.white),
+              color: Colors.black.withOpacity(0.7),
+            ),
           ),
-        ],
-        tooltipBehavior: TooltipBehavior(
-          enable: true,
-          header: 'Sholat Count',
-          textStyle: TextStyle(color: Colors.white),
-          color: Colors.black.withOpacity(0.7),
         ),
       ),
     );
