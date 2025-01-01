@@ -78,7 +78,7 @@ class _IntroScreenState extends State<IntroScreen> {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Color(0xFF00263F),
             ),

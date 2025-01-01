@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/intro_screen.dart';
 
 void main() {
@@ -12,11 +13,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'tumanina',
+      title: 'Tumanina',
       theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme(), // Mengatur font global
         primarySwatch: Colors.blue,
       ),
-      home: const IntroScreen(),
+      home: IntroScreen(),
     );
   }
 }

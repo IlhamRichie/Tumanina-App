@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final int surahNumber;
@@ -102,7 +103,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         children: [
           Text(
             widget.surahName,
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -111,7 +112,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           const SizedBox(height: 8),
           Text(
             'Surah Number: ${widget.surahNumber}',
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white70,
             ),
@@ -126,24 +127,39 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       itemCount: ayatList.length,
       itemBuilder: (context, index) {
         var ayat = ayatList[index];
-        return Card(
+        return Container(
           margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16.0),
-            title: Text(
-              ayat['ar'], // Ayat dalam bahasa Arab
-              style: const TextStyle(fontSize: 20, color: Colors.teal),
-              textAlign: TextAlign.right,
+          padding: const EdgeInsets.all(1.5), // Spasi untuk efek gradien
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.teal, Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            subtitle: Text(
-              ayat['idn'], // Terjemahan
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // Inner color
+              borderRadius: BorderRadius.circular(8),
             ),
-            leading: CircleAvatar(
-              backgroundColor: Colors.teal,
-              child: Text(
-                '${ayat['nomor']}', // Nomor ayat
-                style: const TextStyle(color: Colors.white),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16.0),
+              title: Text(
+                ayat['ar'], // Ayat dalam bahasa Arab
+                style: const TextStyle(fontSize: 20, color: Colors.teal),
+                textAlign: TextAlign.right,
+              ),
+              subtitle: Text(
+                ayat['idn'], // Terjemahan
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              leading: CircleAvatar(
+                backgroundColor: Colors.teal,
+                child: Text(
+                  '${ayat['nomor']}', // Nomor ayat
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ),
@@ -161,10 +177,9 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9), // Light modern background
-
+      backgroundColor: Colors.white, // Light modern background
       appBar: AppBar(
-        title: Text(widget.surahName),
+        title: Text(widget.surahName, style: GoogleFonts.poppins()),
         backgroundColor: Colors.teal,
       ),
       body: isLoading

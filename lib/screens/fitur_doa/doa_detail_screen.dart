@@ -40,7 +40,7 @@ class DoaDetailScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: const Color(0xFF2DDCBE),
                 ),
               ),
               SizedBox(height: 8),
@@ -61,7 +61,7 @@ class DoaDetailScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF448AFF),
+                  color: const Color(0xFF2DDCBE),
                 ),
               ),
               SizedBox(height: 8),
@@ -81,7 +81,7 @@ class DoaDetailScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: const Color(0xFF2DDCBE),
                 ),
               ),
               SizedBox(height: 8),
@@ -100,7 +100,7 @@ class DoaDetailScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: const Color(0xFF2DDCBE),
                 ),
               ),
               SizedBox(height: 8),
@@ -122,8 +122,8 @@ class DoaDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFF448AFF),
-                        const Color(0xFF009688)
+                        const Color(0xFF004C7E),
+                        const Color(0xFF2DDCBE)
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
