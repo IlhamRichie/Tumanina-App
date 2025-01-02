@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:MyApp/screens/fitur_doa/doa_detail_screen.dart';
+import 'package:Tumanina/screens/fitur_doa/doa_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Data Doa

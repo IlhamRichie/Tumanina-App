@@ -13,7 +13,7 @@ class ApiService {
 
   // URL dan Key API Groq
   final String groqApiKey =
-      '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'; // Ganti dengan API Key Anda
+      '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'; // Ganti dengan API Key Anda
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
   final String groqModel = 'llama3-groq-8b-8192-tool-use-preview';
 
@@ -111,7 +111,7 @@ class ApiService {
             {
               "role": "system",
               "content":
-                  "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Gunakan ayat & hadis (Arab & Indonesia). Hindari bahasa Inggris. Awali dengan salam, akhiri dengan doa/motivasi."
+                  "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Jangan pernah membuat respon dengan bahasa inggris. Ini aplikasi Tumanina: Tuntunan Mandiri Niat dan Ibadah"
             },
             {"role": "user", "content": userMessage}
           ],

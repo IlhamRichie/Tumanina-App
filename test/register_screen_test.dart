@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MyApp/screens/fitur_login/register_screen.dart';
-import 'package:MyApp/screens/home_screen.dart';
+import 'package:Tumanina/screens/fitur_login/register_screen.dart';
+import 'package:Tumanina/screens/home_screen.dart';
 
 void main() {
   group('RegisterScreen Test', () {

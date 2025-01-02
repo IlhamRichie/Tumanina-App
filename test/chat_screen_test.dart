@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MyApp/screens/tasbih_screen.dart'; // Sesuaikan path dengan struktur project Anda
+import 'package:Tumanina/screens/tasbih_screen.dart'; // Sesuaikan path dengan struktur project Anda
 
 void main() {
   group('Tasbih Screen Tests', () {

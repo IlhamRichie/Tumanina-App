@@ -1,5 +1,5 @@
-import 'package:MyApp/screens/fitur_sholat/belajar_sholat_screen.dart';
-import 'package:MyApp/screens/kiblat_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/belajar_sholat_screen.dart';
+import 'package:Tumanina/screens/kiblat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -421,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }),
-          _buildMenuItem(context, Icons.monitor, 'Pantau\nSholat', () {
+          _buildMenuItem(context, Icons.check_circle_rounded, 'Pantau\nSholat', () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -451,19 +451,19 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => ChatScreen()),
             );
           }),
-          _buildMenuItem(context, Icons.chat, 'Kiblat', () {
+          _buildMenuItem(context, Icons.compass_calibration_rounded, 'Kiblat', () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const KiblatScreen()),
             );
           }),
-          _buildMenuItem(context, Icons.auto_awesome_mosaic, 'Tasbih', () {
+          _buildMenuItem(context, Icons.add_circle_sharp, 'Tasbih', () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const TasbihScreen()),
             );
           }),
-          _buildMenuItem(context, Icons.book, 'Ayat-Ayat\nAl-Qur\'an', () {
+          _buildMenuItem(context, Icons.book_rounded, 'Ayat-Ayat\nAl-Qur\'an', () {
             Navigator.push(
               context,
               MaterialPageRoute(

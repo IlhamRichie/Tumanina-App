@@ -3,7 +3,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:MyApp/screens/waktu_sholat_screen.dart';
+import 'package:Tumanina/screens/waktu_sholat_screen.dart';
 import 'waktu_sholat_test.mocks.dart';
 
 @GenerateMocks([http.Client])

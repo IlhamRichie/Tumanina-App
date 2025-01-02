@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MyApp/screens/fitur_sholat/belajar_sholat_screen.dart';
-import 'package:MyApp/screens/fitur_sholat/mengenal_sholat_screen.dart';
-import 'package:MyApp/screens/fitur_sholat/gerakan_sholat/sholat_screen.dart';
-import 'package:MyApp/screens/fitur_sholat/syarat_sholat_screen.dart';
-import 'package:MyApp/screens/home_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/belajar_sholat_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/mengenal_sholat_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/gerakan_sholat/sholat_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/syarat_sholat_screen.dart';
+import 'package:Tumanina/screens/home_screen.dart';
 
 void main() {
   testWidgets('BelajarSholatScreen renders correctly and navigates properly', (WidgetTester tester) async {

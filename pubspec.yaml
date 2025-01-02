@@ -1,5 +1,5 @@
-name: MyApp
-description: "A new Flutter project."
+name: Tumanina
+description: "Tuntunan Mandiri Niat dan Ibdadah"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -56,6 +56,7 @@ dependencies:
   mockito: ^5.1.0
   build_runner: ^2.4.10
   dio: ^5.2.1
+  flutter_launcher_icons: ^0.14.2
 
   
 
@@ -99,6 +100,10 @@ flutter:
     - assets/TUMABOT.tflite
     - assets/pp.jpeg
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets\\logo\\Logo.png"  # Ganti dengan path ikon Anda
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

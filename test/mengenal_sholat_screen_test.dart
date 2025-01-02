@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MyApp/screens/fitur_sholat/mengenal_sholat_screen.dart';
+import 'package:Tumanina/screens/fitur_sholat/mengenal_sholat_screen.dart';
 
 void main() {
   testWidgets('MengenalSholatScreen renders correctly', (WidgetTester tester) async {

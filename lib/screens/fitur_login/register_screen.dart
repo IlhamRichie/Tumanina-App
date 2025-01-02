@@ -203,12 +203,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: Text(
-              title == "Syarat dan Ketentuan"
-                  ? """
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [const Color(0xFF2DDCBE), const Color(0xFF004C7E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      title == "Syarat dan Ketentuan"
+                          ? """
 Syarat dan Ketentuan
 
 1. Pendahuluan  
@@ -229,10 +265,10 @@ Syarat dan Ketentuan
 5. Perubahan Layanan  
    - Kami dapat memperbarui atau menghentikan fitur aplikasi tanpa pemberitahuan sebelumnya.  
 
-6. Hukum yang Berlaku 
+6. Hukum yang Berlaku  
    Syarat dan Ketentuan ini diatur sesuai dengan hukum yang berlaku di Indonesia.  
-          """
-                  : """
+                    """
+                          : """
 Kebijakan Privasi
 
 1. Informasi yang Dikumpulkan
@@ -247,21 +283,39 @@ Kebijakan Privasi
    - Kami menggunakan teknologi terkini untuk melindungi data Anda dari akses yang tidak sah.  
    - Namun, kami tidak dapat menjamin keamanan absolut dari informasi yang Anda berikan.  
 
-4. Hak Pengguna 
+4. Hak Pengguna  
    - Anda berhak mengakses, mengubah, atau menghapus informasi pribadi Anda kapan saja.  
    - Hubungi kami jika Anda memiliki pertanyaan terkait privasi.  
 
 5. Perubahan Kebijakan  
    - Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan diberitahukan melalui aplikasi.  
-          """,
+                    """,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Tutup"),
+                  ),
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Tutup"),
-            ),
-          ],
         );
       },
     );
