@@ -13,7 +13,7 @@ class ApiService {
 
   // URL dan Key API Groq
   final String groqApiKey =
-      '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'; // Ganti dengan API Key Anda
+      'yourapikey'; // Ganti dengan API Key Anda
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
   final String groqModel = 'llama3-groq-8b-8192-tool-use-preview';
 
