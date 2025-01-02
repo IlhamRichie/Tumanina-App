@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:MyApp/screens/register_screen.dart';
+import 'package:MyApp/screens/fitur_login/register_screen.dart';
 import 'package:MyApp/screens/home_screen.dart';
 
 void main() {

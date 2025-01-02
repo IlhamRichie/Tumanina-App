@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../services/api_service.dart';
 import '../artikel/artikel_screen.dart';
 import '../home_screen.dart';
-import '../login_screen.dart';
+import '../fitur_login/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../home_screen.dart';
 import 'package:flutter/gestures.dart';
 
 class RegisterScreen extends StatefulWidget {
