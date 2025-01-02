@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../artikel/artikel_screen.dart';
 import '../home_screen.dart';
 import '../fitur_login/login_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,18 +16,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Image and username variables
   File? _profileImage;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-
-  // Picking image from gallery or camera
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Set default username (In practice, fetch from your backend)
     _usernameController.text = 'Ilham Rigan';
     _emailController.text = 'ilham.rigan@example.com';
   }
@@ -49,22 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _saveProfile() {
-    String updatedUsername = _usernameController.text;
-    if (updatedUsername.isNotEmpty) {
-      ApiService().updateProfile(updatedUsername, _profileImage);
-
-      // Optionally show a message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid username")),
-      );
-    }
-  }
-
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -81,16 +63,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
         ),
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Color(0xFF2B2D42)),
         elevation: 2,
-        automaticallyImplyLeading: false, // This removes the back icon
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Profile Image Container
             GestureDetector(
               onTap: () {
                 _showImagePickerDialog(context);
@@ -107,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 8),
                     ),
@@ -125,16 +104,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Username displayed as text
             Text(
-              'Ilham Rigan',
+              _usernameController.text,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            // Email displayed below the username
             Text(
               _emailController.text,
               style: const TextStyle(
@@ -144,15 +121,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Divider
             const Divider(
                 thickness: 1.2, color: Colors.grey, indent: 30, endIndent: 30),
             const SizedBox(height: 20),
-            // ListTiles
             _buildProfileOption(
               icon: Icons.person_outline,
               text: 'Edit Profil',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditProfileScreen(
+                      initialUsername: _usernameController.text,
+                      initialEmail: _emailController.text,
+                      profileImage: _profileImage,
+                    ),
+                  ),
+                );
+              },
             ),
             _buildProfileOption(
               icon: Icons.feedback_outlined,
@@ -160,11 +146,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onTap: () {
                 _showFeedbackDialog(context);
               },
-            ),
-            _buildProfileOption(
-              icon: Icons.lock_outline,
-              text: 'Ubah Kata Sandi',
-              onTap: () {},
             ),
             _buildProfileOption(
               icon: Icons.exit_to_app,
@@ -192,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Icon(icon, color: const Color(0xFF004C7E), size: 30),
       title: Text(
         text,
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
     );
@@ -205,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return Dialog(
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Rounded corners
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -216,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 15,
-                  offset: Offset(0, 5),
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -272,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: 2, // Set current index to 2 for "Profil"
+        currentIndex: 2,
         elevation: 5,
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF004C7E),
@@ -332,10 +313,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
     final date = DateTime.now().toIso8601String();
 
     if (_formKey.currentState?.validate() ?? false) {
-      // Assuming ApiService().submitFeedback is implemented
       ApiService().submitFeedback(name, feedback, date);
-
-      // Close the dialog
       Navigator.pop(context);
     }
   }
@@ -353,13 +331,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
               labelText: 'Nama',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.teal),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.teal),
+                borderSide: const BorderSide(color: Colors.teal),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -376,13 +352,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
               labelText: 'Tulis Ulasan Anda',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.teal),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.teal),
+                borderSide: const BorderSide(color: Colors.teal),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 50),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -396,7 +370,6 @@ class _FeedbackFormState extends State<FeedbackForm> {
             onPressed: _submitFeedback,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal,
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 103),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

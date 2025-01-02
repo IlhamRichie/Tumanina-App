@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final int surahNumber;
@@ -11,7 +12,7 @@ class SurahDetailScreen extends StatefulWidget {
   const SurahDetailScreen({
     super.key,
     required this.surahNumber,
-    required this.surahName,
+    required this.surahName, int? initialAyat,
   });
 
   @override
@@ -25,10 +26,13 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   bool isLoading = true;
   bool isPlaying = false;
 
+  List<String> bookmarkedAyat = []; // List untuk bookmark
+
   @override
   void initState() {
     super.initState();
     fetchSurahDetail();
+    loadBookmarks();
   }
 
   Future<void> fetchSurahDetail() async {
@@ -40,8 +44,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          ayatList = data['ayat']; // Ambil daftar ayat
-          surahAudioUrl = data['audio']; // Ambil URL audio surah
+          ayatList = data['ayat'];
+          surahAudioUrl = data['audio'];
           isLoading = false;
         });
       } else {
@@ -66,7 +70,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
 
     try {
-      await audioPlayer.play(UrlSource(surahAudioUrl));
+      await audioPlayer.setSourceUrl(surahAudioUrl);
+      await audioPlayer.resume();
       setState(() {
         isPlaying = true;
       });
@@ -90,12 +95,37 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
   }
 
+  Future<void> loadBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      bookmarkedAyat = prefs.getStringList('bookmarkedAyat') ?? [];
+    });
+  }
+
+  Future<void> toggleBookmark(String ayatData) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (bookmarkedAyat.contains(ayatData)) {
+      setState(() {
+        bookmarkedAyat.remove(ayatData);
+      });
+    } else {
+      setState(() {
+        bookmarkedAyat.add(ayatData);
+      });
+    }
+    await prefs.setStringList('bookmarkedAyat', bookmarkedAyat);
+  }
+
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.teal,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -127,12 +157,14 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       itemCount: ayatList.length,
       itemBuilder: (context, index) {
         var ayat = ayatList[index];
+        String ayatData = '${widget.surahNumber}:${ayat['nomor']}';
+
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 8.0),
-          padding: const EdgeInsets.all(1.5), // Spasi untuk efek gradien
+          padding: const EdgeInsets.all(2.0),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Colors.teal, Colors.blue],
+              colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -140,26 +172,46 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white, // Inner color
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(16.0),
               title: Text(
-                ayat['ar'], // Ayat dalam bahasa Arab
-                style: const TextStyle(fontSize: 20, color: Colors.teal),
+                ayat['ar'],
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  color: const Color(0xFF004C7E),
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.right,
               ),
               subtitle: Text(
-                ayat['idn'], // Terjemahan
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                ayat['idn'],
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
               ),
               leading: CircleAvatar(
-                backgroundColor: Colors.teal,
+                backgroundColor: const Color(0xFF2DDCBE),
                 child: Text(
-                  '${ayat['nomor']}', // Nomor ayat
+                  '${ayat['nomor']}',
                   style: const TextStyle(color: Colors.white),
                 ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  bookmarkedAyat.contains(ayatData)
+                      ? Icons.bookmark
+                      : Icons.bookmark_border,
+                  color: bookmarkedAyat.contains(ayatData)
+                      ? const Color(0xFF2DDCBE)
+                      : Colors.grey,
+                ),
+                onPressed: () {
+                  toggleBookmark(ayatData);
+                },
               ),
             ),
           ),
@@ -177,10 +229,17 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Light modern background
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(widget.surahName, style: GoogleFonts.poppins()),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -200,7 +259,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                         icon: const Icon(Icons.play_arrow),
                         label: const Text('Play'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
+                          backgroundColor: const Color(0xFF2DDCBE),
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -209,7 +268,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                         icon: const Icon(Icons.pause),
                         label: const Text('Pause'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
+                          backgroundColor:
+                              isPlaying ? const Color(0xFF2DDCBE) : Colors.grey,
                           foregroundColor: Colors.white,
                         ),
                       ),

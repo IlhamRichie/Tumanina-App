@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Tumanina/screens/fitur_sholat/belajar_sholat_screen.dart';
 import 'package:Tumanina/screens/kiblat_screen.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String timeRemaining = '';
   List<Surah> surahList = [];
   bool isLoading = false;
+  bool hasInternet = true; // Status internet default
+  List<String> bookmarkedAyat = []; // Tambahkan ini di kelas _HomeScreenState
 
   // Milestone status untuk setiap sholat
   Map<String, bool> sholatMilestones = {
@@ -58,12 +62,42 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchArticles();
     fetchSurahList();
     _loadSholatMilestones();
+    loadBookmarks(); // Tambahkan ini
+    print('Internet status: $hasInternet'); // Debugging
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNextPrayerNotification();
     });
   }
 
+  Future<void> _handleRefresh() async {
+    setState(() {
+      isLoading = true; // Tampilkan loading saat refresh
+    });
+
+    try {
+      await Future.wait([
+        fetchArticles(), // Muat ulang artikel
+        fetchSurahList(), // Muat ulang daftar surah
+        fetchPrayerTimes(), // Muat ulang waktu sholat
+      ]);
+
+      setState(() {
+        isLoading = false; // Sembunyikan loading setelah refresh selesai
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false; // Tetap sembunyikan loading jika ada error
+      });
+      print('Error saat refresh: $e');
+    }
+  }
+
   Future<void> fetchArticles() async {
+    setState(() {
+      isLoading = true;
+      hasInternet = true; // Reset status koneksi
+    });
+
     final url =
         Uri.parse('https://api-berita-indonesia.vercel.app/sindonews/kalam/');
     try {
@@ -72,14 +106,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          articles = data['data']['posts']; // Ambil data artikel dari API
+          articles = data['data']['posts'];
           isLoading = false;
         });
-        // Debug: Print artikel untuk memastikan ada 'thumbnail'
-        print(articles); // Periksa struktur artikel di sini
       } else {
         throw Exception('Gagal memuat artikel');
       }
+    } on SocketException {
+      setState(() {
+        isLoading = false;
+        hasInternet = false; // Set status koneksi ke false
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -161,6 +198,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> loadBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      bookmarkedAyat = prefs.getStringList('bookmarkedAyat') ?? [];
+    });
+  }
+
   Future<void> fetchPrayerTimes() async {
     try {
       final url = Uri.parse(
@@ -192,6 +236,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchSurahList() async {
+    setState(() {
+      isLoading = true;
+      hasInternet = true; // Reset status koneksi
+    });
+
     try {
       final url = Uri.parse('https://equran.id/api/surat');
       final response = await http.get(url);
@@ -202,9 +251,16 @@ class _HomeScreenState extends State<HomeScreen> {
           surahList = data.map((item) => Surah.fromJson(item)).toList();
           isLoading = false;
         });
+        print('Surah list loaded successfully');
       } else {
-        throw Exception('Failed to load surah list');
+        throw Exception('Gagal memuat daftar surah');
       }
+    } on SocketException {
+      setState(() {
+        isLoading = false;
+        hasInternet = false; // Set status koneksi ke false
+      });
+      print('Tidak ada koneksi internet');
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -276,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: const Color.fromRGBO(255, 255, 255, 0),
         elevation: 0,
         centerTitle: true,
-        toolbarHeight: 0, // Tinggi AppBar
+        toolbarHeight: 0,
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
@@ -284,126 +340,106 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Tambahkan teks Assalamualaikum di bawah AppBar
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Assalamu\'alaikum Rigan',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                              color: Color(0xFF004C7E), // Warna teks hitam
-                            ),
-                          ),
-                          SizedBox(height: 4), // Beri jarak antara teks
-                          Text(
-                            'Perdalam Sholat Anda dengan Tumanina',
-                            style: TextStyle(
-                              color:
-                                  Color(0xFF2DDCBE), // Warna teks lebih gelap
-                              fontSize: 14,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh, // Fungsi refresh
+        color: Color(0xFF2DDCBE), // Warna spinner (modern hijau terang)
+        backgroundColor:
+            Color(0xFF004C7E), // Warna latar belakang spinner (biru gelap)
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Assalamu\'alaikum Rigan',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                          color: Color(0xFF004C7E),
+                        ),
                       ),
-                    ),
-                    // Image Slider
-                    _buildImageSlider(),
-                    const SizedBox(height: 10),
-                    _buildMenuRow(context),
-                    const SizedBox(height: 10),
-                    _buildNextPrayerCard(),
-                    const SizedBox(height: 10),
-                    _buildPrayerChecklist(sholatMilestones),
-                    const SizedBox(height: 10),
-                    _buildSurahBox(),
-                    const SizedBox(height: 10),
-                    FutureBuilder<List<Surah>>(
-                      future: _getReadingHistory(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Center(
-                            child:
-                                Text('Belum ada riwayat membaca Al-Qur\'an.'),
-                          );
-                        }
-
-                        final historyList = snapshot.data!;
-                        return ListView.builder(
-                          itemCount: historyList.length,
-                          itemBuilder: (context, index) {
-                            final surah = historyList[index];
-                            String latinName =
-                                latinNames[surah.id] ?? surah.name;
-                            // Build your list item here
-                          },
-                        );
-                      },
-                    ),
-                  ],
+                      SizedBox(height: 4),
+                      Text(
+                        'Perdalam Sholat Anda dengan Tumanina',
+                        style: TextStyle(
+                          color: Color(0xFF2DDCBE),
+                          fontSize: 14,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                _buildImageSlider(),
+                const SizedBox(height: 10),
+                _buildMenuRow(context),
+                const SizedBox(height: 10),
+                _buildNextPrayerCard(),
+                const SizedBox(height: 10),
+                _buildPrayerChecklist(sholatMilestones),
+                const SizedBox(height: 10),
+                _buildSurahBox(),
+                const SizedBox(height: 10),
+              ],
             ),
+          ),
+        ),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      backgroundColor: Colors.white, // Warna latar belakang putih
+      backgroundColor: Colors.white,
     );
   }
 
   Widget _buildImageSlider() {
     return SizedBox(
       height: 150,
-      child: articles.isEmpty && isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2DDCBE)),
-              ),
+      child: !hasInternet
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.wifi_off, size: 50, color: Colors.grey),
+                SizedBox(height: 10),
+                Text(
+                  'Tidak ada koneksi internet',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
             )
-          : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: articles.length,
-              itemBuilder: (context, index) {
-                final article = articles[index];
-                final thumbnail = article['thumbnail'] ?? '';
-                final title = article['title'] ?? 'Judul Tidak Tersedia';
+          : isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF2DDCBE)),
+                  ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: articles.length,
+                  itemBuilder: (context, index) {
+                    final article = articles[index];
+                    final thumbnail = article['thumbnail'] ?? '';
+                    final title = article['title'] ?? 'Judul Tidak Tersedia';
 
-                if (thumbnail.isEmpty) {
-                  return const Center(child: Text('Thumbnail tidak tersedia'));
-                }
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ArtikelScreen(),
-                      ),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ArtikelScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildImageCard(thumbnail, title),
                     );
                   },
-                  child: _buildImageCard(thumbnail, title),
-                );
-              },
-            ),
+                ),
     );
   }
 
@@ -421,7 +457,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }),
-          _buildMenuItem(context, Icons.check_circle_rounded, 'Pantau\nSholat', () {
+          _buildMenuItem(context, Icons.check_circle_rounded, 'Pantau\nSholat',
+              () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -451,7 +488,8 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => ChatScreen()),
             );
           }),
-          _buildMenuItem(context, Icons.compass_calibration_rounded, 'Kiblat', () {
+          _buildMenuItem(context, Icons.compass_calibration_rounded, 'Kiblat',
+              () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const KiblatScreen()),
@@ -463,7 +501,8 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => const TasbihScreen()),
             );
           }),
-          _buildMenuItem(context, Icons.book_rounded, 'Ayat-Ayat\nAl-Qur\'an', () {
+          _buildMenuItem(context, Icons.book_rounded, 'Ayat-Ayat\nAl-Qur\'an',
+              () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -637,6 +676,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSurahBox() {
+    Map<int, List<int>> bookmarkedData = {};
+
+    for (var item in bookmarkedAyat) {
+      final parts = item.split(':');
+      if (parts.length == 2) {
+        int surahNumber = int.tryParse(parts[0]) ?? 0;
+        int ayatNumber = int.tryParse(parts[1]) ?? 0;
+        if (surahNumber > 0 && ayatNumber > 0) {
+          bookmarkedData[surahNumber] = (bookmarkedData[surahNumber] ?? [])
+            ..add(ayatNumber);
+        }
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -659,74 +712,70 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Daftar Surah Al-Qur\'an',
+            'Bookmark Surah dan Ayat',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 255, 255, 255),
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: surahList.isEmpty && isLoading
+            child: bookmarkedData.isEmpty
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    child: Text(
+                      'Belum ada bookmark',
+                      style: TextStyle(color: Colors.white),
                     ),
                   )
                 : ListView.builder(
-                    itemCount: surahList.length,
+                    itemCount: bookmarkedData.keys.length,
                     itemBuilder: (context, index) {
-                      final surah = surahList[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SurahDetailScreen(
-                                surahNumber: surah.id,
-                                surahName: surah.name,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 6,
-                          color: Colors.white,
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.all(12),
-                            leading: Icon(
-                              Icons.book,
-                              color: Colors.teal.shade600,
-                              size: 28,
-                            ),
-                            title: Text(
-                              surah.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                color: Colors.teal.shade800,
-                              ),
-                            ),
-                            subtitle: Text(
-                              surah.translation,
-                              style: TextStyle(
-                                color: Colors.teal.shade400,
-                              ),
-                            ),
-                            trailing: Text(
-                              '${surah.ayatCount} Ayat',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.teal.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      final surahNumber = bookmarkedData.keys.elementAt(index);
+                      final surah = surahList.firstWhere(
+                        (s) => s.id == surahNumber,
+                        orElse: () => Surah(
+                          id: surahNumber,
+                          name: 'Surah Tidak Diketahui',
+                          translation: '',
+                          ayatCount: 0,
+                        ),
+                      );
+                      final ayatNumbers =
+                          bookmarkedData[surahNumber]?.join(', ') ?? '';
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 5.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Text(
+                            surah.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF004C7E),
                             ),
                           ),
+                          subtitle: Text(
+                            'Ayat: $ayatNumbers',
+                            style: const TextStyle(
+                              color: Color(0xFF2DDCBE),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SurahDetailScreen(
+                                  surahNumber: surahNumber,
+                                  surahName: surah.name,
+                                  initialAyat: bookmarkedData[surahNumber]?[0],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
