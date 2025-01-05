@@ -32,10 +32,64 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _showInfoDialog(BuildContext context, Offset offset) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Stack(
+          children: [
+            Positioned(
+              top: offset.dy - 10,
+              right: MediaQuery.of(context).size.width - offset.dx - 40,
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Chatbot ini masih dalam proses pengembangan. Fitur-fitur akan terus ditingkatkan.',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    CustomPaint(
+                      painter: TrianglePainter(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5), // Soft background for a modern feel
+      backgroundColor: const Color(0xFFF0F2F5),
       appBar: AppBar(
         title: Text(
           'Tumabot AI',
@@ -47,7 +101,18 @@ class _ChatScreenState extends State<ChatScreen> {
         centerTitle: true,
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Color(0xFF2B2D42)),
-        elevation: 2, // Adding a subtle shadow for modern depth
+        elevation: 2,
+        actions: [
+          GestureDetector(
+            onTapDown: (TapDownDetails details) {
+              _showInfoDialog(context, details.globalPosition);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.info_outline, color: Color(0xFF004C7E)),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -127,4 +192,24 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+}
+
+class TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path();
+    path.moveTo(20, 0);
+    path.lineTo(10, 10);
+    path.lineTo(30, 10);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

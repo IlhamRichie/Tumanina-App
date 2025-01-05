@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import '../artikel/artikel_screen.dart';
 import '../home_screen.dart';
 import '../fitur_login/login_screen.dart';
 import 'edit_profile_screen.dart';
+import 'feedback_form.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -16,34 +17,21 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  File? _profileImage;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _usernameController.text = 'Ilham Rigan';
-    _emailController.text = 'ilham.rigan@example.com';
+    _loadUserData();
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
-  }
-
-  Future<void> _takePhoto() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameController.text = prefs.getString('username') ?? 'Nama Pengguna';
+      _emailController.text = prefs.getString('email') ?? 'Email Pengguna';
+    });
   }
 
   @override
@@ -70,36 +58,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            GestureDetector(
-              onTap: () {
-                _showImagePickerDialog(context);
-              },
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Colors.teal.shade200, Colors.teal.shade700],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Colors.teal.shade200, Colors.teal.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 8),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  image: _profileImage == null
-                      ? const DecorationImage(
-                          image: AssetImage('assets/pp.jpeg'),
-                          fit: BoxFit.cover,
-                        )
-                      : DecorationImage(
-                          image: FileImage(_profileImage!),
-                          fit: BoxFit.cover,
-                        ),
+                ],
+                image: const DecorationImage(
+                  image: AssetImage('assets/pp.jpeg'),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -134,7 +112,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     builder: (context) => EditProfileScreen(
                       initialUsername: _usernameController.text,
                       initialEmail: _emailController.text,
-                      profileImage: _profileImage,
                     ),
                   ),
                 );
@@ -176,67 +153,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
       onTap: onTap,
-    );
-  }
-
-  void _showFeedbackDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: FeedbackForm(),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showImagePickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pilih Foto Profil'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Pilih dari Galeri'),
-                onTap: () {
-                  _pickImage();
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Ambil Foto Baru'),
-                onTap: () {
-                  _takePhoto();
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -283,101 +199,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
               MaterialPageRoute(builder: (context) => const ArtikelScreen()),
             );
-          } else if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
           }
         },
       ),
     );
   }
-}
 
-class FeedbackForm extends StatefulWidget {
-  const FeedbackForm({super.key});
-
-  @override
-  _FeedbackFormState createState() => _FeedbackFormState();
-}
-
-class _FeedbackFormState extends State<FeedbackForm> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _feedbackController = TextEditingController();
-
-  void _submitFeedback() async {
-    final name = _nameController.text;
-    final feedback = _feedbackController.text;
-    final date = DateTime.now().toIso8601String();
-
-    if (_formKey.currentState?.validate() ?? false) {
-      ApiService().submitFeedback(name, feedback, date);
-      Navigator.pop(context);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: 'Nama',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.teal),
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Nama tidak boleh kosong';
-              }
-              return null;
-            },
+  void _showFeedbackDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _feedbackController,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: 'Tulis Ulasan Anda',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.teal),
-              ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Feedback tidak boleh kosong';
-              }
-              return null;
-            },
+            child: FeedbackForm(),
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _submitFeedback,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Kirim', style: TextStyle(fontSize: 16)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

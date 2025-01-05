@@ -27,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String _username = 'User';
   Map<String, String> prayerTimes = {};
   String nextPrayer = '';
   List articles = [];
@@ -63,9 +64,17 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchSurahList();
     _loadSholatMilestones();
     loadBookmarks(); // Tambahkan ini
+    _loadUsername(); // Muat nama pengguna
     print('Internet status: $hasInternet'); // Debugging
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNextPrayerNotification();
+    });
+  }
+
+  Future<void> _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _username = prefs.getString('username') ?? 'User';
     });
   }
 
@@ -351,22 +360,22 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16.0),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Assalamu\'alaikum Rigan',
-                        style: TextStyle(
+                        'Assalamu\'alaikum, $_username',
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                           color: Color(0xFF004C7E),
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
+                      const SizedBox(height: 4),
+                      const Text(
                         'Perdalam Sholat Anda dengan Tumanina',
                         style: TextStyle(
                           color: Color(0xFF2DDCBE),

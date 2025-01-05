@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/api_service.dart';
 import '../home_screen.dart';
 import 'package:flutter/gestures.dart';
 
@@ -10,12 +11,184 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   bool isPasswordVisible = false;
   bool isChecked = false;
+
+  @override
+  void dispose() {
+    // Jangan lupa membersihkan controller saat widget dihapus
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _showErrorDialog(BuildContext context, String title,
+      {String message = "Terjadi kesalahan. Silakan coba lagi."}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Tutup"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showTerms(BuildContext context, String title) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [const Color(0xFF2DDCBE), const Color(0xFF004C7E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      title == "Syarat dan Ketentuan"
+                          ? """
+Syarat dan Ketentuan
+
+1. Pendahuluan
+   Selamat datang di aplikasi Tumanina. Dengan menggunakan aplikasi ini, Anda menyetujui untuk mematuhi syarat dan ketentuan yang berlaku.
+
+2. Akses dan Penggunaan Aplikasi
+   - Anda bertanggung jawab atas informasi yang Anda masukkan dalam aplikasi.
+   - Dilarang menggunakan aplikasi ini untuk aktivitas yang melanggar hukum atau mengganggu pengguna lain.
+
+3. Akun dan Keamanan
+   - Anda bertanggung jawab atas kerahasiaan akun Anda, termasuk kata sandi.
+   - Kami tidak bertanggung jawab atas kerugian akibat penyalahgunaan akun Anda.
+
+4. Konten Pengguna
+   - Semua data yang diunggah pengguna akan dijaga kerahasiaannya sesuai dengan Kebijakan Privasi.
+   - Kami berhak menghapus konten yang melanggar ketentuan atau merugikan pihak lain.
+
+5. Perubahan Layanan
+   - Kami dapat memperbarui atau menghentikan fitur aplikasi tanpa pemberitahuan sebelumnya.
+
+6. Hak Kekayaan Intelektual
+   - Semua konten dalam aplikasi ini, termasuk teks, gambar, dan logo, dilindungi oleh hak kekayaan intelektual.
+   - Dilarang menggunakan atau menyalin konten aplikasi tanpa izin tertulis dari pihak pengembang.
+
+7. Hukum yang Berlaku
+   Syarat dan Ketentuan ini diatur sesuai dengan hukum yang berlaku di Indonesia.
+                      """
+                          : """
+Kebijakan Privasi
+
+1. Informasi yang Dikumpulkan
+   - Kami mengumpulkan informasi pribadi, seperti nama, email, dan data lainnya yang relevan untuk penggunaan aplikasi.
+   - Data ini digunakan untuk meningkatkan layanan kami dan memastikan pengalaman pengguna yang optimal.
+
+2. Penggunaan Informasi
+   - Informasi pribadi Anda hanya digunakan untuk keperluan internal dan tidak akan dibagikan kepada pihak ketiga tanpa izin Anda.
+   - Data dapat digunakan untuk memberikan pengalaman yang lebih personal di aplikasi.
+
+3. Keamanan Data
+   - Kami menggunakan teknologi terkini untuk melindungi data Anda dari akses yang tidak sah.
+   - Namun, kami tidak dapat menjamin keamanan absolut dari informasi yang Anda berikan.
+
+4. Hak Pengguna
+   - Anda berhak mengakses, mengubah, atau menghapus informasi pribadi Anda kapan saja melalui pengaturan akun.
+   - Hubungi kami jika Anda memiliki pertanyaan terkait privasi atau permintaan penghapusan data.
+
+5. Penyimpanan Data
+   - Data Anda akan disimpan selama akun Anda aktif. Setelah akun dinonaktifkan, data Anda akan dihapus sesuai kebijakan kami.
+
+6. Perubahan Kebijakan
+   - Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan diberitahukan melalui aplikasi atau email terdaftar Anda.
+
+7. Hubungi Kami
+   Jika Anda memiliki pertanyaan atau masalah terkait privasi, hubungi kami melalui email di support@tumanina.com.
+                      """,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Tutup"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +202,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // Navigate back to login screen
+                  Navigator.pop(context);
                 },
                 child: const Row(
                   children: [
@@ -52,6 +225,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: "Nama",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF2DDCBE)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Color(0xFF2DDCBE), width: 2.0),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -135,7 +325,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: RichText(
                       text: TextSpan(
                         text:
-                            "Dengan ini saya membaca, memahami, dan menyetujui hal-hal yang tercantum pada ",
+                            "Dengan ini saya membaca, memahami, dan menyetujui ",
                         style: const TextStyle(
                             color: Colors.black87, fontSize: 12),
                         children: [
@@ -149,7 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _showTerms(context, "Syarat dan Ketentuan");
                               },
                           ),
-                          const TextSpan(text: " dan "),
+                          const TextSpan(text: " serta "),
                           TextSpan(
                             text: "Kebijakan Privasi",
                             style: const TextStyle(
@@ -160,7 +350,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _showTerms(context, "Kebijakan Privasi");
                               },
                           ),
-                          const TextSpan(text: " yang berlaku."),
                         ],
                       ),
                     ),
@@ -172,15 +361,61 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: isChecked
-                      ? () {
-                          // Navigate to HomeScreen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HomeScreen()),
-                          );
+                      ? () async {
+                          if (nameController.text.isEmpty ||
+                              emailController.text.isEmpty ||
+                              passwordController.text.isEmpty ||
+                              confirmPasswordController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Harap isi semua kolom!"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (passwordController.text !=
+                              confirmPasswordController.text) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Kata sandi tidak cocok!"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          try {
+                            final apiService = ApiService();
+                            await apiService.register(
+                              nameController.text,
+                              emailController.text,
+                              passwordController.text,
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Registrasi berhasil"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HomeScreen()),
+                            );
+                          } catch (e) {
+                            _showErrorDialog(
+                              context,
+                              "Registrasi Gagal",
+                              message:
+                                  "Terjadi kesalahan saat registrasi. Silakan coba lagi nanti.",
+                            );
+                          }
                         }
-                      : null, // Disable button if checkbox is not checked
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2DDCBE),
                     foregroundColor: Colors.white,
@@ -196,128 +431,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  void _showTerms(BuildContext context, String title) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [const Color(0xFF2DDCBE), const Color(0xFF004C7E)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      title == "Syarat dan Ketentuan"
-                          ? """
-Syarat dan Ketentuan
-
-1. Pendahuluan  
-   Selamat datang di aplikasi Tumanina. Dengan menggunakan aplikasi ini, Anda menyetujui untuk mematuhi syarat dan ketentuan yang berlaku.  
-
-2. Akses dan Penggunaan Aplikasi  
-   - Anda bertanggung jawab atas informasi yang Anda masukkan dalam aplikasi.  
-   - Dilarang menggunakan aplikasi ini untuk aktivitas yang melanggar hukum atau mengganggu pengguna lain.  
-
-3. Akun dan Keamanan  
-   - Anda bertanggung jawab atas kerahasiaan akun Anda, termasuk kata sandi.  
-   - Kami tidak bertanggung jawab atas kerugian akibat penyalahgunaan akun Anda.  
-
-4. Konten Pengguna  
-   - Semua data yang diunggah pengguna akan dijaga kerahasiaannya sesuai dengan Kebijakan Privasi.  
-   - Kami berhak menghapus konten yang melanggar ketentuan atau merugikan pihak lain.  
-
-5. Perubahan Layanan  
-   - Kami dapat memperbarui atau menghentikan fitur aplikasi tanpa pemberitahuan sebelumnya.  
-
-6. Hukum yang Berlaku  
-   Syarat dan Ketentuan ini diatur sesuai dengan hukum yang berlaku di Indonesia.  
-                    """
-                          : """
-Kebijakan Privasi
-
-1. Informasi yang Dikumpulkan
-   - Kami mengumpulkan informasi pribadi, seperti nama, email, dan data lainnya yang relevan untuk penggunaan aplikasi.  
-   - Data akan digunakan untuk meningkatkan layanan kami.  
-
-2. Penggunaan Informasi  
-   - Informasi pribadi Anda hanya digunakan untuk keperluan internal dan tidak akan dibagikan kepada pihak ketiga tanpa izin Anda.  
-   - Data dapat digunakan untuk memberikan pengalaman yang lebih personal di aplikasi.  
-
-3. Keamanan Data  
-   - Kami menggunakan teknologi terkini untuk melindungi data Anda dari akses yang tidak sah.  
-   - Namun, kami tidak dapat menjamin keamanan absolut dari informasi yang Anda berikan.  
-
-4. Hak Pengguna  
-   - Anda berhak mengakses, mengubah, atau menghapus informasi pribadi Anda kapan saja.  
-   - Hubungi kami jika Anda memiliki pertanyaan terkait privasi.  
-
-5. Perubahan Kebijakan  
-   - Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Perubahan akan diberitahukan melalui aplikasi.  
-                    """,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blueAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Tutup"),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

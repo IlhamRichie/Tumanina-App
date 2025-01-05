@@ -7,7 +7,8 @@ class ApiService {
   final Dio _dio = Dio();
 
   // URL Server Flask
-  final String flaskBaseUrl = "http://127.0.0.1:5000"; // Ganti jika URL berbeda
+  final String BaseUrl =
+      "http://tumanina.me/admin/api"; // Ganti jika URL berbeda
   final String updateProfileEndpoint =
       '/updateProfile'; // Replace with your actual endpoint
 
@@ -21,12 +22,60 @@ class ApiService {
   final String artikelBaseUrl =
       'hhttps://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
 
+  Future<void> register(String email, String password, String text) async {
+    final url = Uri.parse('$BaseUrl/register');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Registration successful');
+      } else {
+        throw Exception('Registration failed: ${response.body}');
+      }
+    } catch (e) {
+      print('Error during registration: $e');
+      throw e;
+    }
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final url = Uri.parse('$BaseUrl/login');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('Login successful: ${data['username']}');
+        return data; // Mengembalikan data pengguna
+      } else {
+        throw Exception('Login failed: ${response.body}');
+      }
+    } catch (e) {
+      print('Error during login: $e');
+      throw e;
+    }
+  }
+
   /// Fungsi untuk mengirim frame ke server Flask
   Future<Map<String, dynamic>> sendFrame(File imageFile) async {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('$flaskBaseUrl/detect-movement'),
+        Uri.parse('$BaseUrl/detect-movement'),
       );
       request.files.add(
         await http.MultipartFile.fromPath('frame', imageFile.path),
@@ -45,8 +94,7 @@ class ApiService {
   }
 
   Future<void> submitFeedback(String name, String feedback, String date) async {
-    final url =
-        Uri.parse('$flaskBaseUrl/submit_feedback'); // Update the endpoint
+    final url = Uri.parse('$BaseUrl/submit_feedback'); // Update the endpoint
 
     try {
       final response = await http.post(
@@ -81,7 +129,7 @@ class ApiService {
 
       // Send POST request to update profile
       final response = await _dio.post(
-        '$flaskBaseUrl$updateProfileEndpoint',
+        '$BaseUrl$updateProfileEndpoint',
         data: formData,
       );
 
