@@ -5,7 +5,7 @@ class PraktekButton extends StatelessWidget {
   const PraktekButton({super.key});
 
   // URL tujuan
-  final String praktekUrl = 'https://f36b-2404-c0-7140-00-f8cd-45ae.ngrok-free.app';
+  final String praktekUrl = 'https://deteksi.tumanina.me';
 
   // Fungsi untuk meluncurkan URL
   Future<void> _launchPraktekUrl() async {

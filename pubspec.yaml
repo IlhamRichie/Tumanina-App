@@ -56,7 +56,7 @@ dependencies:
   mockito: ^5.1.0
   build_runner: ^2.4.10
   dio: ^5.2.1
-  flutter_launcher_icons: ^0.14.2
+  flutter_launcher_icons: ^0.13.1
 
   
 
@@ -99,11 +99,11 @@ flutter:
     - assets/splash/Logo1 1.png
     - assets/TUMABOT.tflite
     - assets/pp.jpeg
+    - assets\pilihGerakan\camera detect.png
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
-  ios: true
-  image_path: "assets\\logo\\Logo.png"  # Ganti dengan path ikon Anda
+  image_path: "assets/logo/icon.png"  # Ganti dengan path ikon Anda
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

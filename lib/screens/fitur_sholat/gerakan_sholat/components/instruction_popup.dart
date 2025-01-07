@@ -5,7 +5,7 @@ class InstructionPopup extends StatelessWidget {
   const InstructionPopup({super.key});
 
   // URL tujuan
-  final String praktekUrl = 'https://f36b-2404-c0-7140-00-f8cd-45ae.ngrok-free.app';
+  final String praktekUrl = 'https://deteksi.tumanina.me';
 
   // Fungsi untuk membuka URL
   Future<void> _launchPraktekUrl(BuildContext context) async {
@@ -25,7 +25,7 @@ class InstructionPopup extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('assets/camera_setup.png'), // Gambar posisi kamera
+          Image.asset('assets\pilihGerakan\camera detect.png'), // Gambar posisi kamera
           const SizedBox(height: 10),
           const Text(
             "Posisikan kamera di samping dengan jarak yang cukup agar seluruh tubuh terlihat.",

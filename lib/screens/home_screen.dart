@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'artikel/artikel_screen.dart';
 import 'pantau_sholat_screen.dart';
 import 'fitur_alquran/surat_detail_screen.dart';
@@ -15,7 +14,6 @@ import 'waktu_sholat_screen.dart';
 import 'chat_screen.dart';
 import 'tasbih_screen.dart';
 import 'fitur_alquran/ayat_al_quran_screen.dart';
-import 'fitur_login/login_screen.dart';
 import 'profil/profile_screen.dart';
 import 'fitur_doa/doa_screen.dart';
 

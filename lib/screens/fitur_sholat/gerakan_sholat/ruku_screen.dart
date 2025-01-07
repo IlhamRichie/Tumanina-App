@@ -11,7 +11,7 @@ class RukuScreen extends StatelessWidget {
     return GerakanDetailScreen(
       title: "Ruku'",
       description: "Bungkukkan badan dengan posisi tangan di lutut...",
-      bacaan: "سُبْحَانَ رَبِّيَ الْعَظِيْمِ",
+      bacaan: "سُبْحَانَ رَبِّيَ الْعَظِيْمِ وَبِحَمْدِهِ\nSubhaana robbiyal 'adziimi wabihamdih (sebanyak 3 kali.)",
       videoPath: 'assets/videos/ruku.mp4',
       previousScreen: const TakbirScreen(),
       nextScreen: const ItidalScreen(),

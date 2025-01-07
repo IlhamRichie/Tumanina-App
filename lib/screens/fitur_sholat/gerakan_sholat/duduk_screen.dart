@@ -11,7 +11,7 @@ class DudukScreen extends StatelessWidget {
     return GerakanDetailScreen(
       title: "Duduk di Antara Dua Sujud",
       description: "Duduklah dengan posisi lutut dan ujung kaki menghadap kiblat...",
-      bacaan: "رَبِّ اغْفِرْ لِيْ",
+      bacaan: "رَبِّ اغْفِرْ لِى وَارْحَمْنِى وَاجْبُرْنِى وَارْزُقْنِى وَارْفَعْنِى\nRobbighfirlii warhamnii wajburnii warfa'nii warzuqnii wahdinii wa'aafinii wa'fu 'annii.",
       videoPath: 'assets/videos/duduk.mp4',
       previousScreen: const SujudScreen(),
       nextScreen: const TasyahudScreen(),

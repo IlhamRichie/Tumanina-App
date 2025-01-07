@@ -11,14 +11,14 @@ class GerakanDetailScreen extends StatefulWidget {
   final Widget? previousScreen;
 
   const GerakanDetailScreen({
-    super.key,
+    Key? key,
     required this.title,
     required this.description,
     required this.bacaan,
     required this.videoPath,
     this.nextScreen,
     this.previousScreen,
-  });
+  }) : super(key: key);
 
   @override
   _GerakanDetailScreenState createState() => _GerakanDetailScreenState();
@@ -26,24 +26,21 @@ class GerakanDetailScreen extends StatefulWidget {
 
 class _GerakanDetailScreenState extends State<GerakanDetailScreen>
     with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    // Set the AnimationController duration and vsync
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
-    )..repeat(
-        reverse: true); // Repeat the animation in reverse for continuous effect
+    )..repeat(reverse: true);
 
-    // Create a Tween with a more subtle scaling range [0.95, 1.05]
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeInOut, // Smooth animation curve
+        curve: Curves.easeInOut,
       ),
     );
   }
@@ -60,17 +57,15 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: const TextStyle(
-              color: Color(0xFF004C7E)), // Corrected color syntax
+          style: const TextStyle(color: Color(0xFF004C7E)),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color(0xFF004C7E)), // Corrected color syntax
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF004C7E)),
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const SholatScreen()),
-              (Route<dynamic> route) => false,
+              (route) => false,
             );
           },
         ),
@@ -79,9 +74,9 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
         centerTitle: true,
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, const Color.fromARGB(255, 255, 255, 255)],
+            colors: [Colors.white, Color(0xFFFFFFFF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -90,152 +85,148 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Cara Melakukan Gerakan ${widget.title}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF004C7E), // Corrected color syntax
-              ),
-            ),
+            _buildSectionTitle("Cara Melakukan Gerakan ${widget.title}"),
             const SizedBox(height: 10),
-            Text(
-              widget.description,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
+            _buildSectionContent(widget.description),
             const SizedBox(height: 20),
-            Text(
-              "Bacaan ${widget.title}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF004C7E), // Corrected color syntax
-              ),
-            ),
+            _buildSectionTitle("Bacaan ${widget.title}"),
             const SizedBox(height: 10),
-            Text(
-              widget.bacaan,
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Logika untuk menampilkan video tutorial
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2DDCBE), // Correct color
-                minimumSize: const Size.fromHeight(60),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-              ),
-              child: const Text(
-                "Lihat Video Tutorial",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            AnimatedBuilder(
-              animation: _scaleAnimation,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            const InstructionPopup(),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2DDCBE), // Correct color
-                      minimumSize: const Size.fromHeight(60),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    child: const Text(
-                      "Praktek Gerakan",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: widget.previousScreen != null
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => widget.previousScreen!),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2DDCBE), // Correct color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: const Text(
-                    "Sebelumnya",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: widget.nextScreen != null
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => widget.nextScreen!),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2DDCBE), // Correct color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: const Text(
-                    "Selanjutnya",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _buildSectionContent(widget.bacaan),
+            const Spacer(),
+            _buildBottomButtons(context),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF004C7E),
+      ),
+    );
+  }
+
+  Widget _buildSectionContent(String content) {
+    return Text(
+      content,
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            // Logika untuk menampilkan video tutorial
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2DDCBE),
+            minimumSize: const Size.fromHeight(60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
+          ),
+          child: const Text(
+            "Lihat Video Tutorial",
+            style: TextStyle(fontSize: 18, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 20),
+        AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const InstructionPopup(),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2DDCBE),
+                  minimumSize: const Size.fromHeight(60),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  "Praktek Gerakan",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: widget.previousScreen != null
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => widget.previousScreen!),
+                        );
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2DDCBE),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  "Sebelumnya",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: widget.nextScreen != null
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => widget.nextScreen!),
+                        );
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2DDCBE),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: const Text(
+                  "Selanjutnya",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -10,7 +10,7 @@ class TasyahudScreen extends StatelessWidget {
     return GerakanDetailScreen(
       title: "Tasyahud Akhir",
       description: "Duduklah dengan posisi kaki kanan tegak dan kaki kiri terlipat...",
-      bacaan: "اَلتَّحِيَّاتُ ِللهِ...",
+      bacaan: "At tahiyyaatul mubaarakaatush shalawaatuth thoyyibaatulillaah. as salaamu'alaika ayyuhan nabiyyu wa rahmatullaahi wabarakaatuh, assalaamu'alaina wa'alaa ibaadillaahishaalihiin.",
       videoPath: 'assets/videos/tasyahud.mp4',
       previousScreen: const DudukScreen(),
       nextScreen: null, // Tidak ada gerakan setelah Tasyahud Akhir

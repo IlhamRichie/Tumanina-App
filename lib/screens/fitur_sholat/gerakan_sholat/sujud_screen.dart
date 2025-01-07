@@ -11,7 +11,7 @@ class SujudScreen extends StatelessWidget {
     return GerakanDetailScreen(
       title: "Sujud",
       description: "Letakkan tangan, lutut, dan ujung kaki di lantai...",
-      bacaan: "سُبْحَانَ رَبِّيَ الْأَعْلَى",
+      bacaan: "سُبْحَانَ رَبِّىَ الْأَعْلَى وَبِحَمْدِهِ\nSubhaana robbiyal a'la wabihamdih (3x)",
       videoPath: 'assets/videos/sujud.mp4',
       previousScreen: const ItidalScreen(),
       nextScreen: const DudukScreen(),

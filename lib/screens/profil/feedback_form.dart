@@ -14,8 +14,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
   final TextEditingController _feedbackController = TextEditingController();
 
   void _submitFeedback() async {
-    final name = _nameController.text;
-    final feedback = _feedbackController.text;
+    final name = _nameController.text.trim();
+    final feedback = _feedbackController.text.trim();
     final date = DateTime.now().toIso8601String();
 
     if (_formKey.currentState?.validate() ?? false) {
@@ -24,7 +24,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Feedback berhasil dikirim"),
-            backgroundColor: Colors.green,
+            backgroundColor: Color(0xFF2DDCBE),
           ),
         );
         Navigator.pop(context);
@@ -51,13 +51,16 @@ class _FeedbackFormState extends State<FeedbackForm> {
             controller: _nameController,
             decoration: InputDecoration(
               labelText: 'Nama',
+              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.teal),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF004C7E)),
               ),
+              fillColor: Colors.white,
+              filled: true,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -72,13 +75,16 @@ class _FeedbackFormState extends State<FeedbackForm> {
             maxLines: 4,
             decoration: InputDecoration(
               labelText: 'Tulis Ulasan Anda',
+              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.teal),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF004C7E)),
               ),
+              fillColor: Colors.white,
+              filled: true,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -88,15 +94,21 @@ class _FeedbackFormState extends State<FeedbackForm> {
             },
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _submitFeedback,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Center(
+            child: ElevatedButton(
+              onPressed: _submitFeedback,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: const Color(0xFF2DDCBE),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
+              child: const Text('Kirim', style: TextStyle(fontSize: 16)),
             ),
-            child: const Text('Kirim', style: TextStyle(fontSize: 16)),
           ),
         ],
       ),
