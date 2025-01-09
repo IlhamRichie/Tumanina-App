@@ -12,7 +12,8 @@ class SurahDetailScreen extends StatefulWidget {
   const SurahDetailScreen({
     super.key,
     required this.surahNumber,
-    required this.surahName, int? initialAyat,
+    required this.surahName,
+    int? initialAyat,
   });
 
   @override
@@ -179,8 +180,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
               contentPadding: const EdgeInsets.all(16.0),
               title: Text(
                 ayat['ar'],
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
+                style: GoogleFonts.amiri(
+                  fontSize: 16,
                   color: const Color(0xFF004C7E),
                   fontWeight: FontWeight.bold,
                 ),

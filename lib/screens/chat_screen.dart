@@ -14,6 +14,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ApiService _apiService = ApiService();
   final List<Map<String, String>> _messages = [];
+  bool _isThinking = false; // Status untuk animasi "Is Thinking"
 
   void _sendMessage() async {
     String userMessage = _controller.text.trim();
@@ -21,6 +22,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add({"role": "user", "content": userMessage});
+      _isThinking = true; // Tampilkan animasi "Is Thinking"
     });
 
     _controller.clear();
@@ -29,6 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add({"role": "assistant", "content": response});
+      _isThinking = false; // Sembunyikan animasi setelah respons diterima
     });
   }
 
@@ -40,8 +43,10 @@ class _ChatScreenState extends State<ChatScreen> {
         return Stack(
           children: [
             Positioned(
-              top: offset.dy - 10,
-              right: MediaQuery.of(context).size.width - offset.dx - 40,
+              top: offset.dy - 10, // Mengatur posisi vertikal
+              right: MediaQuery.of(context).size.width -
+                  offset.dx -
+                  40, // Mengatur posisi horizontal
               child: Material(
                 color: Colors.transparent,
                 child: Column(
@@ -105,7 +110,8 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           GestureDetector(
             onTapDown: (TapDownDetails details) {
-              _showInfoDialog(context, details.globalPosition);
+              _showInfoDialog(context,
+                  details.globalPosition); // Pasang posisi dari globalPosition
             },
             child: const Padding(
               padding: EdgeInsets.only(right: 16.0),
@@ -119,8 +125,12 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              itemCount: _messages.length,
+              itemCount: _messages.length +
+                  (_isThinking ? 1 : 0), // Tambahkan "Is Thinking"
               itemBuilder: (context, index) {
+                if (_isThinking && index == _messages.length) {
+                  return const ThinkingBubble(); // Animasi tiga titik
+                }
                 final message = _messages[index];
                 final isUser = message['role'] == 'user';
                 return MessageBubble(
@@ -190,6 +200,91 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ThinkingBubble extends StatelessWidget {
+  const ThinkingBubble({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 15,
+            backgroundColor: Color(0xFF004C7E),
+            child: Icon(Icons.smart_toy, color: Colors.white, size: 16),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: const DotLoader(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DotLoader extends StatefulWidget {
+  const DotLoader({super.key});
+
+  @override
+  _DotLoaderState createState() => _DotLoaderState();
+}
+
+class _DotLoaderState extends State<DotLoader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Opacity(
+                opacity: (_controller.value * 3 - index).clamp(0.0, 1.0),
+                child: const CircleAvatar(
+                    radius: 4, backgroundColor: Color(0xFF004C7E)),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

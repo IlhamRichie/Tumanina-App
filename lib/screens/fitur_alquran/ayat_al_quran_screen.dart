@@ -367,7 +367,7 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
                                           ),
                                           Text(
                                             surah.name,
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.amiri(
                                               fontSize: 24,
                                               color: const Color(0xFF2DDCBE),
                                             ),
