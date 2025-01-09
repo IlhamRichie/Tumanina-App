@@ -8,15 +8,16 @@ class ApiService {
 
   // URL Server Flask
   final String BaseUrl =
-      "http://tumanina.me/admin/api"; // Ganti jika URL berbeda
+      "https://tumanina.me/admin/api"; // Ganti jika URL berbeda
   final String updateProfileEndpoint =
       '/updateProfile'; // Replace with your actual endpoint
+  final String deleteAccountEndpoint = '/deleteAccount';
 
   // URL dan Key API Groq
   final String groqApiKey =
-      'apikey'; // Ganti dengan API Key Anda
+      'yourapikey'; // Ganti dengan API Key Anda
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
-  final String groqModel = 'llama3-groq-8b-8192-tool-use-preview';
+  final String groqModel = 'llama-3.3-70b-versatile';
 
   // URL API Artikel
   final String artikelBaseUrl =
@@ -141,6 +142,21 @@ class ApiService {
       }
     } catch (e) {
       print('Error updating profile: $e');
+    }
+  }
+
+  // Method to delete account
+  Future<void> deleteAccount() async {
+    try {
+      final response = await _dio.post('$BaseUrl$deleteAccountEndpoint');
+
+      if (response.statusCode == 200) {
+        print('Account deleted successfully!');
+      } else {
+        print('Failed to delete account: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error deleting account: $e');
     }
   }
 

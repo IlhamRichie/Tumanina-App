@@ -477,6 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                     _saveSholatMilestones();
                   },
+                  prayerTimes: prayerTimes, // Waktu sholat diteruskan
                 ),
               ),
             );

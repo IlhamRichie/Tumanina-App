@@ -5,19 +5,22 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:convert';
 
 class PantauSholatScreen extends StatefulWidget {
-  final Function(Map<String, bool>) onUpdate; // Callback function
+  final Function(Map<String, bool>) onUpdate;
+  final Map<String, String> prayerTimes;
+  final Map<String, bool> sholatMilestones;
 
-  const PantauSholatScreen(
-      {super.key,
-      required this.onUpdate,
-      required Map<String, bool> sholatMilestones});
+  const PantauSholatScreen({
+    super.key,
+    required this.onUpdate,
+    required this.prayerTimes,
+    required this.sholatMilestones,
+  });
 
   @override
   _PantauSholatScreenState createState() => _PantauSholatScreenState();
 }
 
 class _PantauSholatScreenState extends State<PantauSholatScreen> {
-  List<Map<String, dynamic>> prayerLog = [];
   Map<String, bool> todayLog = {
     'shubuh': false,
     'dzuhur': false,
@@ -25,6 +28,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     'maghrib': false,
     'isya': false,
   };
+  List<Map<String, dynamic>> prayerLog = [];
   bool isLoading = true;
 
   @override
@@ -97,6 +101,41 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     });
   }
 
+  bool isTimeValid(String prayerKey) {
+    final now = DateTime.now();
+    final currentPrayerTime = _getPrayerTime(prayerKey);
+    final nextPrayerTime = _getNextPrayerTime(prayerKey);
+
+    // Valid jika sekarang di antara waktu sholat saat ini dan waktu sholat berikutnya
+    return now.isAfter(currentPrayerTime) && now.isBefore(nextPrayerTime);
+  }
+
+  DateTime _getPrayerTime(String prayerKey) {
+    final now = DateTime.now();
+    final prayerTimeString = widget.prayerTimes[prayerKey] ?? "00:00";
+    final prayerTimeParts = prayerTimeString.split(':');
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(prayerTimeParts[0]),
+      int.parse(prayerTimeParts[1]),
+    );
+  }
+
+  DateTime _getNextPrayerTime(String prayerKey) {
+    final prayerOrder = ['shubuh', 'dzuhur', 'ashar', 'maghrib', 'isya'];
+    final currentIndex = prayerOrder.indexOf(prayerKey);
+
+    // Jika ini adalah sholat terakhir (Isya), waktu berikutnya adalah Subuh hari berikutnya
+    if (currentIndex == prayerOrder.length - 1) {
+      return _getPrayerTime('shubuh').add(const Duration(days: 1));
+    }
+
+    final nextPrayerKey = prayerOrder[currentIndex + 1];
+    return _getPrayerTime(nextPrayerKey);
+  }
+
   void updateLog(String prayer, bool value) {
     final today = DateTime.now().toString().split(' ')[0];
 
@@ -117,13 +156,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
       }
     });
 
-    widget.onUpdate({
-      'Shubuh': todayLog['shubuh'] ?? false,
-      'Dzuhur': todayLog['dzuhur'] ?? false,
-      'Ashar': todayLog['ashar'] ?? false,
-      'Maghrib': todayLog['maghrib'] ?? false,
-      'Isya': todayLog['isya'] ?? false,
-    });
+    widget.onUpdate(todayLog);
 
     saveProgress();
   }
@@ -144,6 +177,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
             Navigator.pop(context);
           },
         ),
@@ -153,7 +187,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -167,6 +201,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        const SizedBox(height: 16),
                         ...todayLog.entries.map((entry) {
                           IconData? icon;
                           switch (entry.key) {
@@ -207,17 +242,24 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                             }),
                             value: entry.value,
                             onChanged: (value) {
-                              if (value != null) {
+                              if (value != null && isTimeValid(entry.key)) {
                                 updateLog(entry.key, value);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Waktu untuk ${entry.key.capitalize()} telah berlalu atau belum waktunya.'),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
                               }
                             },
                           );
-                        }),
+                        }).toList(),
                       ],
                     ),
                   ),
-                  PrayerChart(
-                      prayerLog: prayerLog), // This is where the chart is added
+                  PrayerChart(prayerLog: prayerLog), // Kembalikan Grafik
                 ],
               ),
             ),
@@ -225,7 +267,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   }
 }
 
-// Prayer log chart component
+// Komponen Grafik
 class PrayerChart extends StatelessWidget {
   final List<Map<String, dynamic>> prayerLog;
 
@@ -244,56 +286,20 @@ class PrayerChart extends StatelessWidget {
     }).toList();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0), // Add padding on the left and right
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 8.0), // Extra padding around the chart
-          child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(
-              majorGridLines: MajorGridLines(width: 0),
-              axisLine: AxisLine(width: 0),
-            ),
-            primaryYAxis: NumericAxis(
-              axisLine: AxisLine(width: 0),
-              majorTickLines: MajorTickLines(size: 0),
-              isVisible: false,
-            ),
-            title: ChartTitle(
-              text: 'Jumlah Sholat Harian',
-              textStyle: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF004C7E)),
-            ),
-            series: <CartesianSeries>[
-              ColumnSeries<_ChartData, String>(
-                dataSource: chartData,
-                xValueMapper: (_ChartData data, _) => data.date,
-                yValueMapper: (_ChartData data, _) => data.completedPrayers,
-                dataLabelSettings: const DataLabelSettings(isVisible: true),
-                borderRadius: BorderRadius.circular(10),
-                color: const Color(0xFF004C7E),
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
-                  stops: [0.0, 1.0],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                trackBorderWidth: 0,
-                width: 0.6, // Adjusted the width for a more balanced look
-              ),
-            ],
-            tooltipBehavior: TooltipBehavior(
-              enable: true,
-              header: 'Sholat Count',
-              textStyle: TextStyle(color: Colors.white),
-              color: Colors.black.withOpacity(0.7),
-            ),
+      padding: const EdgeInsets.all(16.0),
+      child: SfCartesianChart(
+        primaryXAxis: CategoryAxis(),
+        primaryYAxis: NumericAxis(),
+        series: <CartesianSeries<_ChartData, String>>[
+          ColumnSeries<_ChartData, String>(
+            dataSource: chartData,
+            xValueMapper: (_ChartData data, _) => data.date,
+            yValueMapper: (_ChartData data, _) => data.completedPrayers,
+            dataLabelSettings: const DataLabelSettings(isVisible: true),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            color: const Color(0xFF004C7E),
           ),
-        ),
+        ],
       ),
     );
   }

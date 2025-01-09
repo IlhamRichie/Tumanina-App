@@ -1,22 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../deteksi_page.dart'; // Import halaman Deteksi
 
 class InstructionPopup extends StatelessWidget {
   const InstructionPopup({super.key});
-
-  // URL tujuan
-  final String praktekUrl = 'https://deteksi.tumanina.me';
-
-  // Fungsi untuk membuka URL
-  Future<void> _launchPraktekUrl(BuildContext context) async {
-    final Uri url = Uri.parse(praktekUrl); // Konversi string ke Uri
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      // Tampilkan pesan error jika URL gagal dibuka
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal membuka tautan')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +11,7 @@ class InstructionPopup extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset('assets\pilihGerakan\camera detect.png'), // Gambar posisi kamera
+          Image.asset('assets\pilihGerakan\camerascan.png'), // Gambar posisi kamera
           const SizedBox(height: 10),
           const Text(
             "Posisikan kamera di samping dengan jarak yang cukup agar seluruh tubuh terlihat.",
@@ -37,7 +23,10 @@ class InstructionPopup extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.pop(context); // Tutup dialog
-            _launchPraktekUrl(context); // Buka tautan
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Deteksi()), // Navigasi ke halaman Deteksi
+            );
           },
           child: const Text("Mengerti"),
         ),

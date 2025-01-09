@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../fitur_login/login_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String initialUsername;
@@ -46,6 +47,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           content: const Text("Harap isi semua kolom"),
           backgroundColor: Colors.red,
         ),
+      );
+    }
+  }
+
+  void _deleteAccount() async {
+    bool? confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi Hapus Akun"),
+          content: const Text("Apakah Anda yakin ingin menghapus akun Anda? Tindakan ini tidak dapat dibatalkan."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      await ApiService().deleteAccount(); // Implementasi di ApiService untuk menghapus akun
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Akun berhasil dihapus"),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (Route<dynamic> route) => false,
       );
     }
   }
@@ -129,6 +169,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: const Text(
                     "Simpan Perubahan",
                     style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: TextButton(
+                  onPressed: _deleteAccount,
+                  child: const Text(
+                    "Hapus Akun",
+                    style: TextStyle(color: Colors.red, fontSize: 16),
                   ),
                 ),
               ),

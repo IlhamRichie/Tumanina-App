@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -22,10 +23,39 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     fetchPrayerTimes(widget.client);
   }
 
+  Future<Position> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Cek status lokasi
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permission denied.');
+      }
+    }
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
   Future<void> fetchPrayerTimes(http.Client client) async {
     try {
+      // Mendapatkan posisi pengguna
+      Position position = await _getCurrentLocation();
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
       final url = Uri.parse(
-          'http://api.aladhan.com/v1/timingsByCity?city=Tegal&country=Indonesia&method=4');
+        'http://api.aladhan.com/v1/timings?latitude=$latitude&longitude=$longitude&method=4'
+      );
       final response = await client.get(url);
 
       if (response.statusCode == 200) {
@@ -64,7 +94,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Waktu Sholat Tegal',
+          'Waktu Sholat',
           style: GoogleFonts.poppins(
             color: const Color(0xFF004C7E),
             fontWeight: FontWeight.bold,
