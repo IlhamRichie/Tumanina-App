@@ -94,8 +94,10 @@ class ApiService {
     }
   }
 
-  Future<void> submitFeedback(String name, String feedback, String date) async {
-    final url = Uri.parse('$BaseUrl/submit_feedback'); // Update the endpoint
+  Future<void> submitFeedback(String name, String feedback) async {
+    final String baseUrl =
+        'https://tumanina.me/sentimen'; // Ganti dengan URL server Anda
+    final Uri url = Uri.parse('$baseUrl/add_review');
 
     try {
       final response = await http.post(
@@ -103,18 +105,20 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,
-          'feedback': feedback,
-          'date': date,
+          'text': feedback, // Ubah ke "text" karena Flask menggunakan key ini
         }),
       );
 
       if (response.statusCode == 200) {
-        print('Feedback submitted successfully');
+        final responseData = jsonDecode(response.body);
+        print('Feedback submitted successfully: ${responseData['sentiment']}');
       } else {
-        throw Exception('Failed to submit feedback');
+        print('Failed to submit feedback: ${response.body}');
+        throw Exception('Error: ${response.body}');
       }
     } catch (e) {
-      print('Error submitting feedback: $e');
+      print('Error during feedback submission: $e');
+      throw e;
     }
   }
 

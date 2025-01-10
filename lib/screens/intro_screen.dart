@@ -39,25 +39,54 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemCount: _introData.length,
-              itemBuilder: (context, index) => _buildIntroSlide(
-                title: _introData[index]["title"]!,
-                description: _introData[index]["description"]!,
-                imagePath: _introData[index]["image"]!,
+          Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                  itemCount: _introData.length,
+                  itemBuilder: (context, index) => _buildIntroSlide(
+                    title: _introData[index]["title"]!,
+                    description: _introData[index]["description"]!,
+                    imagePath: _introData[index]["image"]!,
+                  ),
+                ),
+              ),
+              _buildBottomNavigation(),
+            ],
+          ),
+          // Dekorasi Lingkaran di Pojok Kiri Bawah
+          Positioned(
+            bottom: -70, // Agar sebagian lingkaran terlihat seperti terpotong
+            left: -100, // Posisi kiri di luar layar
+            child: Container(
+              height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2DDCBE).withOpacity(0.2),
+                shape: BoxShape.circle,
               ),
             ),
           ),
-          _buildBottomNavigation()
+          Positioned(
+            bottom: -90, // Tumpukan lingkaran kedua
+            left: 20, // Posisi lebih ke tengah
+            child: Container(
+              height: 150,
+              width: 150,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2DDCBE),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
         ],
       ),
     );

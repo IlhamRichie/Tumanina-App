@@ -106,7 +106,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     final currentPrayerTime = _getPrayerTime(prayerKey);
     final nextPrayerTime = _getNextPrayerTime(prayerKey);
 
-    // Valid jika sekarang di antara waktu sholat saat ini dan waktu sholat berikutnya
+    // Valid jika sekarang >= waktu sholat saat ini dan < waktu sholat berikutnya
     return now.isAfter(currentPrayerTime) && now.isBefore(nextPrayerTime);
   }
 

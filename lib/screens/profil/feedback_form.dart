@@ -16,11 +16,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
   void _submitFeedback() async {
     final name = _nameController.text.trim();
     final feedback = _feedbackController.text.trim();
-    final date = DateTime.now().toIso8601String();
 
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        ApiService().submitFeedback(name, feedback, date);
+        // Perbarui untuk hanya mengirim name dan feedback
+        await ApiService().submitFeedback(name, feedback);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Feedback berhasil dikirim"),
@@ -41,76 +41,86 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: 'Nama',
-              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFF004C7E)),
-              ),
-              fillColor: Colors.white,
-              filled: true,
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Nama tidak boleh kosong';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _feedbackController,
-            maxLines: 4,
-            decoration: InputDecoration(
-              labelText: 'Tulis Ulasan Anda',
-              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xFF004C7E)),
-              ),
-              fillColor: Colors.white,
-              filled: true,
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Feedback tidak boleh kosong';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: ElevatedButton(
-              onPressed: _submitFeedback,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: const Color(0xFF2DDCBE),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 15,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context)
+              .viewInsets
+              .bottom, // Untuk memberikan ruang bagi keyboard
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama',
+                  labelStyle: const TextStyle(color: Color(0xFF004C7E)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF004C7E)),
+                  ),
+                  fillColor: Colors.white,
+                  filled: true,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama tidak boleh kosong';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _feedbackController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: 'Tulis Ulasan Anda',
+                  labelStyle: const TextStyle(color: Color(0xFF004C7E)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFF004C7E)),
+                  ),
+                  fillColor: Colors.white,
+                  filled: true,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Feedback tidak boleh kosong';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _submitFeedback,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF2DDCBE),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 50,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text('Kirim', style: TextStyle(fontSize: 16)),
                 ),
               ),
-              child: const Text('Kirim', style: TextStyle(fontSize: 16)),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
