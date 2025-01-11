@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../deteksi_page.dart'; // Import halaman Deteksi
 
 class PraktekButton extends StatelessWidget {
   const PraktekButton({super.key});

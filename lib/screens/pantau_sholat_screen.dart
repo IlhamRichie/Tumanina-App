@@ -7,13 +7,11 @@ import 'dart:convert';
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate;
   final Map<String, String> prayerTimes;
-  final Map<String, bool> sholatMilestones;
 
   const PantauSholatScreen({
     super.key,
     required this.onUpdate,
-    required this.prayerTimes,
-    required this.sholatMilestones,
+    required this.prayerTimes, required Map<String, bool> sholatMilestones,
   });
 
   @override
@@ -39,7 +37,19 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonLog = json.encode(prayerLog);
+
+    final List<Map<String, dynamic>> validPrayerLog = prayerLog.map((log) {
+      return {
+        'date': log['date'] ?? DateTime.now().toString().split(' ')[0],
+        'shubuh': log['shubuh'] == true,
+        'dzuhur': log['dzuhur'] == true,
+        'ashar': log['ashar'] == true,
+        'maghrib': log['maghrib'] == true,
+        'isya': log['isya'] == true,
+      };
+    }).toList();
+
+    final jsonLog = json.encode(validPrayerLog);
     await prefs.setString('prayerLog', jsonLog);
   }
 
@@ -50,29 +60,17 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
     if (jsonLog != null) {
       setState(() {
-        prayerLog = List<Map<String, dynamic>>.from(json.decode(jsonLog));
-      });
-
-      final todayEntry = prayerLog.firstWhere(
-        (log) => log['date'] == today,
-        orElse: () => {
-          'date': today,
-          'shubuh': false,
-          'dzuhur': false,
-          'ashar': false,
-          'maghrib': false,
-          'isya': false,
-        },
-      );
-
-      setState(() {
-        todayLog = {
-          'shubuh': todayEntry['shubuh'],
-          'dzuhur': todayEntry['dzuhur'],
-          'ashar': todayEntry['ashar'],
-          'maghrib': todayEntry['maghrib'],
-          'isya': todayEntry['isya'],
-        };
+        prayerLog =
+            List<Map<String, dynamic>>.from(json.decode(jsonLog)).map((log) {
+          return {
+            'date': log['date'] ?? today,
+            'shubuh': log['shubuh'] == true,
+            'dzuhur': log['dzuhur'] == true,
+            'ashar': log['ashar'] == true,
+            'maghrib': log['maghrib'] == true,
+            'isya': log['isya'] == true,
+          };
+        }).toList();
       });
     } else {
       setState(() {
@@ -86,13 +84,6 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
             'isya': false,
           }
         ];
-        todayLog = {
-          'shubuh': false,
-          'dzuhur': false,
-          'ashar': false,
-          'maghrib': false,
-          'isya': false,
-        };
       });
     }
 
@@ -221,7 +212,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                               icon = Icons.brightness_2;
                               break;
                           }
-                          return CheckboxListTile(
+                          return ListTile(
                             title: Row(
                               children: [
                                 Icon(icon, color: Colors.teal),
@@ -232,18 +223,20 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                                 ),
                               ],
                             ),
-                            checkColor: Colors.white,
-                            fillColor:
-                                MaterialStateProperty.resolveWith((states) {
-                              if (states.contains(MaterialState.selected)) {
-                                return const Color(0xFF2DDCBE);
-                              }
-                              return Colors.grey[300];
-                            }),
-                            value: entry.value,
-                            onChanged: (value) {
-                              if (value != null && isTimeValid(entry.key)) {
-                                updateLog(entry.key, value);
+                            trailing: CircleAvatar(
+                              backgroundColor: entry.value
+                                  ? const Color(0xFF2DDCBE)
+                                  : Colors.grey[300],
+                              child: Icon(
+                                entry.value
+                                    ? Icons.check_circle
+                                    : Icons.radio_button_unchecked,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onTap: () {
+                              if (isTimeValid(entry.key)) {
+                                updateLog(entry.key, !entry.value);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -275,14 +268,13 @@ class PrayerChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<_ChartData> chartData = prayerLog.map((data) {
-      int completedPrayers = 0;
-      if (data['shubuh'] == true) completedPrayers++;
-      if (data['dzuhur'] == true) completedPrayers++;
-      if (data['ashar'] == true) completedPrayers++;
-      if (data['maghrib'] == true) completedPrayers++;
-      if (data['isya'] == true) completedPrayers++;
-      return _ChartData(data['date'], completedPrayers);
+    List<_ChartData> chartData = prayerLog.where((data) {
+      return data['date'] is String;
+    }).map((data) {
+      int completedPrayers = data.entries
+          .where((entry) => entry.key != 'date' && entry.value == true)
+          .length;
+      return _ChartData(data['date'] as String, completedPrayers);
     }).toList();
 
     return Padding(

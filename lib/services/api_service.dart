@@ -23,13 +23,14 @@ class ApiService {
   final String artikelBaseUrl =
       'hhttps://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
 
-  Future<void> register(String email, String password, String text) async {
-    final url = Uri.parse('$BaseUrl/register');
+  Future<void> register(String username, String email, String password) async {
+    final url = Uri.parse('https://dcaf-36-68-54-156.ngrok-free.app/register');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          'username': username,
           'email': email,
           'password': password,
         }),

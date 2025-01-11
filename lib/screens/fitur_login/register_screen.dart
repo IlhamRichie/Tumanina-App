@@ -14,7 +14,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool isPasswordVisible = false;
   bool isChecked = false;
 
@@ -362,6 +363,7 @@ Kebijakan Privasi
                 child: ElevatedButton(
                   onPressed: isChecked
                       ? () async {
+                          // Validasi input
                           if (nameController.text.isEmpty ||
                               emailController.text.isEmpty ||
                               passwordController.text.isEmpty ||
@@ -389,9 +391,9 @@ Kebijakan Privasi
                           try {
                             final apiService = ApiService();
                             await apiService.register(
-                              nameController.text,
-                              emailController.text,
-                              passwordController.text,
+                              nameController.text, // Nama pengguna
+                              emailController.text, // Email
+                              passwordController.text, // Kata sandi
                             );
 
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -401,6 +403,7 @@ Kebijakan Privasi
                               ),
                             );
 
+                            // Navigasi ke layar berikutnya
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
