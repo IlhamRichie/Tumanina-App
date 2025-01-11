@@ -9,10 +9,10 @@ class PantauSholatScreen extends StatefulWidget {
   final Map<String, String> prayerTimes;
 
   const PantauSholatScreen({
-    super.key,
+    Key? key,
     required this.onUpdate,
-    required this.prayerTimes, required Map<String, bool> sholatMilestones,
-  });
+    required this.prayerTimes,
+  }) : super(key: key);
 
   @override
   _PantauSholatScreenState createState() => _PantauSholatScreenState();
@@ -20,11 +20,11 @@ class PantauSholatScreen extends StatefulWidget {
 
 class _PantauSholatScreenState extends State<PantauSholatScreen> {
   Map<String, bool> todayLog = {
-    'shubuh': false,
-    'dzuhur': false,
-    'ashar': false,
-    'maghrib': false,
-    'isya': false,
+    'Shubuh': false,
+    'Dzuhur': false,
+    'Ashar': false,
+    'Maghrib': false,
+    'Isya': false,
   };
   List<Map<String, dynamic>> prayerLog = [];
   bool isLoading = true;
@@ -37,20 +37,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
-
-    final List<Map<String, dynamic>> validPrayerLog = prayerLog.map((log) {
-      return {
-        'date': log['date'] ?? DateTime.now().toString().split(' ')[0],
-        'shubuh': log['shubuh'] == true,
-        'dzuhur': log['dzuhur'] == true,
-        'ashar': log['ashar'] == true,
-        'maghrib': log['maghrib'] == true,
-        'isya': log['isya'] == true,
-      };
-    }).toList();
-
-    final jsonLog = json.encode(validPrayerLog);
-    await prefs.setString('prayerLog', jsonLog);
+    await prefs.setString('prayerLog', json.encode(prayerLog));
   }
 
   Future<void> loadProgress() async {
@@ -59,32 +46,38 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     final today = DateTime.now().toString().split(' ')[0];
 
     if (jsonLog != null) {
-      setState(() {
-        prayerLog =
-            List<Map<String, dynamic>>.from(json.decode(jsonLog)).map((log) {
-          return {
-            'date': log['date'] ?? today,
-            'shubuh': log['shubuh'] == true,
-            'dzuhur': log['dzuhur'] == true,
-            'ashar': log['ashar'] == true,
-            'maghrib': log['maghrib'] == true,
-            'isya': log['isya'] == true,
-          };
-        }).toList();
-      });
+      prayerLog = List<Map<String, dynamic>>.from(json.decode(jsonLog));
+
+      final todayEntry = prayerLog.firstWhere(
+        (log) => log['date'] == today,
+        orElse: () => {
+          'date': today,
+          'Shubuh': false,
+          'Dzuhur': false,
+          'Ashar': false,
+          'Maghrib': false,
+          'Isya': false,
+        },
+      );
+
+      todayLog = {
+        'Shubuh': todayEntry['Shubuh'] ?? false,
+        'Dzuhur': todayEntry['Dzuhur'] ?? false,
+        'Ashar': todayEntry['Ashar'] ?? false,
+        'Maghrib': todayEntry['Maghrib'] ?? false,
+        'Isya': todayEntry['Isya'] ?? false,
+      };
     } else {
-      setState(() {
-        prayerLog = [
-          {
-            'date': today,
-            'shubuh': false,
-            'dzuhur': false,
-            'ashar': false,
-            'maghrib': false,
-            'isya': false,
-          }
-        ];
-      });
+      prayerLog = [
+        {
+          'date': today,
+          'Shubuh': false,
+          'Dzuhur': false,
+          'Ashar': false,
+          'Maghrib': false,
+          'Isya': false,
+        }
+      ];
     }
 
     setState(() {
@@ -94,62 +87,67 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
   bool isTimeValid(String prayerKey) {
     final now = DateTime.now();
-    final currentPrayerTime = _getPrayerTime(prayerKey);
+    final prayerTime = _parsePrayerTime(prayerKey);
     final nextPrayerTime = _getNextPrayerTime(prayerKey);
-
-    // Valid jika sekarang >= waktu sholat saat ini dan < waktu sholat berikutnya
-    return now.isAfter(currentPrayerTime) && now.isBefore(nextPrayerTime);
+    return now.isAfter(prayerTime) && now.isBefore(nextPrayerTime);
   }
 
-  DateTime _getPrayerTime(String prayerKey) {
+  DateTime _parsePrayerTime(String prayerKey) {
     final now = DateTime.now();
-    final prayerTimeString = widget.prayerTimes[prayerKey] ?? "00:00";
-    final prayerTimeParts = prayerTimeString.split(':');
+    final timeString = widget.prayerTimes[prayerKey] ?? "00:00";
+    final timeParts = timeString.split(':');
     return DateTime(
       now.year,
       now.month,
       now.day,
-      int.parse(prayerTimeParts[0]),
-      int.parse(prayerTimeParts[1]),
+      int.parse(timeParts[0]),
+      int.parse(timeParts[1]),
     );
   }
 
   DateTime _getNextPrayerTime(String prayerKey) {
-    final prayerOrder = ['shubuh', 'dzuhur', 'ashar', 'maghrib', 'isya'];
+    final prayerOrder = ['Shubuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
     final currentIndex = prayerOrder.indexOf(prayerKey);
 
-    // Jika ini adalah sholat terakhir (Isya), waktu berikutnya adalah Subuh hari berikutnya
+    if (currentIndex == -1) return DateTime.now();
+
     if (currentIndex == prayerOrder.length - 1) {
-      return _getPrayerTime('shubuh').add(const Duration(days: 1));
+      return _parsePrayerTime('Shubuh').add(Duration(days: 1));
     }
 
-    final nextPrayerKey = prayerOrder[currentIndex + 1];
-    return _getPrayerTime(nextPrayerKey);
+    return _parsePrayerTime(prayerOrder[currentIndex + 1]);
   }
 
   void updateLog(String prayer, bool value) {
     final today = DateTime.now().toString().split(' ')[0];
-
     setState(() {
       todayLog[prayer] = value;
-
       final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
       if (todayIndex != -1) {
-        prayerLog[todayIndex] = {
-          'date': today,
-          ...todayLog,
-        };
+        prayerLog[todayIndex] = {'date': today, ...todayLog};
       } else {
-        prayerLog.add({
-          'date': today,
-          ...todayLog,
-        });
+        prayerLog.add({'date': today, ...todayLog});
       }
     });
-
     widget.onUpdate(todayLog);
-
     saveProgress();
+  }
+
+  IconData getPrayerIcon(String prayerKey) {
+    switch (prayerKey) {
+      case 'Shubuh':
+        return Icons.wb_sunny;
+      case 'Dzuhur':
+        return Icons.sunny;
+      case 'Ashar':
+        return Icons.cloud;
+      case 'Maghrib':
+        return Icons.nights_stay;
+      case 'Isya':
+        return Icons.brightness_3;
+      default:
+        return Icons.circle_outlined;
+    }
   }
 
   @override
@@ -166,146 +164,110 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         ),
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF004C7E)),
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pantau Sholat Hari Ini',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ...todayLog.entries.map((entry) {
-                          IconData? icon;
-                          switch (entry.key) {
-                            case 'shubuh':
-                              icon = Icons.sunny;
-                              break;
-                            case 'dzuhur':
-                              icon = Icons.access_time;
-                              break;
-                            case 'ashar':
-                              icon = Icons.access_time_filled;
-                              break;
-                            case 'maghrib':
-                              icon = Icons.nights_stay;
-                              break;
-                            case 'isya':
-                              icon = Icons.brightness_2;
-                              break;
-                          }
-                          return ListTile(
-                            title: Row(
-                              children: [
-                                Icon(icon, color: Colors.teal),
-                                const SizedBox(width: 8),
-                                Text(
-                                  entry.key.capitalize(),
-                                  style: GoogleFonts.poppins(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                            trailing: CircleAvatar(
-                              backgroundColor: entry.value
-                                  ? const Color(0xFF2DDCBE)
-                                  : Colors.grey[300],
-                              child: Icon(
-                                entry.value
-                                    ? Icons.check_circle
-                                    : Icons.radio_button_unchecked,
-                                color: Colors.white,
-                              ),
-                            ),
-                            onTap: () {
-                              if (isTimeValid(entry.key)) {
-                                updateLog(entry.key, !entry.value);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Waktu untuk ${entry.key.capitalize()} telah berlalu atau belum waktunya.'),
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
-                              }
-                            },
-                          );
-                        }).toList(),
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pantau Sholat Hari Ini',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: const Color(0xFF004C7E),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  PrayerChart(prayerLog: prayerLog), // Kembalikan Grafik
-                ],
+                    const SizedBox(height: 16),
+                    _buildPrayerChecklist(),
+                    const SizedBox(height: 20),
+                    _buildPrayerChart(),
+                  ],
+                ),
               ),
             ),
     );
   }
-}
 
-// Komponen Grafik
-class PrayerChart extends StatelessWidget {
-  final List<Map<String, dynamic>> prayerLog;
+  Widget _buildPrayerChecklist() {
+    return Column(
+      children: todayLog.entries.map((entry) {
+        final isActive = isTimeValid(entry.key);
+        return ListTile(
+          leading: Icon(
+            getPrayerIcon(entry.key),
+            color: isActive ? const Color(0xFF2DDCBE) : Colors.grey,
+          ),
+          title: Text(
+            entry.key,
+            style: TextStyle(
+              color: isActive ? const Color(0xFF2DDCBE) : Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          trailing: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color:
+                  entry.value ? const Color(0xFF2DDCBE) : Colors.grey.shade300,
+            ),
+            child: Icon(
+              entry.value ? Icons.check : Icons.close,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          onTap: isActive
+              ? () {
+                  updateLog(entry.key, !entry.value);
+                }
+              : null,
+        );
+      }).toList(),
+    );
+  }
 
-  const PrayerChart({super.key, required this.prayerLog});
-
-  @override
-  Widget build(BuildContext context) {
-    List<_ChartData> chartData = prayerLog.where((data) {
-      return data['date'] is String;
-    }).map((data) {
-      int completedPrayers = data.entries
+  Widget _buildPrayerChart() {
+    List<_ChartData> chartData = prayerLog.map((log) {
+      final date = log['date'] is String ? log['date'] : 'Unknown';
+      int completed = log.entries
           .where((entry) => entry.key != 'date' && entry.value == true)
           .length;
-      return _ChartData(data['date'] as String, completedPrayers);
+
+      return _ChartData(date, completed);
     }).toList();
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SfCartesianChart(
-        primaryXAxis: CategoryAxis(),
-        primaryYAxis: NumericAxis(),
-        series: <CartesianSeries<_ChartData, String>>[
-          ColumnSeries<_ChartData, String>(
-            dataSource: chartData,
-            xValueMapper: (_ChartData data, _) => data.date,
-            yValueMapper: (_ChartData data, _) => data.completedPrayers,
-            dataLabelSettings: const DataLabelSettings(isVisible: true),
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-            color: const Color(0xFF004C7E),
+    return SfCartesianChart(
+      primaryXAxis: CategoryAxis(),
+      primaryYAxis: NumericAxis(),
+      series: <CartesianSeries<_ChartData, String>>[
+        ColumnSeries<_ChartData, String>(
+          dataSource: chartData,
+          xValueMapper: (_ChartData data, _) => data.date,
+          yValueMapper: (_ChartData data, _) => data.completed,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class _ChartData {
   final String date;
-  final int completedPrayers;
+  final int completed;
 
-  _ChartData(this.date, this.completedPrayers);
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
-  }
+  _ChartData(this.date, this.completed);
 }

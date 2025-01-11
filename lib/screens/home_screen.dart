@@ -99,6 +99,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> reloadSholatMilestones() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? milestonesData = prefs.getString('sholatMilestones');
+    if (milestonesData != null) {
+      setState(() {
+        sholatMilestones = Map<String, bool>.from(json.decode(milestonesData));
+      });
+    }
+  }
+
   Future<void> fetchArticles() async {
     setState(() {
       isLoading = true;
@@ -470,17 +480,19 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => PantauSholatScreen(
-                  sholatMilestones: Map<String, bool>.from(sholatMilestones),
                   onUpdate: (updatedMilestones) {
                     setState(() {
                       sholatMilestones = updatedMilestones;
                     });
                     _saveSholatMilestones();
                   },
-                  prayerTimes: prayerTimes, // Waktu sholat diteruskan
+                  prayerTimes: prayerTimes,
                 ),
               ),
-            );
+            ).then((_) {
+              // Reload sholatMilestones setelah kembali dari PantauSholatScreen
+              reloadSholatMilestones();
+            });
           }),
           _buildMenuItem(context, Icons.access_time, 'Waktu\nSholat', () {
             Navigator.push(
