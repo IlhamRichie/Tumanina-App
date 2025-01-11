@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   final Dio _dio = Dio();
@@ -23,8 +24,47 @@ class ApiService {
   final String artikelBaseUrl =
       'hhttps://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
 
+  String extractErrorMessage(http.Response response) {
+    try {
+      final body = jsonDecode(response.body);
+      if (body is Map<String, dynamic> && body.containsKey('msg')) {
+        return body['msg'];
+      } else {
+        return 'Terjadi kesalahan pada server.';
+      }
+    } catch (e) {
+      return 'Gagal memproses respons dari server.';
+    }
+  }
+
+  String handleExceptionMessage(Object e, [http.Response? response]) {
+    if (response != null && response.body.isNotEmpty) {
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map<String, dynamic> && body.containsKey('msg')) {
+          return body['msg'];
+        }
+      } catch (_) {
+        // Abaikan error parsing
+      }
+    }
+
+    // Pesan fallback untuk error lain
+    String errorMessage = e.toString();
+    if (errorMessage.contains("Failed to fetch response")) {
+      return "Gagal mendapatkan data dari server. Silakan coba lagi.";
+    } else if (errorMessage.contains("Token expired")) {
+      return "Sesi Anda telah berakhir. Silakan login ulang.";
+    } else if (errorMessage.contains("Connection timed out")) {
+      return "Koneksi ke server gagal. Periksa koneksi internet Anda.";
+    } else {
+      return "Terjadi kesalahan. Silakan coba lagi.";
+    }
+  }
+
+  // Fungsi Register
   Future<void> register(String username, String email, String password) async {
-    final url = Uri.parse('https://dcaf-36-68-54-156.ngrok-free.app/register');
+    final url = Uri.parse('https://api.tumanina.me/register');
     try {
       final response = await http.post(
         url,
@@ -36,39 +76,177 @@ class ApiService {
         }),
       );
 
-      if (response.statusCode == 200) {
-        print('Registration successful');
-      } else {
-        throw Exception('Registration failed: ${response.body}');
+      if (response.statusCode != 201) {
+        throw Exception(extractErrorMessage(response));
       }
     } catch (e) {
-      print('Error during registration: $e');
-      throw e;
+      throw Exception(e.toString());
     }
   }
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse('$BaseUrl/login');
+  // Fungsi Login
+  Future<void> login(String email, String password) async {
+    final url = Uri.parse('https://api.tumanina.me/login');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Login successful: ${data['username']}');
-        return data; // Mengembalikan data pengguna
+
+        // Simpan token ke SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['token']);
+        await prefs.setString('refresh_token', data['refresh_token']);
+
+        // Ambil data pengguna dari server
+        final userResponse = await http.get(
+          Uri.parse('https://api.tumanina.me/user'),
+          headers: {'Authorization': 'Bearer ${data['token']}'},
+        );
+
+        if (userResponse.statusCode == 200) {
+          final userData = jsonDecode(userResponse.body);
+
+          // Debug log untuk memastikan data user berhasil diambil
+          print('Data User: ${userData.toString()}');
+
+          await prefs.setString('username', userData['username']);
+          await prefs.setString('email', userData['email']);
+        } else {
+          final errorData = jsonDecode(userResponse.body);
+          print('Error User Fetch: ${errorData['msg']}');
+          throw Exception('Gagal mengambil data pengguna setelah login.');
+        }
       } else {
-        throw Exception('Login failed: ${response.body}');
+        // Debug log jika login gagal
+        print('Login Failed: ${response.body}');
+        throw Exception(extractErrorMessage(response));
       }
     } catch (e) {
-      print('Error during login: $e');
-      throw e;
+      // Debug log untuk mengetahui error apa yang terjadi
+      print('Login Exception: $e');
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<Map<String, String>> getUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      throw Exception('Token tidak ditemukan. Silakan login ulang.');
+    }
+
+    final url = Uri.parse('https://api.tumanina.me/user');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'username': data['username'] ?? '',
+          'email': data['email'] ?? '',
+        };
+      } else {
+        final errorData = jsonDecode(response.body);
+        throw Exception(errorData['msg'] ?? 'Gagal mengambil data pengguna');
+      }
+    } catch (e) {
+      throw Exception('Error saat mengambil data pengguna: $e');
+    }
+  }
+
+  Future<void> refreshUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      throw Exception('Token tidak ditemukan.');
+    }
+
+    final url = Uri.parse('https://api.tumanina.me/user');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await prefs.setString('username', data['username'] ?? '');
+        await prefs.setString('email', data['email'] ?? '');
+      } else {
+        throw Exception('Gagal memperbarui data pengguna.');
+      }
+    } catch (e) {
+      throw Exception('Error memperbarui data pengguna: $e');
+    }
+  }
+
+  // Fungsi Update Profil
+  Future<void> updateProfile({
+    required String username,
+    required String email,
+    String? oldPassword,
+    String? newPassword,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null)
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+
+    final url = Uri.parse('https://api.tumanina.me/user');
+    final Map<String, dynamic> payload = {'username': username, 'email': email};
+
+    if (oldPassword != null && newPassword != null) {
+      payload['old_password'] = oldPassword;
+      payload['new_password'] = newPassword;
+    }
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // Fungsi Hapus Akun
+  Future<void> deleteAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null)
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+
+    final url = Uri.parse('https://api.tumanina.me/user');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
@@ -120,48 +298,6 @@ class ApiService {
     } catch (e) {
       print('Error during feedback submission: $e');
       throw e;
-    }
-  }
-
-  // Method to update profile (username and profile image)
-  Future<void> updateProfile(String username, File? profileImage) async {
-    try {
-      // Prepare the data for the request
-      FormData formData = FormData.fromMap({
-        'username': username,
-        if (profileImage != null)
-          'profile_image': await MultipartFile.fromFile(profileImage.path),
-      });
-
-      // Send POST request to update profile
-      final response = await _dio.post(
-        '$BaseUrl$updateProfileEndpoint',
-        data: formData,
-      );
-
-      // Check for success
-      if (response.statusCode == 200) {
-        print('Profile updated successfully!');
-      } else {
-        print('Failed to update profile: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error updating profile: $e');
-    }
-  }
-
-  // Method to delete account
-  Future<void> deleteAccount() async {
-    try {
-      final response = await _dio.post('$BaseUrl$deleteAccountEndpoint');
-
-      if (response.statusCode == 200) {
-        print('Account deleted successfully!');
-      } else {
-        print('Failed to delete account: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error deleting account: $e');
     }
   }
 

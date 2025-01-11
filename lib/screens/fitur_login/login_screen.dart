@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'register_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/api_service.dart';
 import '../home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
+  bool isLoading = false; // Untuk menampilkan indikator loading
 
   Widget _buildTextField({
     required String labelText,
@@ -48,6 +51,55 @@ class _LoginScreenState extends State<LoginScreen> {
       style: const TextStyle(fontSize: 16),
     );
   }
+
+ void _login() async {
+  if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Email dan kata sandi tidak boleh kosong.'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    isLoading = true; // Aktifkan indikator loading
+  });
+
+  try {
+    await ApiService().login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Login berhasil!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Navigate ke halaman berikutnya
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          e.toString().replaceAll('Exception: ', ''),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    setState(() {
+      isLoading = false; // Nonaktifkan indikator loading
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -115,14 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Logika login dengan emailController dan passwordController
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
-                    );
-                  },
+                  onPressed: isLoading ? null : _login, // Disable tombol saat loading
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0xFF2DDCBE),
@@ -132,13 +177,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     elevation: 5,
                   ),
-                  child: const Text(
-                    'Masuk',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Masuk',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -174,7 +221,6 @@ class _LoginScreenState extends State<LoginScreen> {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    // Arahkan ke halaman register
                     Navigator.push(
                       context,
                       MaterialPageRoute(

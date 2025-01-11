@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: Text(
           'Profil',
@@ -51,104 +51,135 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 2,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Colors.teal.shade200, Colors.teal.shade700],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 8),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-                image: const DecorationImage(
-                  image: AssetImage('assets/pp.jpeg'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _usernameController.text,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              _emailController.text,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Divider(
-                thickness: 1.2, color: Colors.grey, indent: 30, endIndent: 30),
-            const SizedBox(height: 20),
-            _buildProfileOption(
-              icon: Icons.person_outline,
-              text: 'Edit Profil',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditProfileScreen(
-                      initialUsername: _usernameController.text,
-                      initialEmail: _emailController.text,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 8),
                     ),
+                  ],
+                  image: const DecorationImage(
+                    image: AssetImage('assets/pp.jpeg'),
+                    fit: BoxFit.cover,
                   ),
-                );
-              },
-            ),
-            _buildProfileOption(
-              icon: Icons.feedback_outlined,
-              text: 'Feedback',
-              onTap: () {
-                _showFeedbackDialog(context);
-              },
-            ),
-            _buildProfileOption(
-              icon: Icons.exit_to_app,
-              text: 'Keluar',
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _usernameController.text,
+                style: GoogleFonts.poppins(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF004C7E),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _emailController.text,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Divider(
+                  thickness: 1.2,
+                  color: Colors.grey,
+                  indent: 30,
+                  endIndent: 30),
+              const SizedBox(height: 20),
+              _buildProfileOption(
+                icon: Icons.person_outline,
+                text: 'Edit Profil',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfileScreen(
+                        initialUsername: _usernameController.text,
+                        initialEmail: _emailController.text,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              _buildProfileOption(
+                icon: Icons.feedback_outlined,
+                text: 'Feedback',
+                onTap: () {
+                  _showFeedbackDialog(context);
+                },
+              ),
+              _buildProfileOption(
+                icon: Icons.exit_to_app,
+                text: 'Keluar',
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _buildMenuButton(context),
     );
   }
 
-  Widget _buildProfileOption(
-      {required IconData icon,
-      required String text,
-      required VoidCallback onTap}) {
+  Widget _buildProfileOption({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-      leading: Icon(icon, color: const Color(0xFF004C7E), size: 30),
+      leading: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 28),
+      ),
       title: Text(
         text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF004C7E),
+        ),
       ),
       onTap: onTap,
     );
