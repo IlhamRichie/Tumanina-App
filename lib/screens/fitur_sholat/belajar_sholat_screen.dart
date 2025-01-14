@@ -4,7 +4,7 @@ import 'gerakan_sholat/sholat_screen.dart';
 import 'mengenal_sholat_screen.dart';
 import 'rukun_sholat_screen.dart';
 import 'syarat_sholat_screen.dart';
-import 'niat_sholat_screen.dart'; // Add this import statement
+import 'niat_sholat_screen.dart';
 import '../home_screen.dart';
 
 class BelajarSholatScreen extends StatelessWidget {
@@ -38,27 +38,25 @@ class BelajarSholatScreen extends StatelessWidget {
         },
       },
       {
-        'title': 'Niat Sholat Wajib', // New menu item
+        'title': 'Niat Sholat Wajib',
         'icon': Icons.assignment_turned_in,
         'action': () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  const NiatSholatScreen(), // Navigate to NiatSholatScreen
+              builder: (context) => const NiatSholatScreen(),
             ),
           );
         },
       },
       {
-        'title': 'Rukun Sholat', // New menu item
+        'title': 'Rukun Sholat',
         'icon': Icons.check_circle,
         'action': () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  const RukunSholatScreen(), // Navigate to RukunSholatScreen
+              builder: (context) => const RukunSholatScreen(),
             ),
           );
         },
@@ -107,15 +105,15 @@ class BelajarSholatScreen extends StatelessWidget {
           return GestureDetector(
             onTap: belajarSholatItems[index]['action'],
             child: Card(
-              elevation: 3,
+              elevation: 5,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -141,7 +139,6 @@ class BelajarSholatScreen extends StatelessWidget {
                       child: Text(
                         belajarSholatItems[index]['title'],
                         style: GoogleFonts.poppins(
-                          // Apply Poppins font here
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,

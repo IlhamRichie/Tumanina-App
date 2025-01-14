@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../fitur_login/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FeedbackForm extends StatefulWidget {
   const FeedbackForm({super.key});
@@ -13,13 +15,25 @@ class _FeedbackFormState extends State<FeedbackForm> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('username') ?? 'Tidak ditemukan';
+    });
+  }
+
   void _submitFeedback() async {
     final name = _nameController.text.trim();
     final feedback = _feedbackController.text.trim();
 
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        // Perbarui untuk hanya mengirim name dan feedback
         await ApiService().submitFeedback(name, feedback);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -41,86 +55,72 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context)
-              .viewInsets
-              .bottom, // Untuk memberikan ruang bagi keyboard
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nama',
-                  labelStyle: const TextStyle(color: Color(0xFF004C7E)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF004C7E)),
-                  ),
-                  fillColor: Colors.white,
-                  filled: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama tidak boleh kosong';
-                  }
-                  return null;
-                },
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameController,
+            enabled: false,
+            decoration: InputDecoration(
+              labelText: 'Nama',
+              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _feedbackController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Tulis Ulasan Anda',
-                  labelStyle: const TextStyle(color: Color(0xFF004C7E)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFF004C7E)),
-                  ),
-                  fillColor: Colors.white,
-                  filled: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Feedback tidak boleh kosong';
-                  }
-                  return null;
-                },
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF004C7E)),
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _submitFeedback,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: const Color(0xFF2DDCBE),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 15,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text('Kirim', style: TextStyle(fontSize: 16)),
-                ),
-              ),
-            ],
+              fillColor: Colors.grey[200],
+              filled: true,
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _feedbackController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              labelText: 'Tulis Ulasan Anda',
+              labelStyle: const TextStyle(color: Color(0xFF004C7E)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF004C7E)),
+              ),
+              fillColor: Colors.white,
+              filled: true,
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Feedback tidak boleh kosong';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: ElevatedButton(
+              onPressed: _submitFeedback,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF2DDCBE),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text('Kirim', style: TextStyle(fontSize: 16)),
+            ),
+          ),
+        ],
       ),
     );
   }

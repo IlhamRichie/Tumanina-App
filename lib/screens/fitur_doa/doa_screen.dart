@@ -1,25 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:Tumanina/screens/fitur_doa/doa_detail_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// Data Doa
-class Doa {
-  final String title;
-  final String arabic;
-  final String latin;
-  final String translation;
-  final String timeToRead;
-
-  Doa(
-      {required this.title,
-      required this.arabic,
-      required this.latin,
-      required this.translation,
-      required this.timeToRead});
-}
+import 'package:Tumanina/screens/fitur_doa/doa.dart';
+import 'package:Tumanina/screens/fitur_doa/doa_detail_screen.dart';
 
 class DoaScreen extends StatelessWidget {
-  // Daftar doa sehari-hari
   final List<Doa> doaList = [
     Doa(
       title: "Doa Sebelum Tidur",
@@ -269,58 +253,53 @@ class DoaScreen extends StatelessWidget {
           itemCount: doaList.length,
           itemBuilder: (context, index) {
             final doa = doaList[index];
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 5.0),
-              decoration: BoxDecoration(
-                // Apply gradient border here
-                border: Border.all(
-                  width: 2.0,
-                  color: Colors
-                      .transparent, // transparent to make it a border effect
-                ),
-                borderRadius: BorderRadius.circular(16.0),
-                gradient: LinearGradient(
-                  colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DoaDetailScreen(doa: doa),
+                  ),
+                );
+              },
               child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
-                  color:
-                      Colors.white, // Set the background color inside the card
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(16.0),
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  title: Text(
-                    doa.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF004C7E),
-                    ),
+                padding: const EdgeInsets.all(3.0), // Ketebalan border
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Warna latar dalam
+                    borderRadius: BorderRadius.circular(14.0),
                   ),
-                  subtitle: Text(
-                    doa.timeToRead,
-                    style: GoogleFonts.poppins(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.teal,
-                  ),
-                  onTap: () {
-                    // Navigate to the Doa Detail Screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DoaDetailScreen(doa: doa),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: Text(
+                      doa.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF004C7E),
                       ),
-                    );
-                  },
+                    ),
+                    subtitle: Text(
+                      doa.timeToRead,
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.teal,
+                    ),
+                  ),
                 ),
               ),
             );

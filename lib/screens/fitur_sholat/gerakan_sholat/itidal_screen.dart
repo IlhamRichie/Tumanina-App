@@ -10,9 +10,9 @@ class ItidalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return GerakanDetailScreen(
       title: "I'tidal",
-      description: "Bangkit dari ruku' dengan mengucapkan...",
-      bacaan: "سَمِعَ اللهُ لِمَنْ حَمِدَهُ\nSami'allahu liman hamidah",
-      videoPath: 'assets/videos/itidal.mp4',
+      description: "Berdiri tegak setelah ruku' sambil mengucapkan bacaan i'tidal sebagai bentuk syukur dan pengakuan kebesaran Allah.",
+      bacaan: "رَبَّنَا لَكَ الْحَمْدُ مِلْءَ السَّمَوَاتِ وَمِلْءَ الْأَرْضِ وَمِلْءَ مَا شِئْتَ مِنْ شَيْءٍ بَعْدُ \n\n(Robbanaa lakal hamdu mil us samawaati wamil ul ardhi wamil u maa syi’ta min syain ba’du)\n\nArtinya: \nYa Allah tuhan kami, bagimu segala puji sepenuh langit dan bumi, dan sepenuh sesuatu yang engkau kehendaki sesudah itu.",
+      videoUrl: "https://youtu.be/OhBq9VDdNRw?si=_a3K0cJKTtmz85lG",
       previousScreen: const RukuScreen(),
       nextScreen: const SujudScreen(),
     );

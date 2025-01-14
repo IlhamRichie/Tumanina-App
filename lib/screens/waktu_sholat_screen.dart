@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'pantau_sholat_screen.dart';
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -27,7 +28,6 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Cek status lokasi
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw Exception('Location services are disabled.');
@@ -48,13 +48,12 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
   Future<void> fetchPrayerTimes(http.Client client) async {
     try {
-      // Mendapatkan posisi pengguna
       Position position = await _getCurrentLocation();
       double latitude = position.latitude;
       double longitude = position.longitude;
 
       final url = Uri.parse(
-        'http://api.aladhan.com/v1/timings?latitude=$latitude&longitude=$longitude&method=4'
+        'http://api.aladhan.com/v1/timings?latitude=$latitude&longitude=$longitude&method=4',
       );
       final response = await client.get(url);
 
@@ -73,18 +72,14 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
           });
         }
       } else {
-        if (mounted) {
-          setState(() {
-            errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
         setState(() {
-          errorMessage = 'Gagal memuat waktu sholat, periksa internet anda';
+          errorMessage = 'Gagal memuat waktu sholat, periksa internet Anda.';
         });
       }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Gagal memuat waktu sholat, periksa internet Anda.';
+      });
     }
   }
 
@@ -111,65 +106,117 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                 child: Text(
                   errorMessage,
                   style: GoogleFonts.poppins(
-                    color: Colors.red, 
-                    fontSize: 18
+                    color: Colors.red,
+                    fontSize: 18,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
             )
-          : prayerTimes.isNotEmpty
-              ? ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: prayerTimes.entries.map((entry) {
-                    return Card(
+          : Column(
+              children: [
+                Expanded(
+                  child: prayerTimes.isNotEmpty
+                      ? ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: prayerTimes.entries.length,
+                          itemBuilder: (context, index) {
+                            final entry = prayerTimes.entries.elementAt(index);
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 5,
+                              shadowColor: Colors.black.withOpacity(0.2),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.all(16),
+                                  leading: Icon(
+                                    _getPrayerIcon(entry.key),
+                                    size: 32,
+                                    color: Colors.white,
+                                  ),
+                                  title: Text(
+                                    entry.key,
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    entry.value,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Color(0xFF004C7E)),
+                          ),
+                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (prayerTimes.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PantauSholatScreen(
+                              prayerTimes: prayerTimes,
+                              onUpdate: (log) {
+                                print("Log sholat: $log");
+                              },
+                              sholatMilestones: {},
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Waktu sholat belum tersedia. Tunggu sebentar!'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF004C7E),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16.0, horizontal: 24.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 5,
-                      shadowColor: Colors.black.withOpacity(0.2),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          leading: Icon(
-                            _getPrayerIcon(entry.key),
-                            size: 32,
-                            color: Colors.white,
-                          ),
-                          title: Text(
-                            entry.key,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                          trailing: Text(
-                            entry.value,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                    ),
+                    child: Text(
+                      'Pantau Sholat',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                    );
-                  }).toList(),
-                )
-              : const Center(
-                  child: CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFF004C7E)),
+                    ),
                   ),
                 ),
+              ],
+            ),
     );
   }
 

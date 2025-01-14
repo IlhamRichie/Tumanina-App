@@ -1,28 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final Dio _dio = Dio();
-
-  // URL Server Flask
-  final String BaseUrl =
-      "https://tumanina.me/admin/api"; // Ganti jika URL berbeda
-  final String updateProfileEndpoint =
-      '/updateProfile'; // Replace with your actual endpoint
-  final String deleteAccountEndpoint = '/deleteAccount';
-
-  // URL dan Key API Groq
-  final String groqApiKey =
-      'yourapikey'; // Ganti dengan API Key Anda
+  final String baseUrl = "http://139.59.100.62:5000/";
+  final String artikelBaseUrl =
+      'https://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
+  final String groqApiKey = 'yourapikey';
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
   final String groqModel = 'llama-3.3-70b-versatile';
-
-  // URL API Artikel
-  final String artikelBaseUrl =
-      'hhttps://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
 
   String extractErrorMessage(http.Response response) {
     try {
@@ -36,6 +22,7 @@ class ApiService {
       return 'Gagal memproses respons dari server.';
     }
   }
+
 
   String handleExceptionMessage(Object e, [http.Response? response]) {
     if (response != null && response.body.isNotEmpty) {
@@ -62,9 +49,26 @@ class ApiService {
     }
   }
 
+
+  Future<bool> isSessionValid() async {
+    final prefs = await SharedPreferences.getInstance();
+    final loginTimestamp = prefs.getInt('login_timestamp');
+    final token = prefs.getString('token');
+
+    if (loginTimestamp == null || token == null) {
+      return false; // Selalu return false jika null
+    }
+
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    final thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000; // 30 hari
+
+    return (currentTime - loginTimestamp) < thirtyDaysInMillis;
+  }
+
+
   // Fungsi Register
   Future<void> register(String username, String email, String password) async {
-    final url = Uri.parse('https://api.tumanina.me/register');
+    final url = Uri.parse('$baseUrl/register');
     try {
       final response = await http.post(
         url,
@@ -85,8 +89,9 @@ class ApiService {
   }
 
   // Fungsi Login
+  // Fungsi Login yang sudah diperbarui
   Future<void> login(String email, String password) async {
-    final url = Uri.parse('https://api.tumanina.me/login');
+    final url = Uri.parse('$baseUrl/login');
     try {
       final response = await http.post(
         url,
@@ -102,9 +107,12 @@ class ApiService {
         await prefs.setString('token', data['token']);
         await prefs.setString('refresh_token', data['refresh_token']);
 
+        // Simpan timestamp login untuk validasi session (Tambahan)
+        await prefs.setInt('login_timestamp', DateTime.now().millisecondsSinceEpoch);
+
         // Ambil data pengguna dari server
         final userResponse = await http.get(
-          Uri.parse('https://api.tumanina.me/user'),
+          Uri.parse('$baseUrl/user'),
           headers: {'Authorization': 'Bearer ${data['token']}'},
         );
 
@@ -137,15 +145,18 @@ class ApiService {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    if (token == null) {
+    if (token == null || token.isEmpty) {
       throw Exception('Token tidak ditemukan. Silakan login ulang.');
     }
 
-    final url = Uri.parse('https://api.tumanina.me/user');
+    final url = Uri.parse('$baseUrl/user');
     try {
       final response = await http.get(
         url,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -155,13 +166,13 @@ class ApiService {
           'email': data['email'] ?? '',
         };
       } else {
-        final errorData = jsonDecode(response.body);
-        throw Exception(errorData['msg'] ?? 'Gagal mengambil data pengguna');
+        throw Exception(extractErrorMessage(response));
       }
     } catch (e) {
-      throw Exception('Error saat mengambil data pengguna: $e');
+      throw Exception("Error saat mengambil data pengguna: $e");
     }
   }
+
 
   Future<void> refreshUserData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -171,7 +182,7 @@ class ApiService {
       throw Exception('Token tidak ditemukan.');
     }
 
-    final url = Uri.parse('https://api.tumanina.me/user');
+    final url = Uri.parse('$baseUrl/user');
     try {
       final response = await http.get(
         url,
@@ -199,11 +210,16 @@ class ApiService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    if (token == null)
-      throw Exception("Token tidak ditemukan. Silakan login ulang.");
 
-    final url = Uri.parse('https://api.tumanina.me/user');
-    final Map<String, dynamic> payload = {'username': username, 'email': email};
+    if (token == null || token.isEmpty) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final url = Uri.parse('$baseUrl/user');
+    final Map<String, dynamic> payload = {
+      'username': username,
+      'email': email,
+    };
 
     if (oldPassword != null && newPassword != null) {
       payload['old_password'] = oldPassword;
@@ -214,8 +230,8 @@ class ApiService {
       final response = await http.put(
         url,
         headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
+          'Authorization': 'Bearer $token',  // Pastikan format Bearer benar
+          'Content-Type': 'application/json',
         },
         body: jsonEncode(payload),
       );
@@ -224,7 +240,7 @@ class ApiService {
         throw Exception(extractErrorMessage(response));
       }
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception("Error saat update profil: $e");
     }
   }
 
@@ -232,76 +248,65 @@ class ApiService {
   Future<void> deleteAccount() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    if (token == null)
-      throw Exception("Token tidak ditemukan. Silakan login ulang.");
 
-    final url = Uri.parse('https://api.tumanina.me/user');
+    if (token == null || token.isEmpty) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final url = Uri.parse('$baseUrl/user');
     try {
       final response = await http.delete(
         url,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await prefs.clear();
+        print('Akun berhasil dihapus.');
+      } else {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error saat menghapus akun: $e");
+    }
+  }
+
+
+  // Fungsi Submit Feedback
+  Future<void> submitFeedback(String name, String feedback) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception('Token tidak ditemukan. Silakan login ulang.');
+    }
+
+    final url = Uri.parse('$baseUrl/sentiment');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'nama': name,
+          'review': feedback,
+        }),
       );
 
       if (response.statusCode != 200) {
         throw Exception(extractErrorMessage(response));
       }
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception("Error saat mengirim feedback: $e");
     }
   }
 
-  /// Fungsi untuk mengirim frame ke server Flask
-  Future<Map<String, dynamic>> sendFrame(File imageFile) async {
-    try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$BaseUrl/detect-movement'),
-      );
-      request.files.add(
-        await http.MultipartFile.fromPath('frame', imageFile.path),
-      );
-
-      final response = await request.send();
-      if (response.statusCode == 200) {
-        final respStr = await response.stream.bytesToString();
-        return json.decode(respStr);
-      } else {
-        return {'error': 'Failed to detect movement: ${response.statusCode}'};
-      }
-    } catch (e) {
-      return {'error': 'Failed to connect to server: $e'};
-    }
-  }
-
-  Future<void> submitFeedback(String name, String feedback) async {
-    final String baseUrl =
-        'https://tumanina.me/sentimen'; // Ganti dengan URL server Anda
-    final Uri url = Uri.parse('$baseUrl/add_review');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'text': feedback, // Ubah ke "text" karena Flask menggunakan key ini
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        print('Feedback submitted successfully: ${responseData['sentiment']}');
-      } else {
-        print('Failed to submit feedback: ${response.body}');
-        throw Exception('Error: ${response.body}');
-      }
-    } catch (e) {
-      print('Error during feedback submission: $e');
-      throw e;
-    }
-  }
-
-  /// Fungsi untuk mengirim pesan ke Groq API
+  // Fungsi Chatbot Groq API
   Future<String> sendMessageToGroqAPI(String userMessage) async {
     final url = Uri.parse('$groqBaseUrl/chat/completions');
     try {
@@ -315,8 +320,7 @@ class ApiService {
           "messages": [
             {
               "role": "system",
-              "content":
-                  "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Jangan pernah membuat respon dengan bahasa inggris. Ini aplikasi Tumanina: Tuntunan Mandiri Niat dan Ibadah"
+              "content": "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Jangan pernah membuat respon dengan bahasa inggris. Ini aplikasi Tumanina: Tuntunan Mandiri Niat dan Ibadah"
             },
             {"role": "user", "content": userMessage}
           ],
@@ -331,33 +335,63 @@ class ApiService {
         final data = jsonDecode(response.body);
         return data['choices'][0]['message']['content'];
       } else {
-        throw Exception(
-          'Failed to fetch response: ${response.statusCode}, ${response.body}',
-        );
+        throw Exception(extractErrorMessage(response));
       }
-    } on SocketException {
-      return "Maaf, sepertinya Anda sedang offline. Pastikan koneksi internet Anda aktif untuk menggunakan Tumabot.";
-    } on Exception catch (e) {
-      return "Maaf, terjadi masalah teknis: $e. Silakan coba lagi nanti.";
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 
-  /// Fungsi untuk mengambil artikel dari API Artikel
+  // Fungsi Fetch Artikel
   Future<List<Map<String, dynamic>>> fetchArticles() async {
     final url = Uri.parse(artikelBaseUrl);
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-
-      if (data.containsKey('data') && data['data'] is List) {
-        return List<Map<String, dynamic>>.from(data['data']);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data.containsKey('data') && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        } else {
+          throw Exception('Data artikel tidak ditemukan.');
+        }
       } else {
-        throw Exception(
-            'Data articles tidak ditemukan atau tidak dalam format yang diharapkan');
+        throw Exception(extractErrorMessage(response));
       }
-    } else {
-      throw Exception('Failed to load articles');
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
+
+  // Fungsi Logout
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null || token.isEmpty) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final url = Uri.parse('$baseUrl/logout');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await prefs.clear();
+        print('Logout berhasil.');
+      } else {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error saat logout: $e");
+    }
+  }
+
+
 }

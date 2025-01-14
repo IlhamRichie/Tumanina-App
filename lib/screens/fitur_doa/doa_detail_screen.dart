@@ -1,144 +1,121 @@
-import 'package:Tumanina/screens/fitur_doa/doa_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'doa.dart';
 
 class DoaDetailScreen extends StatelessWidget {
   final Doa doa;
 
   DoaDetailScreen({required this.doa});
 
+  void _shareToWhatsApp(BuildContext context) async {
+    final String message = '''
+Assalamu'alaikum, berikut doa yang ingin saya bagikan:
+
+🕌 *${doa.title}* 🕌
+
+📖 *Doa dalam Bahasa Arab:*
+${doa.arabic}
+
+✍️ *Bacaan Latin:*
+${doa.latin}
+
+🌟 *Terjemahan:*
+${doa.translation}
+
+⏰ *Waktu Membaca:*
+${doa.timeToRead}
+''';
+
+    final Uri whatsappUrl = Uri.parse(
+        'https://wa.me/?text=${Uri.encodeComponent(message)}');
+
+    if (await canLaunchUrl(whatsappUrl)) {
+      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Gagal membuka WhatsApp. Pastikan aplikasi terpasang."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          doa.title,
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF004C7E),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+    return WillPopScope(
+      onWillPop: () async {
+        // Menghapus semua SnackBar sebelum keluar
+        ScaffoldMessenger.of(context).clearSnackBars();
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        appBar: AppBar(
+          title: Text(
+            doa.title,
+            style: GoogleFonts.poppins(
+              color: const Color(0xFF004C7E),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              // Hapus SnackBar ketika keluar dengan tombol back
+              ScaffoldMessenger.of(context).clearSnackBars();
+              Navigator.pop(context);
+            },
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Arabic Doa
-              Text(
-                "Doa dalam Bahasa Arab:",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2DDCBE),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildGradientCard(
+                  title: "Doa dalam Bahasa Arab:",
+                  content: doa.arabic,
+                  isArabic: true,
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                doa.arabic,
-                style: GoogleFonts.amiri(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black87,
+                const SizedBox(height: 16),
+                _buildGradientCard(
+                  title: "Bacaan Latin:",
+                  content: doa.latin,
+                  isArabic: false,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-
-              // Latin Bacaan
-              Text(
-                "Bacaan Latin:",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2DDCBE),
+                const SizedBox(height: 16),
+                _buildGradientCard(
+                  title: "Terjemahan:",
+                  content: doa.translation,
+                  isArabic: false,
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                doa.latin,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.black54,
+                const SizedBox(height: 16),
+                _buildGradientCard(
+                  title: "Waktu Membaca Doa:",
+                  content: doa.timeToRead,
+                  isArabic: false,
                 ),
-              ),
-              SizedBox(height: 16),
-
-              // Translation
-              Text(
-                "Terjemahan:",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2DDCBE),
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                doa.translation,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Waktu Membaca Doa
-              Text(
-                "Waktu Membaca Doa:",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2DDCBE),
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                doa.timeToRead,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 32),
-
-              // Gradient Button (centered)
-              Center(
-                child: Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF004C7E),
-                        const Color(0xFF2DDCBE)
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      // Optional: Define an action, like bookmarking or sharing
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14.0),
+                const SizedBox(height: 32),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () => _shareToWhatsApp(context),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: const Color(0xFF004C7E),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     child: Text(
-                      'Simpan Doa Ini',
+                      'Bagikan Doa Ini',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -146,9 +123,62 @@ class DoaDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientCard({
+    required String title,
+    required String content,
+    required bool isArabic,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF004C7E),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              content,
+              style: isArabic
+                  ? GoogleFonts.amiri(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black87,
+                    )
+                  : GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black54,
+                    ),
+              textAlign: isArabic ? TextAlign.center : TextAlign.start,
+            ),
+          ],
         ),
       ),
     );

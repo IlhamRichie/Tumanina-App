@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'fitur_login/login_screen.dart';
 
 class IntroScreen extends StatefulWidget {
@@ -36,57 +37,51 @@ class _IntroScreenState extends State<IntroScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _checkIntroStatus();
+  }
+
+  Future<void> _checkIntroStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool? seenIntro = prefs.getBool('seenIntro') ?? false;
+
+    if (seenIntro) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
+
+  Future<void> _setIntroSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seenIntro', true);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  itemCount: _introData.length,
-                  itemBuilder: (context, index) => _buildIntroSlide(
-                    title: _introData[index]["title"]!,
-                    description: _introData[index]["description"]!,
-                    imagePath: _introData[index]["image"]!,
-                  ),
-                ),
-              ),
-              _buildBottomNavigation(),
-            ],
-          ),
-          // Dekorasi Lingkaran di Pojok Kiri Bawah
-          Positioned(
-            bottom: -70, // Agar sebagian lingkaran terlihat seperti terpotong
-            left: -100, // Posisi kiri di luar layar
-            child: Container(
-              height: 200,
-              width: 200,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2DDCBE).withOpacity(0.2),
-                shape: BoxShape.circle,
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              itemCount: _introData.length,
+              itemBuilder: (context, index) => _buildIntroSlide(
+                title: _introData[index]["title"]!,
+                description: _introData[index]["description"]!,
+                imagePath: _introData[index]["image"]!,
               ),
             ),
           ),
-          Positioned(
-            bottom: -90, // Tumpukan lingkaran kedua
-            left: 20, // Posisi lebih ke tengah
-            child: Container(
-              height: 150,
-              width: 150,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2DDCBE),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
+          _buildBottomNavigation()
         ],
       ),
     );
@@ -131,32 +126,54 @@ class _IntroScreenState extends State<IntroScreen> {
     return Padding(
       padding: const EdgeInsets.all(64.0),
       child: _currentPage == _introData.length - 1
-          ? Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
+          ? Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    await _setIntroSeen();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2DDCBE),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2DDCBE),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 64.0, vertical: 12.0),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 64.0, vertical: 12.0),
-                ),
-                child: const Text(
-                  "Mulai",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+                  child: const Text(
+                    "Mulai",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () async {
+                    await _setIntroSeen();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Jangan tampilkan lagi",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

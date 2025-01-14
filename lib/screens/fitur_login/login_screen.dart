@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import '../home_screen.dart';
 import 'register_screen.dart';
@@ -52,54 +51,54 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
- void _login() async {
-  if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Email dan kata sandi tidak boleh kosong.'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-    return;
-  }
-
-  setState(() {
-    isLoading = true; // Aktifkan indikator loading
-  });
-
-  try {
-    await ApiService().login(
-      emailController.text.trim(),
-      passwordController.text.trim(),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login berhasil!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    // Navigate ke halaman berikutnya
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          e.toString().replaceAll('Exception: ', ''),
+  void _login() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email dan kata sandi tidak boleh kosong.'),
+          backgroundColor: Colors.orange,
         ),
-        backgroundColor: Colors.red,
-      ),
-    );
-  } finally {
+      );
+      return;
+    }
+
     setState(() {
-      isLoading = false; // Nonaktifkan indikator loading
+      isLoading = true; // Aktifkan indikator loading
     });
+
+    try {
+      await ApiService().login(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login berhasil!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate ke halaman berikutnya
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceAll('Exception: ', ''),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false; // Nonaktifkan indikator loading
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -186,35 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Center(
-                child: Text(
-                  'Atau',
-                  style: TextStyle(color: Colors.black54),
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black87,
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFF2DDCBE)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: Image.asset(
-                    'assets/logo/google.png',
-                    width: 20,
-                    height: 20,
-                  ),
-                  label: const Text('Lanjutkan dengan Google'),
                 ),
               ),
               const SizedBox(height: 20),

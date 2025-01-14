@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import '../fitur_login/login_screen.dart';
 
@@ -18,8 +19,12 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  bool _isLoading = false;
+  bool _isOldPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
 
   @override
   void initState() {
@@ -31,57 +36,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _saveProfile() async {
     String updatedUsername = _usernameController.text.trim();
     String updatedEmail = _emailController.text.trim();
-    String updatedPassword = _passwordController.text.trim();
+    String oldPassword = _oldPasswordController.text.trim();
+    String newPassword = _newPasswordController.text.trim();
 
-    // Validasi email
-    if (!_isValidEmail(updatedEmail)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Masukkan email yang valid"),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (updatedUsername.isEmpty || updatedEmail.isEmpty) {
+      _showSnackBar("Nama pengguna dan Email harus diisi.", Colors.red);
       return;
     }
 
-    if (updatedUsername.isNotEmpty && updatedEmail.isNotEmpty) {
-      try {
-        await ApiService().updateProfile(
-          username: updatedUsername,
-          email: updatedEmail,
-          oldPassword: null,
-          newPassword: updatedPassword.isNotEmpty ? updatedPassword : null,
-        );
+    if (newPassword.isNotEmpty && oldPassword.isEmpty) {
+      _showSnackBar("Password Lama harus diisi jika ingin mengganti Password Baru.", Colors.red);
+      return;
+    }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text("Profil berhasil diperbarui"),
-            backgroundColor: const Color(0xFF2DDCBE),
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await ApiService().updateProfile(
+        username: updatedUsername,
+        email: updatedEmail,
+        oldPassword: oldPassword.isEmpty ? null : oldPassword,
+        newPassword: newPassword.isEmpty ? null : newPassword,
+      );
+
+      final userData = await ApiService().getUserInfo();
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', userData['username'] ?? 'DefaultUsername');
+      await prefs.setString('email', userData['email'] ?? 'DefaultEmail');
+
+      _showSnackBar("Profil berhasil diperbarui.", const Color(0xFF2DDCBE));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditProfileScreen(
+            initialUsername: userData['username'] ?? 'DefaultUsername',
+            initialEmail: userData['email'] ?? 'DefaultEmail',
           ),
-        );
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Gagal memperbarui profil: $e"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Harap isi semua kolom"),
-          backgroundColor: Colors.red,
         ),
       );
+    } catch (e) {
+      _showSnackBar(e.toString(), Colors.red);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-  }
-
-// Fungsi validasi email
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-    return emailRegex.hasMatch(email);
   }
 
   void _deleteAccount() async {
@@ -112,195 +115,215 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
 
     if (confirmDelete == true) {
-      await ApiService().deleteAccount();
+      setState(() {
+        _isLoading = true;
+      });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Akun berhasil dihapus"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      try {
+        await ApiService().deleteAccount();
+        _showSnackBar("Akun berhasil dihapus.", Colors.red);
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (Route<dynamic> route) => false,
-      );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      } catch (e) {
+        _showSnackBar(e.toString(), Colors.red);
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration({
+    required String hintText,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      labelText: hintText,
+      labelStyle: const TextStyle(color: Color(0xFF004C7E)),
+      prefixIcon: Icon(icon, color: const Color(0xFF004C7E)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF004C7E)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color.fromARGB(255, 62, 207, 230)),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
         title: const Text(
           "Edit Profil",
-          style:
-              TextStyle(color: Color(0xFF004C7E), fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        elevation: 2,
-        iconTheme: const IconThemeData(color: Color(0xFF004C7E)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                "Perbarui Informasi",
+                "Edit Profil",
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF004C7E),
                 ),
               ),
-              const SizedBox(height: 20),
-              _buildTextField(
+              const SizedBox(height: 16),
+              const Text(
+                "Perbarui informasi profil Anda",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF004C7E),
+                ),
+              ),
+              const SizedBox(height: 24),
+              TextField(
                 controller: _usernameController,
-                label: "Username",
-                icon: Icons.person,
+                decoration: _buildInputDecoration(
+                  hintText: "Nama Pengguna",
+                  icon: Icons.person_outline,
+                ),
+                style: const TextStyle(color: Colors.black87),
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                controller: _passwordController,
-                label: "Password",
-                icon: Icons.lock,
-                isPassword: true,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
+              TextField(
                 controller: _emailController,
-                label: "Email",
-                icon: Icons.email,
+                decoration: _buildInputDecoration(
+                  hintText: "Email Pengguna",
+                  icon: Icons.email_outlined,
+                ),
+                style: const TextStyle(color: Colors.black87),
               ),
-              const SizedBox(height: 30),
-              Center(
-                child: Column(
-                  children: [
-                    _buildGradientButton(
-                      text: "Simpan Perubahan",
+              const SizedBox(height: 16),
+              TextField(
+                controller: _oldPasswordController,
+                decoration: _buildInputDecoration(
+                  hintText: "Password Lama",
+                  icon: Icons.lock_outline,
+                ).copyWith(
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isOldPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.grey.shade600,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isOldPasswordVisible = !_isOldPasswordVisible;
+                      });
+                    },
+                  ),
+                ),
+                obscureText: !_isOldPasswordVisible,
+                style: const TextStyle(color: Colors.black87),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newPasswordController,
+                decoration: _buildInputDecoration(
+                  hintText: "Password Baru",
+                  icon: Icons.lock_open_outlined,
+                ).copyWith(
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isNewPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.grey.shade600,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isNewPasswordVisible = !_isNewPasswordVisible;
+                      });
+                    },
+                  ),
+                ),
+                obscureText: !_isNewPasswordVisible,
+                style: const TextStyle(color: Colors.black87),
+              ),
+
+              const SizedBox(height: 24),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
                       onPressed: _saveProfile,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.all(0),
                       ),
-                      textColor: Colors.white,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildOutlinedButton(
-                      text: "Hapus Akun",
-                      onPressed: _deleteAccount,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      child: Ink(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            "Simpan Perubahan",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
-                      textColor: Colors.red,
                     ),
-                  ],
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _deleteAccount,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  "Hapus Akun",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool isPassword = false,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF004C7E)),
-        prefixIcon: Icon(icon, color: const Color(0xFF004C7E)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Color(0xFF004C7E),
-            width: 1.5,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(
-            color: Color(0xFF2DDCBE),
-            width: 2.0,
-          ),
-        ),
-        fillColor: Colors.white,
-        filled: true,
-      ),
-    );
-  }
-
-  Widget _buildGradientButton({
-    required String text,
-    required VoidCallback onPressed,
-    required LinearGradient gradient,
-    required Color textColor,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOutlinedButton({
-    required String text,
-    required VoidCallback onPressed,
-    required LinearGradient gradient,
-    required Color textColor,
-  }) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(
-          color: gradient.colors.first,
-          width: 2,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
