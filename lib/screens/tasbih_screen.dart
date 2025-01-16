@@ -89,7 +89,8 @@ class _TasbihScreenState extends State<TasbihScreen> {
               // Modernized and extended Dropdown
               Container(
                 width: 300, // Increased width of the dropdown
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: Colors.white,
@@ -105,7 +106,8 @@ class _TasbihScreenState extends State<TasbihScreen> {
                 child: DropdownButton<String>(
                   value: dropdownValue,
                   isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF004C7E)),
+                  icon: const Icon(Icons.arrow_drop_down,
+                      color: Color(0xFF004C7E)),
                   style: TextStyle(color: Color(0xFF004C7E), fontSize: 18),
                   underline: const SizedBox(),
                   onChanged: (String? newValue) {
@@ -137,7 +139,8 @@ class _TasbihScreenState extends State<TasbihScreen> {
 
               // Image with rotation animation
               TweenAnimationBuilder(
-                tween: Tween<double>(begin: 0, end: counter % 2 == 0 ? 360.0 : 0),
+                tween:
+                    Tween<double>(begin: 0, end: counter % 2 == 0 ? 360.0 : 0),
                 duration: Duration(milliseconds: 500),
                 builder: (context, double angle, child) {
                   return Transform.rotate(
@@ -187,7 +190,9 @@ class _TasbihScreenState extends State<TasbihScreen> {
               ElevatedButton(
                 onPressed: resetCounter,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), backgroundColor: Colors.transparent,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  backgroundColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ), // Make the button background transparent
@@ -203,7 +208,8 @@ class _TasbihScreenState extends State<TasbihScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                     child: const Text(
                       'Reset',
                       style: TextStyle(fontSize: 18, color: Colors.white),

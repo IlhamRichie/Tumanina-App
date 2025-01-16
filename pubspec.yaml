@@ -91,15 +91,11 @@ flutter:
     - assets/logo/
     - assets/tasbih/
     - assets/kiblat/
-    - assets/pose_references.json
-    - assets/sounds/
     - assets/splash/1 (7).png
     - assets/splash/2 (6).png
     - assets/splash/3 (7).png
     - assets/splash/Logo1 1.png
-    - assets/TUMABOT.tflite
     - assets/pp.jpeg
-    - assets/pilihGerakan/camerascan.png
 
 flutter_launcher_icons:
   android: true

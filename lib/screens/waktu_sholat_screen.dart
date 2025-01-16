@@ -131,7 +131,10 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                                    colors: [
+                                      Color(0xFF2DDCBE),
+                                      Color(0xFF004C7E)
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
@@ -166,8 +169,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                         )
                       : const Center(
                           child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Color(0xFF004C7E)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF004C7E)),
                           ),
                         ),
                 ),

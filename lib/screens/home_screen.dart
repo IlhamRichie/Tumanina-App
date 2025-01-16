@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'artikel/artikel_screen.dart';
+import 'diskusi_screen.dart';
 import 'pantau_sholat_screen.dart';
 import 'fitur_alquran/surat_detail_screen.dart';
 import 'waktu_sholat_screen.dart';
@@ -75,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _username = prefs.getString('username') ?? 'User';
     });
   }
-
 
   Future<void> _handleRefresh() async {
     setState(() {
@@ -909,10 +909,15 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
           );
         } else if (index == 1) {
-          // Navigate to ArtikelScreen when 'Artikel' is tapped
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ArtikelScreen()),
+          );
+        } else if (index == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const DiskusiScreen()), // Tambahkan ini
           );
         }
       },
@@ -939,6 +944,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icon(Icons.person),
           label: 'Profil',
           backgroundColor: Colors.greenAccent,
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat),
+          label: 'Diskusi',
+          backgroundColor: Colors.orangeAccent, // Warna untuk Diskusi
         ),
       ],
     );

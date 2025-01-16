@@ -4,10 +4,9 @@ import 'screens/intro_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   bool isLoggedIn = false;
   try {
     isLoggedIn = await ApiService().isSessionValid();
@@ -17,7 +16,6 @@ void main() async {
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
-
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;

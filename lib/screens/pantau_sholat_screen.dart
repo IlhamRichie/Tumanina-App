@@ -6,7 +6,8 @@ import 'dart:convert';
 
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate;
-  final Map<String, String> prayerTimes; // Data waktu sholat dari WaktuSholatScreen
+  final Map<String, String>
+      prayerTimes; // Data waktu sholat dari WaktuSholatScreen
   final Map<String, bool> sholatMilestones; // Milestones sholat (bisa kosong)
 
   const PantauSholatScreen({
@@ -117,7 +118,8 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
   DateTime _getPrayerTime(String prayerKey) {
     final now = DateTime.now();
-    final prayerTimeString = widget.prayerTimes[prayerKey.capitalize()] ?? "00:00";
+    final prayerTimeString =
+        widget.prayerTimes[prayerKey.capitalize()] ?? "00:00";
     final prayerTimeParts = prayerTimeString.split(':');
     return DateTime(
       now.year,

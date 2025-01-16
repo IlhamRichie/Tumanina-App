@@ -25,6 +25,14 @@ ${doa.translation}
 
 ⏰ *Waktu Membaca:*
 ${doa.timeToRead}
+
+__________________
+
+🌟 *Tumanina App* 🌟
+Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang interaktif di satu aplikasi. Tingkatkan ibadah Anda dengan mudah kapan saja dan di mana saja.
+
+📥 Download sekarang di:
+🌐 [tumanina.me](https://tumanina.me)
 ''';
 
     final Uri whatsappUrl = Uri.parse(

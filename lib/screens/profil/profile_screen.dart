@@ -29,22 +29,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _usernameController.text = prefs.getString('username') ?? 'Tidak ditemukan';
+      _usernameController.text =
+          prefs.getString('username') ?? 'Tidak ditemukan';
       _emailController.text = prefs.getString('email') ?? 'Tidak ditemukan';
     });
   }
 
   void _checkSession() async {
-  final isValidSession = await ApiService().isSessionValid();
-  if (!isValidSession) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (route) => false, // Kembali ke LoginScreen jika sesi tidak valid
-    );
+    final isValidSession = await ApiService().isSessionValid();
+    if (!isValidSession) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false, // Kembali ke LoginScreen jika sesi tidak valid
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -137,18 +137,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             _buildProfileOption(
-                icon: Icons.exit_to_app,
-                text: 'Keluar',
-                onTap: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.clear(); // Hapus semua data di SharedPreferences
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    (route) => false, // Hapus semua route sebelumnya
-                  );
-                },
-              ),
+              icon: Icons.exit_to_app,
+              text: 'Keluar',
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // Hapus semua data di SharedPreferences
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false, // Hapus semua route sebelumnya
+                );
+              },
+            ),
           ],
         ),
       ),
