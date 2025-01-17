@@ -823,6 +823,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Artikel',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.mark_chat_unread),
+            label: 'Diskusi',
+            backgroundColor: Color(0xFF004C7E), // Warna untuk Diskusi
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
             label: 'Profil',
           ),
@@ -841,6 +846,12 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => const ArtikelScreen()),
             );
           } else if (index == 2) {
+            // Navigasi ke ProfilScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DiskusiScreen()),
+            );
+          } else if (index == 3) {
             // Navigasi ke ProfilScreen
             Navigator.pushReplacement(
               context,
@@ -903,7 +914,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return BottomNavigationBar(
       currentIndex: 0,
       onTap: (index) {
-        if (index == 2) {
+        if (index == 3) {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -913,7 +924,7 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             MaterialPageRoute(builder: (context) => const ArtikelScreen()),
           );
-        } else if (index == 3) {
+        } else if (index == 2) {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -938,17 +949,17 @@ class _HomeScreenState extends State<HomeScreen> {
         BottomNavigationBarItem(
           icon: Icon(Icons.article),
           label: 'Artikel',
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: Color(0xFF004C7E),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.mark_chat_unread),
+          label: 'Diskusi',
+          backgroundColor: Color(0xFF004C7E), // Warna untuk Diskusi
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Profil',
-          backgroundColor: Colors.greenAccent,
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat),
-          label: 'Diskusi',
-          backgroundColor: Colors.orangeAccent, // Warna untuk Diskusi
+          backgroundColor: Color(0xFF004C7E),
         ),
       ],
     );

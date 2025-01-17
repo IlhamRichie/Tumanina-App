@@ -6,15 +6,14 @@ import 'dart:convert';
 
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate;
-  final Map<String, String>
-      prayerTimes; // Data waktu sholat dari WaktuSholatScreen
-  final Map<String, bool> sholatMilestones; // Milestones sholat (bisa kosong)
+  final Map<String, String> prayerTimes;
+  final Map<String, bool> sholatMilestones;
 
   const PantauSholatScreen({
     super.key,
     required this.onUpdate,
     required this.prayerTimes,
-    this.sholatMilestones = const {}, // Default jika tidak ada data
+    this.sholatMilestones = const {},
   });
 
   @override
@@ -252,7 +251,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       ],
                     ),
                   ),
-                  PrayerChart(prayerLog: prayerLog), // Grafik
+                  PrayerChart(prayerLog: prayerLog),
                 ],
               ),
             ),
@@ -268,13 +267,15 @@ class PrayerChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<_ChartData> chartData = prayerLog.where((data) {
-      return data['date'] is String;
-    }).map((data) {
+    List<_ChartData> chartData = prayerLog.map((data) {
       int completedPrayers = data.entries
           .where((entry) => entry.key != 'date' && entry.value == true)
           .length;
-      return _ChartData(data['date'] as String, completedPrayers);
+      return _ChartData(
+        data['date'] as String,
+        completedPrayers,
+        data,
+      );
     }).toList();
 
     return Padding(
@@ -282,6 +283,7 @@ class PrayerChart extends StatelessWidget {
       child: SfCartesianChart(
         primaryXAxis: CategoryAxis(),
         primaryYAxis: NumericAxis(),
+        tooltipBehavior: TooltipBehavior(enable: true),
         series: <CartesianSeries<_ChartData, String>>[
           ColumnSeries<_ChartData, String>(
             dataSource: chartData,
@@ -290,9 +292,99 @@ class PrayerChart extends StatelessWidget {
             dataLabelSettings: const DataLabelSettings(isVisible: true),
             borderRadius: const BorderRadius.all(Radius.circular(5)),
             color: const Color(0xFF004C7E),
+            // Use the onPointTap callback here
+            onPointTap: (ChartPointDetails details) {
+              if (details.pointIndex != null) {
+                _ChartData selectedData = chartData[details.pointIndex!];
+                _showPrayerDetails(
+                    context, selectedData.date, selectedData.rawData);
+              }
+            },
           ),
         ],
       ),
+    );
+  }
+
+  void _showPrayerDetails(
+      BuildContext context, String date, Map<String, dynamic> prayerData) {
+    List<String> completedPrayers = prayerData.entries
+        .where((entry) => entry.key != 'date' && entry.value == true)
+        .map((entry) => entry.key.capitalize())
+        .toList();
+
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow closing the dialog by tapping outside
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Container(
+              margin: const EdgeInsets.all(3),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sholat pada $date',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF004C7E),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  completedPrayers.isEmpty
+                      ? const Text(
+                          'Tidak ada sholat yang dikerjakan.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: completedPrayers
+                              .map(
+                                (prayer) => Text(
+                                  '- $prayer',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -300,8 +392,9 @@ class PrayerChart extends StatelessWidget {
 class _ChartData {
   final String date;
   final int completedPrayers;
+  final Map<String, dynamic> rawData;
 
-  _ChartData(this.date, this.completedPrayers);
+  _ChartData(this.date, this.completedPrayers, this.rawData);
 }
 
 extension StringExtension on String {

@@ -6,6 +6,7 @@ import '../home_screen.dart';
 import '../fitur_login/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'feedback_form.dart';
+import '../diskusi_screen.dart'; // Pastikan ada halaman diskusi
 import '../../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (route) => false, // Kembali ke LoginScreen jika sesi tidak valid
+        (route) => false,
       );
     }
   }
@@ -141,18 +142,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               text: 'Keluar',
               onTap: () async {
                 final prefs = await SharedPreferences.getInstance();
-                await prefs.clear(); // Hapus semua data di SharedPreferences
+                await prefs.clear();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  (route) => false, // Hapus semua route sebelumnya
+                  (route) => false,
                 );
               },
             ),
           ],
         ),
       ),
-      bottomNavigationBar: _buildMenuButton(context),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 
@@ -171,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuButton(BuildContext context) {
+  Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -184,25 +185,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: 2,
-        elevation: 5,
         backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF004C7E),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.article_rounded),
-            label: 'Artikel',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Profil',
-          ),
-        ],
+        currentIndex: 3,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacement(
@@ -214,8 +198,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
               MaterialPageRoute(builder: (context) => const ArtikelScreen()),
             );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DiskusiScreen()),
+            );
+          } else if (index == 3) {
+            // Tetap di halaman Profil
           }
         },
+        selectedItemColor: const Color(0xFF004C7E),
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.article),
+            label: 'Artikel',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.mark_chat_unread),
+            label: 'Diskusi',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
       ),
     );
   }

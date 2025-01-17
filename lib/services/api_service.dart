@@ -6,7 +6,8 @@ class ApiService {
   final String baseUrl = "http://139.59.100.62:5000/";
   final String artikelBaseUrl =
       'https://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
-  final String groqApiKey = 'yourapikey';
+  final String groqApiKey =
+      'yourapikey';
   final String groqBaseUrl = 'https://api.groq.com/openai/v1';
   final String groqModel = 'llama-3.3-70b-versatile';
 
@@ -22,7 +23,6 @@ class ApiService {
       return 'Gagal memproses respons dari server.';
     }
   }
-
 
   String handleExceptionMessage(Object e, [http.Response? response]) {
     if (response != null && response.body.isNotEmpty) {
@@ -49,7 +49,6 @@ class ApiService {
     }
   }
 
-
   Future<bool> isSessionValid() async {
     final prefs = await SharedPreferences.getInstance();
     final loginTimestamp = prefs.getInt('login_timestamp');
@@ -64,7 +63,6 @@ class ApiService {
 
     return (currentTime - loginTimestamp) < thirtyDaysInMillis;
   }
-
 
   // Fungsi Register
   Future<void> register(String username, String email, String password) async {
@@ -108,7 +106,8 @@ class ApiService {
         await prefs.setString('refresh_token', data['refresh_token']);
 
         // Simpan timestamp login untuk validasi session (Tambahan)
-        await prefs.setInt('login_timestamp', DateTime.now().millisecondsSinceEpoch);
+        await prefs.setInt(
+            'login_timestamp', DateTime.now().millisecondsSinceEpoch);
 
         // Ambil data pengguna dari server
         final userResponse = await http.get(
@@ -173,7 +172,6 @@ class ApiService {
     }
   }
 
-
   Future<void> refreshUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -230,7 +228,7 @@ class ApiService {
       final response = await http.put(
         url,
         headers: {
-          'Authorization': 'Bearer $token',  // Pastikan format Bearer benar
+          'Authorization': 'Bearer $token', // Pastikan format Bearer benar
           'Content-Type': 'application/json',
         },
         body: jsonEncode(payload),
@@ -273,7 +271,6 @@ class ApiService {
       throw Exception("Error saat menghapus akun: $e");
     }
   }
-
 
   // Fungsi Submit Feedback
   Future<void> submitFeedback(String name, String feedback) async {
@@ -320,7 +317,8 @@ class ApiService {
           "messages": [
             {
               "role": "system",
-              "content": "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Jangan pernah membuat respon dengan bahasa inggris. Ini aplikasi Tumanina: Tuntunan Mandiri Niat dan Ibadah"
+              "content":
+                  "Tumabot: Asisten Islami berbahasa Indonesia. Jawaban selalu Islami, sopan, dan bermanfaat. Jangan pernah membuat respon dengan bahasa inggris. Ini aplikasi Tumanina: Tuntunan Mandiri Niat dan Ibadah"
             },
             {"role": "user", "content": userMessage}
           ],
@@ -392,6 +390,4 @@ class ApiService {
       throw Exception("Error saat logout: $e");
     }
   }
-
-
 }

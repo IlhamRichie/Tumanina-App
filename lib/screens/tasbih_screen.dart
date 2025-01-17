@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:vibration/vibration.dart'; // Import vibration package
+import 'package:vibration/vibration.dart';
 
 class TasbihScreen extends StatefulWidget {
   const TasbihScreen({super.key});
@@ -9,9 +9,11 @@ class TasbihScreen extends StatefulWidget {
   _TasbihScreenState createState() => _TasbihScreenState();
 }
 
-class _TasbihScreenState extends State<TasbihScreen> {
+class _TasbihScreenState extends State<TasbihScreen>
+    with SingleTickerProviderStateMixin {
   int counter = 0;
   String dropdownValue = 'Tasbih';
+  late AnimationController _controller;
 
   String displayedText = "";
   String displayedLatin = "";
@@ -32,17 +34,42 @@ class _TasbihScreenState extends State<TasbihScreen> {
     'Tauhid': {
       'arab': "لَا إِلٰهَ إِلَّا اللَّهُ",
       'latin': "Laa ilaaha illallah (Tiada Tuhan selain Allah)",
-    }
+    },
+    'Hasbiyallahu': {
+      'arab': "حَسْبِيَ اللَّهُ",
+      'latin': "Hasbiyallahu (Cukuplah Allah bagiku)",
+    },
+    'Istighfar': {
+      'arab': "أَسْتَغْفِرُ اللَّهَ",
+      'latin': "Astaghfirullah (Aku memohon ampun kepada Allah)",
+    },
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+      upperBound: 1.0,
+    );
+    updateDzikirText();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void incrementCounter() {
     setState(() {
       counter++;
     });
+    _controller.forward(from: 0);
 
-    // Trigger vibration only if counter reaches 33 or 99
-    if (counter == 33 || counter == 66 || counter == 99) {
-      Vibration.vibrate(duration: 500); // Vibration for 500ms
+    if (counter % 33 == 0 || counter % 99 == 0) {
+      Vibration.vibrate(duration: 500);
     }
   }
 
@@ -86,50 +113,61 @@ class _TasbihScreenState extends State<TasbihScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Modernized and extended Dropdown
+              // Dropdown Consistent Style
               Container(
-                width: 300, // Increased width of the dropdown
+                width: 300, // Lebar dropdown
                 padding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: Colors.white,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30), // Sudut melengkung
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      spreadRadius: 1,
+                      color: Colors.black.withOpacity(0.2),
                       blurRadius: 8,
-                      offset: Offset(0, 3), // Shadow position
+                      offset: const Offset(0, 4), // Efek bayangan
                     ),
                   ],
                 ),
-                child: DropdownButton<String>(
-                  value: dropdownValue,
-                  isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down,
-                      color: Color(0xFF004C7E)),
-                  style: TextStyle(color: Color(0xFF004C7E), fontSize: 18),
-                  underline: const SizedBox(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                      updateDzikirText();
-                    });
-                  },
-                  items: dzikirText.keys
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: dropdownValue,
+                    isExpanded: true, // Isi dropdown mengikuti lebar container
+                    icon:
+                        const Icon(Icons.arrow_drop_down, color: Colors.white),
+                    dropdownColor:
+                        const Color(0xFF004C7E), // Warna latar dropdown
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                        updateDzikirText();
+                      });
+                    },
+                    items: dzikirText.keys
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
 
+              // Counter Display
               Text(
                 'Hitungan: $counter',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF004C7E),
@@ -137,14 +175,12 @@ class _TasbihScreenState extends State<TasbihScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Image with rotation animation
-              TweenAnimationBuilder(
-                tween:
-                    Tween<double>(begin: 0, end: counter % 2 == 0 ? 360.0 : 0),
-                duration: Duration(milliseconds: 500),
-                builder: (context, double angle, child) {
+              // Rotating Image
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
                   return Transform.rotate(
-                    angle: angle * 3.1415927 / 360,
+                    angle: _controller.value * 6.28319,
                     child: GestureDetector(
                       onTap: incrementCounter,
                       child: Image.asset(
@@ -164,43 +200,52 @@ class _TasbihScreenState extends State<TasbihScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Dzikir Text Display
+              // Dzikir Display
               if (displayedText.isNotEmpty) ...[
-                Text(
-                  displayedText,
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF004C7E),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  displayedLatin,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontStyle: FontStyle.italic,
-                    color: Color(0xFF2DDCBE),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20), // Konsisten padding kiri-kanan
+                  child: Column(
+                    children: [
+                      Text(
+                        displayedText,
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF004C7E),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        displayedLatin,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontStyle: FontStyle.italic,
+                          color: Color(0xFF2DDCBE),
+                        ),
+                        textAlign:
+                            TextAlign.center, // Atur teks agar rata tengah
+                      ),
+                    ],
                   ),
                 ),
               ],
               const SizedBox(height: 20),
 
-              // Gradient Reset Button
+              // Reset Button
               ElevatedButton(
                 onPressed: resetCounter,
                 style: ElevatedButton.styleFrom(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   backgroundColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
-                  ), // Make the button background transparent
-                  shadowColor: Colors.transparent, // Remove shadow
+                  ),
                 ),
                 child: Ink(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,

@@ -35,8 +35,8 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
 🌐 [tumanina.me](https://tumanina.me)
 ''';
 
-    final Uri whatsappUrl = Uri.parse(
-        'https://wa.me/?text=${Uri.encodeComponent(message)}');
+    final Uri whatsappUrl =
+        Uri.parse('https://wa.me/?text=${Uri.encodeComponent(message)}');
 
     if (await canLaunchUrl(whatsappUrl)) {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
@@ -113,7 +113,8 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
                   child: ElevatedButton(
                     onPressed: () => _shareToWhatsApp(context),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: const Color(0xFF004C7E),
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF004C7E),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 12,
