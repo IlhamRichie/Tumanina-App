@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class NiatSholatScreen extends StatelessWidget {
   const NiatSholatScreen({super.key});
 
-  // Function to return the corresponding icon for each prayer
   IconData _getPrayerIcon(String prayerName) {
     switch (prayerName) {
       case 'Subuh':
@@ -17,7 +16,7 @@ class NiatSholatScreen extends StatelessWidget {
       case 'Isya':
         return Icons.brightness_3;
       default:
-        return Icons.access_time; // Default icon if no match
+        return Icons.access_time;
     }
   }
 
@@ -27,44 +26,58 @@ class NiatSholatScreen extends StatelessWidget {
       {
         'title': 'Niat Sholat Subuh',
         'prayer': 'Subuh',
-        'arabic': 'أُصَلِّى فَرْضَ الصُّبْح رَكَعتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
-        'latin': 'Usholli fardhol subhi rok\'ataini mustaqbilal qiblati adaa an (sholat sendiri)/Ma\'muuman (menjadi ma\'mum)/Imaaman (menjadi imam) Lillaahi Ta\'alaa',
-        'artinya': 'Saya berniat sholat fardu Subuh dua rakaat menghadap kiblat karena Allah Ta\'ala/Ma\'mum karena Allah Ta\'ala/Imam karena Allah Ta\'ala.'
+        'arabic':
+            'أُصَلِّى فَرْضَ الصُّبْح رَكَعتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
+        'latin':
+            'Usholli fardhol subhi rok\'ataini mustaqbilal qiblati adaa an Lillaahi Ta\'alaa',
+        'artinya':
+            'Saya berniat sholat fardu Subuh dua rakaat menghadap kiblat karena Allah Ta\'ala.'
       },
       {
         'title': 'Niat Sholat Dzuhur',
         'prayer': 'Dzuhur',
-        'arabic': 'اُصَلِّيْ فَرْضَ الظُّهْرِ أَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
-        'latin': 'Usholli fardhol zuhri arba\'a roka\'aati mustaqbilal qiblati adaa an (sholat sendiri)/Ma\'muuman (menjadi ma\'mum)/Imaaman (menjadi imam) Lillaahi Ta\'alaa',
-        'artinya': 'Saya berniat sholat fardu Zuhur empat rakaat menghadap kiblat karena Allah Ta\'ala/Ma\'mum karena Allah Ta\'ala/Imam karena Allah Ta\'ala.'
+        'arabic':
+            'اُصَلِّيْ فَرْضَ الظُّهْرِ أَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
+        'latin':
+            'Usholli fardhol zuhri arba\'a roka\'aati mustaqbilal qiblati adaa an Lillaahi Ta\'alaa',
+        'artinya':
+            'Saya berniat sholat fardu Zuhur empat rakaat menghadap kiblat karena Allah Ta\'ala.'
       },
       {
         'title': 'Niat Sholat Ashar',
         'prayer': 'Ashar',
-        'arabic': 'أُصَلِّى فَرْضَ العَصْرِ أَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
-        'latin': 'Usholli fardhol ashri arba\'a roka\'aati mustaqbilal qiblati adaa an (sholat sendiri)/Ma\'muuman (menjadi ma\'mum)/Imaaman (menjadi imam) Lillaahi Ta\'ala',
-        'artinya': 'Saya berniat sholat fardu Asar empat rakaat menghadap kiblat karena Allah Ta\'ala/Ma\'mum karena Allah Ta\'ala/Imam karena Allah Ta\'ala.'
+        'arabic':
+            'أُصَلِّى فَرْضَ العَصْرِ أَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
+        'latin':
+            'Usholli fardhol ashri arba\'a roka\'aati mustaqbilal qiblati adaa an Lillaahi Ta\'ala',
+        'artinya':
+            'Saya berniat sholat fardu Asar empat rakaat menghadap kiblat karena Allah Ta\'ala.'
       },
       {
         'title': 'Niat Sholat Maghrib',
         'prayer': 'Maghrib',
-        'arabic': 'أُصَلِّى فَرْضَ المَغْرِبِ ثَلاَثَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَ',
-        'latin': 'Usholli fardhol magribi tsalasa rok\'aati mustaqbilal qiblati adaa an (sholat sendiri)/Ma\'muuman (menjadi ma\'mum)/Imaaman (menjadi imam) Lillaahi Ta\'ala',
-        'artinya': 'Saya berniat sholat fardu Magrib tiga rakaat menghadap kiblat karena Allah Ta\'ala/Ma\'mum karena Allah Ta\'ala/Imam karena Allah Ta\'ala.'
+        'arabic':
+            'أُصَلِّى فَرْضَ المَغْرِبِ ثَلاَثَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَ',
+        'latin':
+            'Usholli fardhol magribi tsalasa roka\'aati mustaqbilal qiblati adaa an Lillaahi Ta\'ala',
+        'artinya':
+            'Saya berniat sholat fardu Magrib tiga rakaat menghadap kiblat karena Allah Ta\'ala.'
       },
       {
         'title': 'Niat Sholat Isya',
         'prayer': 'Isya',
-        'arabic': 'أُصَلِّى فَرْضَ العِشَاء ِأَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
-        'latin': 'Usholli fardhol \'Isya i arba\'a roka\'aati mustaqbilal qiblati adaa an (sholat sendiri)/Ma\'muuman (menjadi ma\'mum)/Imaaman (menjadi imam) Lillaahi Ta\'alaa',
-        'artinya': 'Saya berniat sholat fardu Isya empat rakaat menghadap kiblat karena Allah Ta\'ala/Ma\'mum karena Allah Ta\'ala/Imam karena Allah Ta\'ala.'
+        'arabic':
+            'أُصَلِّى فَرْضَ العِشَاء ِأَرْبَعَ رَكَعاَتٍ مُسْتَقْبِلَ الْقِبْلَةِ أَدَاءً لله تَعَالَى',
+        'latin':
+            'Usholli fardhol \'Isya i arba\'a roka\'aati mustaqbilal qiblati adaa an Lillaahi Ta\'ala',
+        'artinya':
+            'Saya berniat sholat fardu Isya empat rakaat menghadap kiblat karena Allah Ta\'ala.'
       },
     ];
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        
         title: const Text(
           'Niat Sholat Wajib',
           style: TextStyle(color: Colors.black),
@@ -115,15 +128,23 @@ class _NiatSholatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      child: Container(
+        margin: const EdgeInsets.all(3), // Gradient border spacing
+        padding: const EdgeInsets.all(16), // Inner content padding
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -131,9 +152,13 @@ class _NiatSholatCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Color(0xFF2DDCBE),
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
                   child: Icon(icon, size: 32, color: Colors.white),
                 ),

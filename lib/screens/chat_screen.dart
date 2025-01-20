@@ -94,7 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F2F5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Tumabot AI',
@@ -106,7 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
         centerTitle: true,
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Color(0xFF2B2D42)),
-        elevation: 2,
+        elevation: 0,
         actions: [
           GestureDetector(
             onTapDown: (TapDownDetails details) {

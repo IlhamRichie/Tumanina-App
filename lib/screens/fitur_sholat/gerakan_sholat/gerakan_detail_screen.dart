@@ -204,7 +204,7 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
   Widget _buildNavigationBubble(String label, Widget? screen, BuildContext context) {
     return GestureDetector(
       onTap: screen != null
-          ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen!))
+          ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => screen))
           : null,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14.0),

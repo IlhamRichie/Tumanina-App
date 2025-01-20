@@ -6,7 +6,7 @@ import '../home_screen.dart';
 import '../fitur_login/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'feedback_form.dart';
-import '../diskusi_screen.dart'; // Pastikan ada halaman diskusi
+import '../fitur_diskusi/diskusi_screen.dart'; // Pastikan ada halaman diskusi
 import '../../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {

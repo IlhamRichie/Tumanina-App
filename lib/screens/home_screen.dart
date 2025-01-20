@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'artikel/artikel_screen.dart';
-import 'diskusi_screen.dart';
+import 'fitur_diskusi/diskusi_screen.dart';
 import 'pantau_sholat_screen.dart';
 import 'fitur_alquran/surat_detail_screen.dart';
 import 'waktu_sholat_screen.dart';

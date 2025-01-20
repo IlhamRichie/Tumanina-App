@@ -7,7 +7,8 @@ class SyaratSholatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Syarat Sholat', style: TextStyle(color: Colors.black)),
+        title:
+            const Text('Syarat Sholat', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -24,20 +25,7 @@ class SyaratSholatScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white, // Set the header container background to white
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              _GradientBorderCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
@@ -63,22 +51,24 @@ class SyaratSholatScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   children: const [
                     _RequirementCard(
                       icon: Icons.clean_hands,
                       title: 'Suci dari hadas',
-                      description: 'Pastikan diri Anda suci dari hadas kecil dan besar.',
+                      description:
+                          'Pastikan diri Anda suci dari hadas kecil dan besar.',
                     ),
                     _RequirementCard(
                       icon: Icons.checkroom,
                       title: 'Menutup aurat',
-                      description: 'Gunakan pakaian yang sesuai untuk menutup aurat.',
+                      description:
+                          'Gunakan pakaian yang sesuai untuk menutup aurat.',
                     ),
                     _RequirementCard(
                       icon: Icons.cleaning_services,
                       title: 'Suci dari najis',
-                      description: 'Badan, pakaian, dan tempat harus bersih dari najis.',
+                      description:
+                          'Badan, pakaian, dan tempat harus bersih dari najis.',
                     ),
                     _RequirementCard(
                       icon: Icons.access_time,
@@ -88,12 +78,14 @@ class SyaratSholatScreen extends StatelessWidget {
                     _RequirementCard(
                       icon: Icons.explore,
                       title: 'Menghadap kiblat',
-                      description: 'Arahkan tubuh ke arah Ka\'bah saat melaksanakan sholat.',
+                      description:
+                          'Arahkan tubuh ke arah Ka\'bah saat melaksanakan sholat.',
                     ),
                     _RequirementCard(
                       icon: Icons.bookmark_added,
                       title: 'Berniat',
-                      description: 'Niatkan hati Anda untuk melakukan sholat dengan ikhlas.',
+                      description:
+                          'Niatkan hati Anda untuk melakukan sholat dengan ikhlas.',
                     ),
                   ],
                 ),
@@ -101,6 +93,35 @@ class SyaratSholatScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _GradientBorderCard extends StatelessWidget {
+  final Widget child;
+
+  const _GradientBorderCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(3), // Space for the gradient border
+        padding: const EdgeInsets.all(16), // Inner padding for content
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: child,
       ),
     );
   }
@@ -119,52 +140,51 @@ class _RequirementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 3, // Set elevation for the card to match previous designs
-      color: Colors.white, // Set card color to white
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Rounded corners
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(0xFF2DDCBE), // Set the box color
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 32, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF004C7E), // Font color updated
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF004C7E), // Font color updated
-                    ),
-                  ),
-                ],
+    return _GradientBorderCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-          ],
-        ),
+            child: Icon(
+              icon,
+              size: 32,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF004C7E),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF004C7E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

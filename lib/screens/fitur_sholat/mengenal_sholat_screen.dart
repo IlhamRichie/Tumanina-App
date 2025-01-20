@@ -27,55 +27,36 @@ class MengenalSholatScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.only(bottom: 16),
-                color: Colors.white, // Set card color to white
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF2DDCBE), // Set the box color
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.book,
-                              size: 32,
-                              color: Colors.white,
-                            ),
+              _GradientBorderCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _IconCircle(icon: Icons.book),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Mengenal Sholat',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF004C7E), // Font color updated
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Mengenal Sholat',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF004C7E), // Font color updated
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Sholat adalah ibadah wajib yang harus dilaksanakan oleh umat Muslim. Sholat terbagi menjadi beberapa jenis, seperti:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF004C7E), // Font color updated
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Sholat adalah ibadah wajib yang harus dilaksanakan oleh umat Muslim. Sholat terbagi menjadi beberapa jenis, seperti:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF004C7E), // Font color updated
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 16),
               _SholatCard(
                 title: 'Sholat Wajib',
                 description:
@@ -88,28 +69,49 @@ class MengenalSholatScreen extends StatelessWidget {
                     'Sholat yang dianjurkan untuk dikerjakan tetapi tidak wajib, seperti sholat Dhuha, Tahajud, dan Witir.',
                 icon: Icons.stars,
               ),
-              Card(
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.only(top: 16),
-                color: Colors.white, // Set card color to white
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: const Text(
-                    'Dengan mengenal jenis-jenis sholat, diharapkan kita dapat lebih memahami pentingnya menjaga sholat dalam kehidupan sehari-hari.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF004C7E), // Font color updated
-                      fontStyle: FontStyle.italic,
-                    ),
+              const SizedBox(height: 16),
+              _GradientBorderCard(
+                child: const Text(
+                  'Dengan mengenal jenis-jenis sholat, diharapkan kita dapat lebih memahami pentingnya menjaga sholat dalam kehidupan sehari-hari.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF004C7E), // Font color updated
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _GradientBorderCard extends StatelessWidget {
+  final Widget child;
+
+  const _GradientBorderCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        margin: const EdgeInsets.all(3), // Space for gradient border
+        padding: const EdgeInsets.all(16), // Content padding
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: child,
       ),
     );
   }
@@ -128,52 +130,62 @@ class _SholatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return _GradientBorderCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _IconCircle(icon: icon),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF004C7E),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF004C7E),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      color: Colors.white, // Set card color to white
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(0xFF2DDCBE), // Set the box color
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 32, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF004C7E), // Font color updated
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF004C7E), // Font color updated
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    );
+  }
+}
+
+class _IconCircle extends StatelessWidget {
+  final IconData icon;
+
+  const _IconCircle({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+      ),
+      child: Icon(
+        icon,
+        size: 32,
+        color: Colors.white,
       ),
     );
   }
