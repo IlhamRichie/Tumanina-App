@@ -1,9 +1,8 @@
-import 'dart:async';
+import 'dart:async'; 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'dart:math';
-
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -28,12 +27,15 @@ class KiblatScreen extends StatefulWidget {
   _KiblatScreenState createState() => _KiblatScreenState();
 }
 
-class _KiblatScreenState extends State<KiblatScreen> {
+class _KiblatScreenState extends State<KiblatScreen>
+    with SingleTickerProviderStateMixin {
   double? _latitude;
   double? _longitude;
   double? _compassDirection;
   double? _kiblatDirection;
   late StreamSubscription<CompassEvent> _compassStreamSubscription;
+  OverlayEntry? _infoOverlay;
+  bool _isPopupVisible = false;
 
   @override
   void initState() {
@@ -42,10 +44,12 @@ class _KiblatScreenState extends State<KiblatScreen> {
     _compassStreamSubscription = FlutterCompass.events!.listen((event) {
       if (mounted) {
         setState(() {
-          // Mengonversi heading kompas dari -180 hingga 180 ke 0 hingga 360
           _compassDirection = (event.heading! + 360) % 360;
         });
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showInfoPopup(context);
     });
   }
 
@@ -76,14 +80,95 @@ class _KiblatScreenState extends State<KiblatScreen> {
 
       setState(() {
         _kiblatDirection =
-            (angle * 180 / pi + 360) % 360; // Mengubah sudut menjadi 0-360
+            (angle * 180 / pi + 360) % 360;
       });
     }
+  }
+
+  void _showInfoPopup(BuildContext context) {
+    if (_isPopupVisible) return;
+
+    _isPopupVisible = true;
+
+    _infoOverlay = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          _dismissInfoPopup();
+        },
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+              ),
+            ),
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut,
+              top: _isPopupVisible ? MediaQuery.of(context).size.height * 0.15 : -200,
+              left: MediaQuery.of(context).size.width * 0.1,
+              child: AnimatedOpacity(
+                opacity: _isPopupVisible ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: const [
+                        SizedBox(height: 8),
+                        Text(
+                          'Cocokkan arah derajat kompas dengan arah derajat kiblat.\nJika sudah sesuai, arah kiblat telah ditemukan.',
+                          style: TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_infoOverlay!);
+
+    Future.delayed(const Duration(seconds: 2), _dismissInfoPopup);
+  }
+
+  void _dismissInfoPopup() {
+    if (!_isPopupVisible) return;
+
+    setState(() {
+      _isPopupVisible = false;
+    });
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _infoOverlay?.remove();
+      _infoOverlay = null;
+    });
   }
 
   @override
   void dispose() {
     _compassStreamSubscription.cancel();
+    _infoOverlay?.remove();
     super.dispose();
   }
 
@@ -107,6 +192,15 @@ class _KiblatScreenState extends State<KiblatScreen> {
           },
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            color: const Color(0xFF004C7E),
+            onPressed: () {
+              _showInfoPopup(context);
+            },
+          ),
+        ],
       ),
       body: _latitude == null || _longitude == null
           ? const Center(child: CircularProgressIndicator())

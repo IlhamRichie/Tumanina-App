@@ -58,6 +58,7 @@ dependencies:
   dio: ^5.2.1
   flutter_launcher_icons: ^0.13.1
   webview_flutter: ^4.10.0
+  flutter_local_notifications: ^18.0.1
 
   
 

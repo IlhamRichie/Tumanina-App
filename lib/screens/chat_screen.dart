@@ -14,7 +14,16 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ApiService _apiService = ApiService();
   final List<Map<String, String>> _messages = [];
-  bool _isThinking = false; // Status untuk animasi "Is Thinking"
+  bool _isThinking = false;
+  OverlayEntry? _infoOverlayEntry;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showInfoPopup(context);
+    });
+  }
 
   void _sendMessage() async {
     String userMessage = _controller.text.trim();
@@ -22,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add({"role": "user", "content": userMessage});
-      _isThinking = true; // Tampilkan animasi "Is Thinking"
+      _isThinking = true;
     });
 
     _controller.clear();
@@ -31,64 +40,72 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add({"role": "assistant", "content": response});
-      _isThinking = false; // Sembunyikan animasi setelah respons diterima
+      _isThinking = false;
     });
   }
 
-  void _showInfoDialog(BuildContext context, Offset offset) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Stack(
+  void _showInfoPopup(BuildContext context) {
+    if (_infoOverlayEntry != null) return;
+
+    _infoOverlayEntry = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          _removeInfoPopup();
+        },
+        child: Stack(
           children: [
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+              ),
+            ),
             Positioned(
-              top: offset.dy - 10, // Mengatur posisi vertikal
-              right: MediaQuery.of(context).size.width -
-                  offset.dx -
-                  40, // Mengatur posisi horizontal
+              top: MediaQuery.of(context).size.height * 0.15,
+              left: MediaQuery.of(context).size.width * 0.1,
               child: Material(
                 color: Colors.transparent,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        'Chatbot ini masih dalam proses pengembangan. Fitur-fitur akan terus ditingkatkan.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: const [
+                      SizedBox(height: 8),
+                      Text(
+                        'Chatbot ini masih dalam proses pengembangan.\nFitur-fitur akan terus ditingkatkan.',
+                        style: TextStyle(fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    CustomPaint(
-                      painter: TrianglePainter(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
+
+    Overlay.of(context).insert(_infoOverlayEntry!);
+
+    Future.delayed(const Duration(seconds: 2), _removeInfoPopup);
+  }
+
+  void _removeInfoPopup() {
+    _infoOverlayEntry?.remove();
+    _infoOverlayEntry = null;
   }
 
   @override
@@ -109,9 +126,8 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         actions: [
           GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              _showInfoDialog(context,
-                  details.globalPosition); // Pasang posisi dari globalPosition
+            onTap: () {
+              _showInfoPopup(context);
             },
             child: const Padding(
               padding: EdgeInsets.only(right: 16.0),
@@ -125,11 +141,10 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              itemCount: _messages.length +
-                  (_isThinking ? 1 : 0), // Tambahkan "Is Thinking"
+              itemCount: _messages.length + (_isThinking ? 1 : 0),
               itemBuilder: (context, index) {
                 if (_isThinking && index == _messages.length) {
-                  return const ThinkingBubble(); // Animasi tiga titik
+                  return const ThinkingBubble();
                 }
                 final message = _messages[index];
                 final isUser = message['role'] == 'user';
@@ -287,24 +302,4 @@ class _DotLoaderState extends State<DotLoader>
       },
     );
   }
-}
-
-class TrianglePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final Path path = Path();
-    path.moveTo(20, 0);
-    path.lineTo(10, 10);
-    path.lineTo(30, 10);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

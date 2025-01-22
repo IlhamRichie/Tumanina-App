@@ -392,137 +392,137 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> fetchThreads() async {
-  final url = Uri.parse('${baseUrl}api/threads');
-  try {
-    final response = await http.get(url);
+    final url = Uri.parse('${baseUrl}api/threads');
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(data['threads']);
-    } else {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data['threads']);
+      } else {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error fetching threads: $e");
     }
-  } catch (e) {
-    throw Exception("Error fetching threads: $e");
   }
-}
 
-Future<void> createThread(String title, String content, int authorId) async {
-  final url = Uri.parse('${baseUrl}api/threads');
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'title': title,
-        'content': content,
-        'author_id': authorId,
-      }),
-    );
+  Future<void> createThread(String title, String content, int authorId) async {
+    final url = Uri.parse('${baseUrl}api/threads');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'title': title,
+          'content': content,
+          'author_id': authorId,
+        }),
+      );
 
-    if (response.statusCode != 201) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 201) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error creating thread: $e");
     }
-  } catch (e) {
-    throw Exception("Error creating thread: $e");
   }
-}
 
-Future<void> editThread(int threadId, String title, String content) async {
-  final url = Uri.parse('${baseUrl}api/threads/$threadId');
-  try {
-    final response = await http.put(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'title': title, 'content': content}),
-    );
+  Future<void> editThread(int threadId, String title, String content) async {
+    final url = Uri.parse('${baseUrl}api/threads/$threadId');
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'title': title, 'content': content}),
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error editing thread: $e");
     }
-  } catch (e) {
-    throw Exception("Error editing thread: $e");
   }
-}
 
-Future<void> deleteThread(int threadId) async {
-  final url = Uri.parse('${baseUrl}api/threads/$threadId');
-  try {
-    final response = await http.delete(url);
+  Future<void> deleteThread(int threadId) async {
+    final url = Uri.parse('${baseUrl}api/threads/$threadId');
+    try {
+      final response = await http.delete(url);
 
-    if (response.statusCode != 200) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error deleting thread: $e");
     }
-  } catch (e) {
-    throw Exception("Error deleting thread: $e");
   }
-}
 
-Future<List<Map<String, dynamic>>> fetchComments(int threadId) async {
-  final url = Uri.parse('${baseUrl}api/threads/$threadId/comments');
-  try {
-    final response = await http.get(url);
+  Future<List<Map<String, dynamic>>> fetchComments(int threadId) async {
+    final url = Uri.parse('${baseUrl}api/threads/$threadId/comments');
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(data['comments']);
-    } else {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data['comments']);
+      } else {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error fetching comments: $e");
     }
-  } catch (e) {
-    throw Exception("Error fetching comments: $e");
   }
-}
 
-Future<void> addComment(int threadId, String content, int authorId, {int? parentCommentId}) async {
-  final url = Uri.parse('${baseUrl}api/threads/$threadId/comments');
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'content': content,
-        'author_id': authorId,
-        'parent_comment_id': parentCommentId,
-      }),
-    );
+  Future<void> addComment(int threadId, String content, int authorId,
+      {int? parentCommentId}) async {
+    final url = Uri.parse('${baseUrl}api/threads/$threadId/comments');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'content': content,
+          'author_id': authorId,
+          'parent_comment_id': parentCommentId,
+        }),
+      );
 
-    if (response.statusCode != 201) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 201) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error adding comment: $e");
     }
-  } catch (e) {
-    throw Exception("Error adding comment: $e");
   }
-}
 
-Future<void> editComment(int commentId, String content) async {
-  final url = Uri.parse('${baseUrl}api/comments/$commentId');
-  try {
-    final response = await http.put(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'content': content}),
-    );
+  Future<void> editComment(int commentId, String content) async {
+    final url = Uri.parse('${baseUrl}api/comments/$commentId');
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'content': content}),
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error editing comment: $e");
     }
-  } catch (e) {
-    throw Exception("Error editing comment: $e");
   }
-}
 
-Future<void> deleteComment(int commentId) async {
-  final url = Uri.parse('${baseUrl}api/comments/$commentId');
-  try {
-    final response = await http.delete(url);
+  Future<void> deleteComment(int commentId) async {
+    final url = Uri.parse('${baseUrl}api/comments/$commentId');
+    try {
+      final response = await http.delete(url);
 
-    if (response.statusCode != 200) {
-      throw Exception(extractErrorMessage(response));
+      if (response.statusCode != 200) {
+        throw Exception(extractErrorMessage(response));
+      }
+    } catch (e) {
+      throw Exception("Error deleting comment: $e");
     }
-  } catch (e) {
-    throw Exception("Error deleting comment: $e");
   }
-}
-
 }
