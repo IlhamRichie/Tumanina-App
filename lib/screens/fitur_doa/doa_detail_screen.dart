@@ -35,15 +35,27 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
 🌐 [tumanina.me](https://tumanina.me)
 ''';
 
-    final Uri whatsappUrl =
-        Uri.parse('https://wa.me/?text=${Uri.encodeComponent(message)}');
+    // Encode message for WhatsApp
+    final String encodedMessage = Uri.encodeComponent(message);
 
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-    } else {
+    // Use WhatsApp API link
+    final Uri whatsappUrl =
+        Uri.parse('https://api.whatsapp.com/send?text=$encodedMessage');
+
+    try {
+      if (await canLaunchUrl(whatsappUrl)) {
+        await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Tidak dapat membuka WhatsApp!';
+      }
+    } catch (e) {
+      debugPrint('Error launching WhatsApp: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Gagal membuka WhatsApp. Pastikan aplikasi terpasang."),
+        SnackBar(
+          content: Text(
+            "Gagal membuka WhatsApp: ${e.toString()}",
+            style: const TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -52,88 +64,80 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Menghapus semua SnackBar sebelum keluar
-        ScaffoldMessenger.of(context).clearSnackBars();
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text(
-            doa.title,
-            style: GoogleFonts.poppins(
-              color: const Color(0xFF004C7E),
-              fontWeight: FontWeight.bold,
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          doa.title,
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF004C7E),
+            fontWeight: FontWeight.bold,
           ),
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {
-              // Hapus SnackBar ketika keluar dengan tombol back
-              ScaffoldMessenger.of(context).clearSnackBars();
-              Navigator.pop(context);
-            },
-          ),
-          centerTitle: true,
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildGradientCard(
-                  title: "Doa dalam Bahasa Arab:",
-                  content: doa.arabic,
-                  isArabic: true,
-                ),
-                const SizedBox(height: 16),
-                _buildGradientCard(
-                  title: "Bacaan Latin:",
-                  content: doa.latin,
-                  isArabic: false,
-                ),
-                const SizedBox(height: 16),
-                _buildGradientCard(
-                  title: "Terjemahan:",
-                  content: doa.translation,
-                  isArabic: false,
-                ),
-                const SizedBox(height: 16),
-                _buildGradientCard(
-                  title: "Waktu Membaca Doa:",
-                  content: doa.timeToRead,
-                  isArabic: false,
-                ),
-                const SizedBox(height: 32),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () => _shareToWhatsApp(context),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xFF004C7E),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            Navigator.pop(context);
+          },
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGradientCard(
+                title: "Doa dalam Bahasa Arab:",
+                content: doa.arabic,
+                isArabic: true,
+              ),
+              const SizedBox(height: 16),
+              _buildGradientCard(
+                title: "Bacaan Latin:",
+                content: doa.latin,
+                isArabic: false,
+              ),
+              const SizedBox(height: 16),
+              _buildGradientCard(
+                title: "Terjemahan:",
+                content: doa.translation,
+                isArabic: false,
+              ),
+              const SizedBox(height: 16),
+              _buildGradientCard(
+                title: "Waktu Membaca Doa:",
+                content: doa.timeToRead,
+                isArabic: false,
+              ),
+              const SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => _shareToWhatsApp(context),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF004C7E),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
                     ),
-                    child: Text(
-                      'Bagikan Doa Ini',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Bagikan Doa Ini',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
