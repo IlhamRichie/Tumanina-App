@@ -35,31 +35,30 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
 🌐 [tumanina.me](https://tumanina.me)
 ''';
 
-    // Encode message for WhatsApp
     final String encodedMessage = Uri.encodeComponent(message);
-
-    // Use WhatsApp API link
     final Uri whatsappUrl =
         Uri.parse('https://api.whatsapp.com/send?text=$encodedMessage');
 
-    try {
-      if (await canLaunchUrl(whatsappUrl)) {
+    if (await canLaunchUrl(whatsappUrl)) {
+      try {
         await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'Tidak dapat membuka WhatsApp!';
+      } catch (e) {
+        debugPrint('Error launching WhatsApp: $e');
+        _showErrorSnackbar(context, 'Gagal membuka WhatsApp!');
       }
-    } catch (e) {
-      debugPrint('Error launching WhatsApp: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Gagal membuka WhatsApp: ${e.toString()}",
-            style: const TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+    } else {
+      debugPrint('WhatsApp URL tidak valid.');
+      _showErrorSnackbar(context, 'Tidak dapat membuka WhatsApp!');
     }
+  }
+
+  void _showErrorSnackbar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override

@@ -224,6 +224,105 @@ class DoaScreen extends StatelessWidget {
           "Sesungguhnya kami milik Allah dan kepada-Nya kami kembali. Ya Allah, berilah aku ganjaran dalam musibahku ini dan gantikanlah untukku yang lebih baik darinya.",
       timeToRead: "Ketika melihat orang mendapat musibah",
     ),
+    Doa(
+      title: "Doa Ketika Mendengar Kabar Gembira",
+      arabic: "الحَمْدُ لِلّهِ الَّذِي بِنِعْمَتِهِ تَتِمُّ الصَّالِحَاتُ",
+      latin: "Alhamdulillahil ladzi bini’matihi tatimmus shalihat",
+      translation:
+          "Segala puji bagi Allah yang dengan nikmat-Nya sempurnalah segala kebaikan.",
+      timeToRead: "Ketika mendengar kabar gembira",
+    ),
+    Doa(
+      title: "Doa Ketika Terkejut atau Takjub",
+      arabic: "سُبْحَانَ اللّٰهِ",
+      latin: "Subhanallah",
+      translation: "Maha Suci Allah.",
+      timeToRead: "Saat terkejut atau takjub",
+    ),
+    Doa(
+      title: "Doa Ketika Menghadapi Kesulitan",
+      arabic: "حَسْبُنَا اللّهُ وَنِعْمَ الْوَكِيلُ",
+      latin: "Hasbunallahu wa ni’mal wakil",
+      translation:
+          "Cukuplah Allah menjadi penolong kami, dan Dia sebaik-baik pelindung.",
+      timeToRead: "Ketika menghadapi kesulitan",
+    ),
+    Doa(
+      title: "Doa Ketika Memulai Pekerjaan",
+      arabic: "اللّٰهُمَّ أَعِنِّي عَلَىٰ عَمَلِي وَبَارِكْ فِيهِ",
+      latin: "Allahumma a’inni ‘ala ‘amali wa barik fihi",
+      translation:
+          "Ya Allah, bantulah aku dalam pekerjaanku dan berkahilah di dalamnya.",
+      timeToRead: "Saat memulai pekerjaan",
+    ),
+    Doa(
+      title: "Doa Ketika Terkena Penyakit",
+      arabic:
+          "اللّٰهُمَّ رَبَّ النَّاسِ أَذْهِبِ الْبَأْسَ اشْفِ أَنْتَ الشَّافِي لَا شِفَاءَ إِلَّا شِفَاؤُكَ شِفَاءً لَا يُغَادِرُ سَقَمًا",
+      latin:
+          "Allahumma rabban-naas adzhibil ba’sa, isyfi antas-syafi laa syifa-a illa syifa-uka, syifa-an laa yughadiru saqama.",
+      translation:
+          "Ya Allah, Tuhan seluruh manusia, hilangkanlah penyakit ini, sembuhkanlah, Engkau Maha Penyembuh. Tidak ada kesembuhan kecuali kesembuhan dari-Mu, kesembuhan yang tidak menyisakan rasa sakit.",
+      timeToRead: "Ketika terkena penyakit",
+    ),
+    Doa(
+      title: "Doa Ketika Mendengar Kabar Duka",
+      arabic: "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ",
+      latin: "Innalillahi wa inna ilaihi raji’un",
+      translation:
+          "Sesungguhnya kami adalah milik Allah, dan kepada-Nya kami kembali.",
+      timeToRead: "Ketika mendengar kabar duka",
+    ),
+    Doa(
+      title: "Doa Memohon Kesabaran",
+      arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَتَوَفَّنَا مُسْلِمِينَ",
+      latin: "Rabbana afrigh ‘alayna sabran wa tawaffana muslimin",
+      translation:
+          "Ya Tuhan kami, limpahkanlah kesabaran kepada kami dan wafatkanlah kami dalam keadaan Islam.",
+      timeToRead: "Saat memohon kesabaran",
+    ),
+    Doa(
+      title: "Doa Sebelum Wudhu",
+      arabic: "بِسْمِ اللّهِ",
+      latin: "Bismillah",
+      translation: "Dengan nama Allah.",
+      timeToRead: "Sebelum wudhu",
+    ),
+    Doa(
+      title: "Doa Setelah Wudhu",
+      arabic:
+          "أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ",
+      latin:
+          "Asyhadu an laa ilaaha illallah, wahdahu laa syarikalah, wa asyhadu anna Muhammadan abduhu wa rasuluh",
+      translation:
+          "Aku bersaksi bahwa tidak ada Tuhan selain Allah, yang tidak ada sekutu bagi-Nya. Dan aku bersaksi bahwa Muhammad adalah hamba dan Rasul-Nya.",
+      timeToRead: "Setelah wudhu",
+    ),
+    Doa(
+      title: "Doa Ketika Akan Sholat",
+      arabic: "اللّٰهُمَّ اجْعَلْ قَلْبِي خَاشِعًا فِيْ صَلَاتِيْ",
+      latin: "Allahumma aj’al qalbi khashian fi shalati",
+      translation: "Ya Allah, jadikanlah hatiku khusyuk dalam sholatku.",
+      timeToRead: "Sebelum sholat",
+    ),
+    Doa(
+      title: "Doa Memohon Kemudahan",
+      arabic:
+          "اللّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا وَأَنْتَ تَجْعَلُ الحَزْنَ إِذَا شِئْتَ سَهْلًا",
+      latin:
+          "Allahumma laa sahla illa ma ja’altahu sahlan, wa anta taj’alul hazna idza syi’ta sahlan.",
+      translation:
+          "Ya Allah, tidak ada kemudahan kecuali apa yang Engkau mudahkan. Dan Engkau dapat menjadikan kesulitan itu mudah jika Engkau kehendaki.",
+      timeToRead: "Saat memohon kemudahan",
+    ),
+    Doa(
+      title: "Doa Ketika Mendapat Kesedihan",
+      arabic: "اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحُزْنِ",
+      latin: "Allahumma inni a’udzu bika minal hammi wal hazan",
+      translation:
+          "Ya Allah, aku berlindung kepada-Mu dari rasa sedih dan duka.",
+      timeToRead: "Ketika merasa sedih",
+    )
   ];
 
   @override
