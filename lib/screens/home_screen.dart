@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:Tumanina/screens/fitur_sholat/belajar_sholat_screen.dart';
 import 'package:Tumanina/screens/kiblat_screen.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +16,7 @@ import 'tasbih_screen.dart';
 import 'fitur_alquran/ayat_al_quran_screen.dart';
 import 'profil/profile_screen.dart';
 import 'fitur_doa/doa_screen.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,10 +64,36 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadSholatMilestones();
     loadBookmarks(); // Tambahkan ini
     _loadUsername(); // Muat nama pengguna
+    _checkLocationPermission();
     print('Internet status: $hasInternet'); // Debugging
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showNextPrayerNotification();
     });
+  }
+
+  Future<void> _checkLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Lokasi tidak aktif, minta pengguna untuk mengaktifkannya
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Izin ditolak, beri tahu pengguna
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Izin ditolak selamanya, beri tahu pengguna
+      return;
+    }
+
+    // Izin diberikan, lanjutkan untuk mendapatkan lokasi
+    fetchPrayerTimes();
   }
 
   Future<void> _loadUsername() async {
@@ -154,7 +180,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-// Function untuk menyimpan riwayat bacaan
   Future<void> _saveReadingHistory(Surah surah) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -188,14 +213,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return prefs.getBool('notificationShown') ?? false;
   }
 
-  // Fungsi untuk menyimpan milestones ke SharedPreferences
   Future<void> _saveSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
     print('Saving milestones: $sholatMilestones');
     await prefs.setString('sholatMilestones', json.encode(sholatMilestones));
   }
 
-  // Fungsi untuk memuat milestones dari SharedPreferences
   Future<void> _loadSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
     final String? milestonesData = prefs.getString('sholatMilestones');
@@ -214,9 +237,34 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchPrayerTimes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? cachedPrayerTimes = prefs.getString('prayerTimes');
+    final String? lastFetchDate = prefs.getString('lastFetchDate');
+
+    // Jika data sudah ada dan belum kedaluwarsa (24 jam), gunakan data cache
+    if (cachedPrayerTimes != null && lastFetchDate != null) {
+      final DateTime now = DateTime.now();
+      final DateTime lastFetch = DateTime.parse(lastFetchDate);
+
+      if (now.difference(lastFetch).inHours < 24) {
+        setState(() {
+          prayerTimes =
+              Map<String, String>.from(json.decode(cachedPrayerTimes));
+          calculateNextPrayer();
+          isLoading = false;
+        });
+        return;
+      }
+    }
+
+    // Jika tidak ada cache atau cache kedaluwarsa, ambil data baru dari API
     try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
       final url = Uri.parse(
-          'http://api.aladhan.com/v1/timingsByCity?city=Tegal&country=Indonesia&method=4');
+          'http://api.aladhan.com/v1/timings/${DateTime.now().toIso8601String().split('T')[0]}?latitude=${position.latitude}&longitude=${position.longitude}&method=4');
+
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -232,6 +280,11 @@ class _HomeScreenState extends State<HomeScreen> {
           calculateNextPrayer();
           isLoading = false;
         });
+
+        // Simpan data ke cache
+        await prefs.setString('prayerTimes', json.encode(prayerTimes));
+        await prefs.setString(
+            'lastFetchDate', DateTime.now().toIso8601String());
       } else {
         throw Exception('Failed to load prayer times');
       }
@@ -620,7 +673,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Tambahkan metode untuk checklist sholat yang dapat diubah
   Widget _buildPrayerChecklist(Map<String, bool> sholatMilestones) {
     return Container(
       padding: const EdgeInsets.all(20),

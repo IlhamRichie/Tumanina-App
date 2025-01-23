@@ -24,8 +24,10 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   bool _isDisposed = false;
   DateTime selectedDate = DateTime.now();
   bool _isOnline = true; // Status koneksi internet
-  final ScrollController _scrollController = ScrollController(); // Controller untuk scroll
-  List<Map<String, dynamic>> calendarData = []; // Data kalender dari API Aladhan
+  final ScrollController _scrollController =
+      ScrollController(); // Controller untuk scroll
+  List<Map<String, dynamic>> calendarData =
+      []; // Data kalender dari API Aladhan
 
   // Data statis hari libur (contoh)
   final Map<DateTime, String> _publicHolidays = {
@@ -45,7 +47,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     super.initState();
     _checkInternetConnection(); // Cek koneksi internet saat init
     fetchPrayerTimesWithCache(widget.client, selectedDate);
-    fetchCalendarData(selectedDate.month, selectedDate.year); // Ambil data kalender
+    fetchCalendarData(
+        selectedDate.month, selectedDate.year); // Ambil data kalender
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedDate(); // Scroll ke tanggal yang dipilih setelah build selesai
     });
@@ -106,13 +109,15 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     };
   }
 
-  Future<void> fetchPrayerTimesWithCache(http.Client client, DateTime date) async {
+  Future<void> fetchPrayerTimesWithCache(
+      http.Client client, DateTime date) async {
     setState(() {
       prayerTimes = {}; // Reset data sementara
     });
 
     try {
-      prayerTimes = await loadPrayerTimesFromCache(); // Tampilkan cache terlebih dahulu
+      prayerTimes =
+          await loadPrayerTimesFromCache(); // Tampilkan cache terlebih dahulu
       await fetchPrayerTimes(client, date); // Perbarui data dari server
       await savePrayerTimesToCache(prayerTimes); // Simpan ke cache
     } catch (e) {
@@ -126,8 +131,12 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       double latitude = position.latitude;
       double longitude = position.longitude;
 
+      // Format the date as DD-MM-YYYY
+      final formattedDate = DateFormat('dd-MM-yyyy').format(date);
+      print('Formatted Date: $formattedDate'); // Debugging
+
       final url = Uri.parse(
-        'http://api.aladhan.com/v1/timings/${date.toIso8601String().split('T')[0]}?latitude=$latitude&longitude=$longitude&method=4',
+        'http://api.aladhan.com/v1/timings/$formattedDate?latitude=$latitude&longitude=$longitude&method=4',
       );
 
       final response = await client
@@ -206,7 +215,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       selectedDate = selectedDate.add(Duration(days: days));
     });
     fetchPrayerTimesWithCache(widget.client, selectedDate);
-    fetchCalendarData(selectedDate.month, selectedDate.year); // Perbarui data kalender
+    fetchCalendarData(
+        selectedDate.month, selectedDate.year); // Perbarui data kalender
     _scrollToSelectedDate(); // Scroll ke tanggal yang dipilih
   }
 
@@ -245,7 +255,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
   // Fungsi untuk scroll ke tanggal yang dipilih
   void _scrollToSelectedDate() {
-    final index = selectedDate.difference(DateTime.now()).inDays + 2; // Hitung index tanggal yang dipilih
+    final index = selectedDate.difference(DateTime.now()).inDays +
+        2; // Hitung index tanggal yang dipilih
     final offset = index * 136.0; // Lebar card + margin
     _scrollController.animateTo(
       offset,
@@ -262,7 +273,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
         onRetry: () {
           // Fungsi yang akan dijalankan saat tombol "Coba Lagi" ditekan
           _checkInternetConnection(); // Cek koneksi internet lagi
-          fetchPrayerTimesWithCache(widget.client, selectedDate); // Coba ambil data lagi
+          fetchPrayerTimesWithCache(
+              widget.client, selectedDate); // Coba ambil data lagi
         },
       );
     }
@@ -288,16 +300,23 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
             child: Stack(
               children: [
                 ListView(
-                  controller: _scrollController, // Gunakan controller untuk scroll
+                  controller:
+                      _scrollController, // Gunakan controller untuk scroll
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0), // Padding untuk memberi ruang arrow
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40.0), // Padding untuk memberi ruang arrow
                   children: List.generate(5, (index) {
-                    final day = selectedDate.add(Duration(days: index - 2)); // Sesuaikan perhitungan tanggal
-                    final isToday = day.day == DateTime.now().day; // Cek apakah hari ini
+                    final day = selectedDate.add(Duration(
+                        days: index - 2)); // Sesuaikan perhitungan tanggal
+                    final isToday =
+                        day.day == DateTime.now().day; // Cek apakah hari ini
                     return GestureDetector(
-                      onTap: () => _changeDate(index - 2), // Sesuaikan perhitungan tanggal
+                      onTap: () => _changeDate(
+                          index - 2), // Sesuaikan perhitungan tanggal
                       child: Container(
-                        width: isToday ? 160 : 120, // Lebar card hari ini lebih panjang
+                        width: isToday
+                            ? 160
+                            : 120, // Lebar card hari ini lebih panjang
                         margin: const EdgeInsets.symmetric(horizontal: 8.0),
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(
@@ -308,7 +327,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                           border: isToday
                               ? null
                               : Border.all(
-                                  color: const Color(0xFF004C7E), // Warna border
+                                  color:
+                                      const Color(0xFF004C7E), // Warna border
                                   width: 2,
                                 ),
                         ),
@@ -318,25 +338,45 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                             Text(
                               day.day.toString(),
                               style: GoogleFonts.poppins(
-                                color: isToday ? Colors.white : Colors.black, // Warna teks
+                                color: isToday
+                                    ? Colors.white
+                                    : Colors.black, // Warna teks
                                 fontWeight: FontWeight.bold,
-                                fontSize: isToday ? 20 : 18, // Ukuran teks hari ini lebih besar
+                                fontSize: isToday
+                                    ? 20
+                                    : 18, // Ukuran teks hari ini lebih besar
                               ),
                             ),
                             Text(
-                              ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
-                                  [day.weekday % 7],
+                              [
+                                'Min',
+                                'Sen',
+                                'Sel',
+                                'Rab',
+                                'Kam',
+                                'Jum',
+                                'Sab'
+                              ][day.weekday % 7],
                               style: GoogleFonts.poppins(
-                                color: isToday ? Colors.white70 : Colors.black54, // Warna teks
-                                fontSize: isToday ? 18 : 16, // Ukuran teks hari ini lebih besar
+                                color: isToday
+                                    ? Colors.white70
+                                    : Colors.black54, // Warna teks
+                                fontSize: isToday
+                                    ? 18
+                                    : 16, // Ukuran teks hari ini lebih besar
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _monthNames[day.month - 1], // Tampilkan nama bulan
+                              _monthNames[
+                                  day.month - 1], // Tampilkan nama bulan
                               style: GoogleFonts.poppins(
-                                color: isToday ? Colors.white70 : Colors.black54, // Warna teks
-                                fontSize: isToday ? 16 : 14, // Ukuran teks hari ini lebih besar
+                                color: isToday
+                                    ? Colors.white70
+                                    : Colors.black54, // Warna teks
+                                fontSize: isToday
+                                    ? 16
+                                    : 14, // Ukuran teks hari ini lebih besar
                               ),
                             ),
                           ],
@@ -352,7 +392,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   bottom: 0,
                   child: Center(
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                      icon:
+                          const Icon(Icons.arrow_back_ios, color: Colors.black),
                       onPressed: () {
                         _changeDate(-1); // Pindah ke tanggal sebelumnya
                       },
@@ -366,7 +407,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   bottom: 0,
                   child: Center(
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                      icon: const Icon(Icons.arrow_forward_ios,
+                          color: Colors.black),
                       onPressed: () {
                         _changeDate(1); // Pindah ke tanggal berikutnya
                       },
@@ -431,29 +473,38 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   final gregorianDate = day['date']['gregorian']['date'];
                   final hijriDate = day['date']['hijri']['date'];
                   final date = DateTime.parse(day['date']['gregorian']['date']);
-                  final isHoliday = _publicHolidays.containsKey(DateTime(date.year, date.month, date.day));
+                  final isHoliday = _publicHolidays
+                      .containsKey(DateTime(date.year, date.month, date.day));
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: isHoliday ? Colors.red[50] : Colors.white, // Warna latar belakang untuk hari libur
+                    color: isHoliday
+                        ? Colors.red[50]
+                        : Colors.white, // Warna latar belakang untuk hari libur
                     child: ListTile(
                       title: Text(
                         'Masehi: $gregorianDate',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: isHoliday ? Colors.red : Colors.black87, // Warna teks untuk hari libur
+                          color: isHoliday
+                              ? Colors.red
+                              : Colors.black87, // Warna teks untuk hari libur
                         ),
                       ),
                       subtitle: Text(
                         'Hijriah: $hijriDate',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          color: isHoliday ? Colors.red[700] : Colors.grey, // Warna teks untuk hari libur
+                          color: isHoliday
+                              ? Colors.red[700]
+                              : Colors.grey, // Warna teks untuk hari libur
                         ),
                       ),
                       trailing: isHoliday
                           ? Text(
-                              _publicHolidays[DateTime(date.year, date.month, date.day)] ?? '',
+                              _publicHolidays[DateTime(
+                                      date.year, date.month, date.day)] ??
+                                  '',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 color: Colors.red,
