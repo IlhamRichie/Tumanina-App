@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'pantau_sholat_screen.dart';
+import '/widgets/no_internet.dart';
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -17,11 +18,18 @@ class WaktuSholatScreen extends StatefulWidget {
 class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Map<String, String> prayerTimes = {};
   String errorMessage = '';
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
     fetchPrayerTimes(widget.client);
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
   Future<Position> _getCurrentLocation() async {
@@ -59,7 +67,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (mounted) {
+        if (!_isDisposed && mounted) {
           setState(() {
             prayerTimes = {
               'Subuh': data['data']['timings']['Fajr'],
@@ -72,48 +80,44 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
           });
         }
       } else {
+        if (!_isDisposed && mounted) {
+          setState(() {
+            errorMessage = 'Gagal memuat waktu sholat, periksa internet Anda.';
+          });
+        }
+      }
+    } catch (e) {
+      if (!_isDisposed && mounted) {
         setState(() {
           errorMessage = 'Gagal memuat waktu sholat, periksa internet Anda.';
         });
       }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Gagal memuat waktu sholat, periksa internet Anda.';
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          'Waktu Sholat',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF004C7E),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        elevation: 0,
-      ),
-      body: errorMessage.isNotEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  errorMessage,
-                  style: GoogleFonts.poppins(
-                    color: Colors.red,
-                    fontSize: 18,
-                  ),
-                  textAlign: TextAlign.center,
+    return errorMessage.isNotEmpty
+        ? NoInternetScreen(
+            onRetry: () {
+              fetchPrayerTimes(widget.client);
+            },
+          )
+        : Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              title: Text(
+                'Waktu Sholat',
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF004C7E),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            )
-          : Column(
+              centerTitle: true,
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+              elevation: 0,
+            ),
+            body: Column(
               children: [
                 Expanded(
                   child: prayerTimes.isNotEmpty
@@ -220,7 +224,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                 ),
               ],
             ),
-    );
+          );
   }
 
   IconData _getPrayerIcon(String prayerName) {

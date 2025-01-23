@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '/widgets/no_internet.dart';
 
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate;
@@ -32,6 +33,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   List<Map<String, dynamic>> prayerLog = [];
   bool isLoading = true;
   Map<String, String> prayerTimes = {};
+  bool hasInternet = true;
 
   @override
   void initState() {
@@ -60,33 +62,15 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
             'isya': timings['Isha'],
             'sunrise': timings['Sunrise'],
           };
+          hasInternet = true;
         });
       } else {
         throw Exception('Failed to fetch prayer times');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Terjadi kesalahan saat mengambil jadwal sholat. Pastikan Anda terhubung ke internet.',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(
-            label: 'Coba Lagi',
-            textColor: Colors.yellow,
-            onPressed: fetchPrayerTimes,
-          ),
-        ),
-      );
+      setState(() {
+        hasInternet = false;
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -264,6 +248,14 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!hasInternet) {
+      return NoInternetScreen(
+        onRetry: () {
+          fetchPrayerTimes();
+        },
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

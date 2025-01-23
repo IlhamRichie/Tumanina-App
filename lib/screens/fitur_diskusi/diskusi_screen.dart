@@ -4,6 +4,7 @@ import 'package:Tumanina/services/api_service.dart';
 import 'package:Tumanina/screens/home_screen.dart';
 import 'package:Tumanina/screens/artikel/artikel_screen.dart';
 import 'package:Tumanina/screens/profil/profile_screen.dart';
+import '/widgets/no_internet.dart';
 
 class DiskusiScreen extends StatefulWidget {
   const DiskusiScreen({super.key});
@@ -15,6 +16,7 @@ class DiskusiScreen extends StatefulWidget {
 class _DiskusiScreenState extends State<DiskusiScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<Map<String, dynamic>>> _threads;
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -22,7 +24,14 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
     _threads = _apiService.fetchThreads();
   }
 
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
   Future<void> _refreshThreads() async {
+    if (_isDisposed) return;
     setState(() {
       _threads = _apiService.fetchThreads(); // Memuat ulang data thread
     });
@@ -43,80 +52,27 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         centerTitle: true,
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshThreads,
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _threads,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildSkeletonList();
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Gagal memuat diskusi.',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF004C7E),
-                            Color(0xFF2DDCBE),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: OutlinedButton(
-                        onPressed: _refreshThreads,
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor:
-                              Colors.white, // Warna background tombol
-                          side: BorderSide.none, // Hilangkan border bawaan
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24.0, vertical: 12.0),
-                        ),
-                        child: ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            colors: [
-                              Color(0xFF004C7E),
-                              Color(0xFF2DDCBE),
-                            ],
-                          ).createShader(bounds),
-                          child: const Text(
-                            'Coba Lagi',
-                            style: TextStyle(
-                              color: Colors.white, // Warna teks default
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text(
-                  'Belum ada diskusi.',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              );
-            } else {
-              final threads = snapshot.data!;
-              return ListView.builder(
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _threads,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildSkeletonList();
+          } else if (snapshot.hasError) {
+            return NoInternetScreen(
+              onRetry: _refreshThreads,
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text(
+                'Belum ada diskusi.',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            );
+          } else {
+            final threads = snapshot.data!;
+            return RefreshIndicator(
+              onRefresh: _refreshThreads,
+              child: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: threads.length,
                 itemBuilder: (context, index) {
@@ -149,10 +105,10 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
                     ),
                   );
                 },
-              );
-            }
-          },
-        ),
+              ),
+            );
+          }
+        },
       ),
       bottomNavigationBar: _buildBottomNavigationBar(context),
     );

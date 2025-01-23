@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '/widgets/no_internet.dart';
 
 const Map<int, String> latinNames = {
   1: "Al-Fatihah",
@@ -134,6 +135,7 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
   List<Surah> filteredSurahList = [];
   String searchQuery = '';
   bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
@@ -145,6 +147,7 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
     try {
       setState(() {
         isLoading = true;
+        errorMessage = '';
       });
 
       final url = Uri.parse('https://equran.id/api/surat');
@@ -163,17 +166,13 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
     } on SocketException {
       setState(() {
         isLoading = false;
+        errorMessage = 'Mohon periksa koneksi internet Anda.';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mohon periksa koneksi internet Anda.')),
-      );
     } catch (e) {
       setState(() {
         isLoading = false;
+        errorMessage = 'Error: $e';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
   }
 
@@ -189,224 +188,205 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          'Alquran Digital',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF004C7E),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFF2DDCBE)),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Memuat data...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF004C7E),
-                    ),
-                  ),
-                ],
+    return errorMessage.isNotEmpty
+        ? NoInternetScreen(
+            onRetry: fetchSurahList,
+          )
+        : Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              title: Text(
+                'Alquran Digital',
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF004C7E),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            )
-          : surahList.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.wifi_off, size: 100, color: Colors.grey),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Mohon periksa koneksi internet Anda.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          color: Colors.grey,
+              backgroundColor: Colors.white,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              centerTitle: true,
+            ),
+            body: isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xFF2DDCBE)),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: fetchSurahList,
-                        child: const Text('Coba Lagi'),
-                      ),
-                    ],
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      // Kotak Pencarian
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF004C7E),
-                              const Color(0xFF2DDCBE)
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Cari surah...',
-                            hintStyle:
-                                GoogleFonts.poppins(color: Colors.white70),
-                            prefixIcon:
-                                const Icon(Icons.search, color: Colors.white),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 15),
-                          ),
-                          onChanged: _filterSurahList,
+                        const SizedBox(height: 20),
+                        Text(
+                          'Memuat data...',
                           style: GoogleFonts.poppins(
                             fontSize: 16,
-                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF004C7E),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // List Surah
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: filteredSurahList.length,
-                          itemBuilder: (context, index) {
-                            final surah = filteredSurahList[index];
-                            String latinName =
-                                latinNames[surah.id] ?? surah.name;
-
-                            return Container(
-                              margin:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF004C7E),
-                                    Color(0xFF2DDCBE)
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16.0),
+                      ],
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Kotak Pencarian
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                const Color(0xFF004C7E),
+                                const Color(0xFF2DDCBE)
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
                               ),
-                              child: Container(
-                                margin: const EdgeInsets.all(
-                                    2.0), // Space between border and content
+                            ],
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Cari surah...',
+                              hintStyle:
+                                  GoogleFonts.poppins(color: Colors.white70),
+                              prefixIcon:
+                                  const Icon(Icons.search, color: Colors.white),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                            ),
+                            onChanged: _filterSurahList,
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // List Surah
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: filteredSurahList.length,
+                            itemBuilder: (context, index) {
+                              final surah = filteredSurahList[index];
+                              String latinName =
+                                  latinNames[surah.id] ?? surah.name;
+
+                              return Container(
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 10.0),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF004C7E),
+                                      Color(0xFF2DDCBE)
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
                                   borderRadius: BorderRadius.circular(16.0),
                                 ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  child: InkWell(
+                                child: Container(
+                                  margin: const EdgeInsets.all(
+                                      2.0), // Space between border and content
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(16.0),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              SurahDetailScreen(
-                                            surahNumber: surah.id,
-                                            surahName: latinName,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: ListTile(
-                                      contentPadding:
-                                          const EdgeInsets.all(10.0),
-                                      title: Text(
-                                        latinName,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF004C7E),
-                                        ),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            surah.translation,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 16,
-                                              fontStyle: FontStyle.italic,
-                                              color: const Color(0xFF757575),
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                SurahDetailScreen(
+                                              surahNumber: surah.id,
+                                              surahName: latinName,
                                             ),
                                           ),
-                                          Text(
-                                            surah.name,
-                                            style: GoogleFonts.amiri(
-                                              fontSize: 24,
-                                              color: const Color(0xFF2DDCBE),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      trailing: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.bookmark,
-                                            size: 70,
+                                        );
+                                      },
+                                      child: ListTile(
+                                        contentPadding:
+                                            const EdgeInsets.all(10.0),
+                                        title: Text(
+                                          latinName,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
                                             color: const Color(0xFF004C7E),
                                           ),
-                                          Positioned(
-                                            top: 10,
-                                            child: Text(
-                                              '${surah.ayatCount}',
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              surah.translation,
                                               style: GoogleFonts.poppins(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontStyle: FontStyle.italic,
+                                                color: const Color(0xFF757575),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                            Text(
+                                              surah.name,
+                                              style: GoogleFonts.amiri(
+                                                fontSize: 24,
+                                                color: const Color(0xFF2DDCBE),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.bookmark,
+                                              size: 70,
+                                              color: const Color(0xFF004C7E),
+                                            ),
+                                            Positioned(
+                                              top: 10,
+                                              child: Text(
+                                                '${surah.ayatCount}',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-    );
+          );
   }
 }
 
