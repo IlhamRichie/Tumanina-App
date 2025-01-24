@@ -1,21 +1,24 @@
+import 'dart:async'; // Import Timer
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart' as geo;
 import '/widgets/no_internet.dart';
+import 'package:intl/intl.dart'; // Import package intl untuk format tanggal
 
 class PantauSholatScreen extends StatefulWidget {
   final Function(Map<String, bool>) onUpdate;
   final Map<String, bool> sholatMilestones;
-  final Map<String, String> prayerTimes; // Tambahkan ini
+  final Map<String, String> prayerTimes;
 
   const PantauSholatScreen({
     super.key,
     required this.onUpdate,
     this.sholatMilestones = const {},
-    required this.prayerTimes, // Tambahkan ini
+    required this.prayerTimes,
   });
 
   @override
@@ -34,22 +37,112 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   bool isLoading = true;
   Map<String, String> prayerTimes = {};
   bool hasInternet = true;
+  double loadingProgress = 0.0; // Progress bar value (0.0 to 1.0)
+  Timer? _loadingTimer; // Simpan referensi Timer
 
   @override
   void initState() {
     super.initState();
-    fetchPrayerTimes();
-    loadProgress();
+    _initializeData();
+    _startLoadingAnimation(); // Start loading animation
   }
 
-  Future<void> fetchPrayerTimes() async {
+  @override
+  void dispose() {
+    _loadingTimer?.cancel(); // Batalkan Timer saat widget di-dispose
+    super.dispose();
+  }
+
+  void _startLoadingAnimation() {
+    const loadingDuration = Duration(seconds: 3); // Total duration for loading
+    const updateInterval = Duration(milliseconds: 30); // Update interval
+
+    _loadingTimer = Timer.periodic(updateInterval, (Timer timer) {
+      if (!mounted) {
+        timer.cancel(); // Batalkan timer jika widget sudah di-dispose
+        return;
+      }
+
+      setState(() {
+        loadingProgress +=
+            updateInterval.inMilliseconds / loadingDuration.inMilliseconds;
+        if (loadingProgress >= 1.0) {
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  Future<void> _initializeData() async {
     setState(() {
       isLoading = true;
     });
 
+    await _requestLocationPermission();
+
     try {
+      await Future.wait([fetchPrayerTimes(), loadProgress()]);
+    } catch (e) {
+      setState(() {
+        hasInternet = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _requestLocationPermission() async {
+    bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Layanan lokasi tidak aktif. Silakan aktifkan.'),
+        ),
+      );
+      return;
+    }
+
+    geo.LocationPermission permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.denied) {
+      permission = await geo.Geolocator.requestPermission();
+      if (permission == geo.LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Izin lokasi ditolak.'),
+          ),
+        );
+        return;
+      }
+    }
+
+    if (permission == geo.LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Izin lokasi ditolak selamanya.'),
+        ),
+      );
+      return;
+    }
+  }
+
+  Future<void> fetchPrayerTimes() async {
+    try {
+      geo.Position position = await geo.Geolocator.getCurrentPosition(
+        desiredAccuracy: geo.LocationAccuracy.high,
+      );
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
       final response = await http.get(Uri.parse(
-          'http://api.aladhan.com/v1/timingsByAddress?address=Jakarta,Indonesia'));
+          'http://api.aladhan.com/v1/timings?latitude=$latitude&longitude=$longitude&method=4'));
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final timings = data['data']['timings'];
@@ -65,16 +158,17 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
           hasInternet = true;
         });
       } else {
-        throw Exception('Failed to fetch prayer times');
+        throw Exception('Gagal mengambil waktu sholat');
       }
     } catch (e) {
       setState(() {
         hasInternet = false;
       });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+        ),
+      );
     }
   }
 
@@ -125,10 +219,6 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         ];
       });
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   IconData getPrayerIcon(String prayerKey) {
@@ -217,8 +307,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   }
 
   Future<void> refreshData() async {
-    await fetchPrayerTimes();
-    await loadProgress();
+    await _initializeData();
   }
 
   void updateLog(String prayer, bool value) {
@@ -246,12 +335,23 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     saveProgress();
   }
 
+  // Fungsi untuk mendapatkan teks hari, tanggal, bulan, dan tahun dalam bahasa Indonesia
+  String _getTodayDetails() {
+    final now = DateTime.now();
+    // Set locale ke 'id_ID' untuk bahasa Indonesia
+    final dayName = DateFormat('EEEE', 'id_ID').format(now); // Format hari (e.g., "Senin")
+    final date = DateFormat('d').format(now); // Tanggal (e.g., "1")
+    final month = DateFormat('MMMM', 'id_ID').format(now); // Bulan (e.g., "Oktober")
+    final year = DateFormat('y').format(now); // Tahun (e.g., "2023")
+    return '$dayName, $date $month $year';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!hasInternet) {
       return NoInternetScreen(
         onRetry: () {
-          fetchPrayerTimes();
+          _initializeData();
         },
       );
     }
@@ -276,7 +376,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
         centerTitle: true,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildLoadingScreen() // Tampilkan loading screen
           : RefreshIndicator(
               onRefresh: refreshData,
               color: const Color(0xFF004C7E),
@@ -290,11 +390,21 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Teks "Pantau Sholat Hari Ini"
                           Text(
                             'Pantau Sholat Hari Ini',
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Teks hari, tanggal, bulan, dan tahun dalam bahasa Indonesia
+                          Text(
+                            _getTodayDetails(), // Panggil fungsi untuk mendapatkan teks
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.grey,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -369,6 +479,67 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Kaligrafi atau ikon Islami
+          Image.asset(
+            'assets/splash/Logo1 1.png', // Ganti dengan path gambar kaligrafi atau ikon Islami
+            width: 100,
+            height: 100,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Pantau Sholat Anda...',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF004C7E),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Progress Bar custom dengan ujung kanan dan kiri tumpul
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Stack(
+              children: [
+                // Latar belakang progress bar
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10), // Sudut tumpul
+                  ),
+                ),
+                // Progress bar yang berjalan
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300), // Animasi
+                  width:
+                      MediaQuery.of(context).size.width * 0.8 * loadingProgress,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2DDCBE),
+                    borderRadius: BorderRadius.circular(10), // Sudut tumpul
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '${(loadingProgress * 100).toStringAsFixed(0)}%',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: const Color(0xFF004C7E),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

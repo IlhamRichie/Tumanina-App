@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart'; // Import untuk inisialisasi locale
 import 'screens/intro_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi locale untuk format tanggal
+  await initializeDateFormatting(
+      'id_ID', null); // 'id_ID' untuk bahasa Indonesia
 
   bool isLoggedIn = false;
   try {

@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '/widgets/no_internet.dart'; // Sesuaikan path-nya
-import 'package:intl/intl.dart'; // Untuk format tanggal (opsional)
+import 'package:intl/intl.dart'; // Untuk format tanggal
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -24,40 +24,22 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   bool _isDisposed = false;
   DateTime selectedDate = DateTime.now();
   bool _isOnline = true; // Status koneksi internet
-  final ScrollController _scrollController =
-      ScrollController(); // Controller untuk scroll
-  List<Map<String, dynamic>> calendarData =
-      []; // Data kalender dari API Aladhan
+  String hijriDate = ''; // Variabel untuk menyimpan tanggal dan bulan Hijriyah
 
-  // Data statis hari libur (contoh)
-  final Map<DateTime, String> _publicHolidays = {
-    DateTime(2023, 1, 1): "Tahun Baru Masehi",
-    DateTime(2023, 3, 22): "Hari Raya Nyepi",
-    DateTime(2023, 4, 7): "Wafat Isa Almasih",
-    DateTime(2023, 5, 1): "Hari Buruh Internasional",
-    DateTime(2023, 5, 18): "Kenaikan Isa Almasih",
-    DateTime(2023, 6, 1): "Hari Lahir Pancasila",
-    DateTime(2023, 6, 29): "Hari Raya Idul Fitri",
-    DateTime(2023, 8, 17): "Hari Kemerdekaan RI",
-    DateTime(2023, 12, 25): "Hari Raya Natal",
-  };
+  bool isFriday(DateTime date) {
+    return date.weekday == DateTime.friday;
+  }
 
   @override
   void initState() {
     super.initState();
     _checkInternetConnection(); // Cek koneksi internet saat init
     fetchPrayerTimesWithCache(widget.client, selectedDate);
-    fetchCalendarData(
-        selectedDate.month, selectedDate.year); // Ambil data kalender
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelectedDate(); // Scroll ke tanggal yang dipilih setelah build selesai
-    });
   }
 
   @override
   void dispose() {
     _isDisposed = true;
-    _scrollController.dispose(); // Dispose controller
     super.dispose();
   }
 
@@ -154,6 +136,10 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
               'Maghrib': data['data']['timings']['Maghrib'],
               'Isya': data['data']['timings']['Isha'],
             };
+            // Ambil tanggal dan bulan Hijriyah dari API
+            final hijriDay = data['data']['date']['hijri']['day'];
+            final hijriMonth = data['data']['date']['hijri']['month']['ar'];
+            hijriDate = '$hijriDay $hijriMonth'; // Gabungkan tanggal dan bulan
             errorMessage = '';
           });
         }
@@ -179,45 +165,11 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     }
   }
 
-  Future<void> fetchCalendarData(int month, int year) async {
-    try {
-      Position position = await _getCurrentLocation();
-      double latitude = position.latitude;
-      double longitude = position.longitude;
-
-      final url = Uri.parse(
-        'https://api.aladhan.com/v1/calendar?latitude=$latitude&longitude=$longitude&method=4&month=$month&year=$year',
-      );
-
-      final response = await widget.client.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (!_isDisposed && mounted) {
-          setState(() {
-            calendarData = List<Map<String, dynamic>>.from(data['data']);
-          });
-        }
-      } else {
-        setState(() {
-          errorMessage = 'Gagal memuat data kalender.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Gagal memuat data kalender.';
-      });
-    }
-  }
-
   void _changeDate(int days) {
     setState(() {
       selectedDate = selectedDate.add(Duration(days: days));
     });
     fetchPrayerTimesWithCache(widget.client, selectedDate);
-    fetchCalendarData(
-        selectedDate.month, selectedDate.year); // Perbarui data kalender
-    _scrollToSelectedDate(); // Scroll ke tanggal yang dipilih
   }
 
   IconData _getPrayerIcon(String prayerName) {
@@ -235,34 +187,6 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       default:
         return Icons.access_time;
     }
-  }
-
-  // Daftar nama bulan dalam Bahasa Indonesia
-  final List<String> _monthNames = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-
-  // Fungsi untuk scroll ke tanggal yang dipilih
-  void _scrollToSelectedDate() {
-    final index = selectedDate.difference(DateTime.now()).inDays +
-        2; // Hitung index tanggal yang dipilih
-    final offset = index * 136.0; // Lebar card + margin
-    _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   @override
@@ -296,12 +220,10 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       body: Column(
         children: [
           SizedBox(
-            height: 120, // Tinggi container diubah agar lebih lebar
+            height: 140, // Tinggi container diubah agar lebih lebar
             child: Stack(
               children: [
                 ListView(
-                  controller:
-                      _scrollController, // Gunakan controller untuk scroll
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 40.0), // Padding untuk memberi ruang arrow
@@ -349,13 +271,13 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                             ),
                             Text(
                               [
-                                'Min',
-                                'Sen',
-                                'Sel',
-                                'Rab',
-                                'Kam',
-                                'Jum',
-                                'Sab'
+                                'Minggu',
+                                'Senin',
+                                'Selasa',
+                                'Rabu',
+                                'Kamis',
+                                'Jumat',
+                                'Sabtu'
                               ][day.weekday % 7],
                               style: GoogleFonts.poppins(
                                 color: isToday
@@ -366,17 +288,24 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                                     : 16, // Ukuran teks hari ini lebih besar
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            // Tambahkan tanggal dan bulan Hijriyah di sini
                             Text(
-                              _monthNames[
-                                  day.month - 1], // Tampilkan nama bulan
+                              hijriDate, // Tampilkan tanggal dan bulan Hijriyah
                               style: GoogleFonts.poppins(
                                 color: isToday
                                     ? Colors.white70
                                     : Colors.black54, // Warna teks
-                                fontSize: isToday
-                                    ? 16
-                                    : 14, // Ukuran teks hari ini lebih besar
+                                fontSize: 14,
+                              ),
+                            ),
+                            // Tambahkan bulan Masehi di sini
+                            Text(
+                              DateFormat('MMMM').format(day), // Tampilkan bulan Masehi
+                              style: GoogleFonts.poppins(
+                                color: isToday
+                                    ? Colors.white70
+                                    : Colors.black54, // Warna teks
+                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -423,6 +352,11 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 ...prayerTimes.entries.map((entry) {
+                  final prayerName =
+                      entry.key == 'Dzuhur' && isFriday(selectedDate)
+                          ? 'Dzuhur/Jumat'
+                          : entry.key;
+
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -435,7 +369,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                         color: Colors.white,
                       ),
                       title: Text(
-                        entry.key,
+                        prayerName,
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -459,62 +393,6 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   thickness: 1,
                 ),
                 const SizedBox(height: 20),
-                // Tabel Kalender Masehi dan Hijriah
-                Text(
-                  'Kalender Masehi dan Hijriah',
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF004C7E),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ...calendarData.map((day) {
-                  final gregorianDate = day['date']['gregorian']['date'];
-                  final hijriDate = day['date']['hijri']['date'];
-                  final date = DateTime.parse(day['date']['gregorian']['date']);
-                  final isHoliday = _publicHolidays
-                      .containsKey(DateTime(date.year, date.month, date.day));
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: isHoliday
-                        ? Colors.red[50]
-                        : Colors.white, // Warna latar belakang untuk hari libur
-                    child: ListTile(
-                      title: Text(
-                        'Masehi: $gregorianDate',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: isHoliday
-                              ? Colors.red
-                              : Colors.black87, // Warna teks untuk hari libur
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Hijriah: $hijriDate',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: isHoliday
-                              ? Colors.red[700]
-                              : Colors.grey, // Warna teks untuk hari libur
-                        ),
-                      ),
-                      trailing: isHoliday
-                          ? Text(
-                              _publicHolidays[DateTime(
-                                      date.year, date.month, date.day)] ??
-                                  '',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null,
-                    ),
-                  );
-                }).toList(),
               ],
             ),
           ),
