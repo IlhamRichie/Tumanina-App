@@ -66,9 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUsername(); // Muat nama pengguna
     _checkLocationPermission();
     print('Internet status: $hasInternet'); // Debugging
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showNextPrayerNotification();
-    });
   }
 
   Future<void> _checkLocationPermission() async {
@@ -362,27 +359,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!sholatMilestones.containsKey(key)) {
         sholatMilestones[key] = false;
       }
-    }
-  }
-
-  void showNextPrayerNotification() async {
-    final hasShownNotification = await _getNotificationShown();
-    if (nextPrayer.isNotEmpty && !hasShownNotification) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Apakah kamu sudah sholat $nextPrayer?'),
-          action: SnackBarAction(
-            label: 'Ya',
-            onPressed: () {
-              setState(() {
-                sholatMilestones[nextPrayer] = true;
-              });
-              _saveSholatMilestones();
-            },
-          ),
-        ),
-      );
-      _setNotificationShown();
     }
   }
 

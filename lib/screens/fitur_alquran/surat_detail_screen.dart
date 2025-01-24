@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final int surahNumber;
@@ -26,14 +27,29 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   String surahAudioUrl = '';
   bool isLoading = true;
   bool isPlaying = false;
+  bool hasInternet = true; // Status koneksi internet
 
   List<String> bookmarkedAyat = []; // List untuk bookmark
 
   @override
   void initState() {
     super.initState();
-    fetchSurahDetail();
-    loadBookmarks();
+    _checkInternetConnection();
+  }
+
+  // Fungsi untuk memeriksa koneksi internet
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        hasInternet = false;
+        isLoading = false;
+      });
+      _showErrorSnackbar('Tidak ada koneksi internet. Mohon periksa jaringan Anda.');
+    } else {
+      fetchSurahDetail();
+      loadBookmarks();
+    }
   }
 
   Future<void> fetchSurahDetail() async {
@@ -56,17 +72,13 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      _showErrorSnackbar('Terjadi kesalahan. Mohon coba lagi.');
     }
   }
 
   Future<void> playSurahAudio() async {
     if (surahAudioUrl.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Audio tidak tersedia untuk surah ini')),
-      );
+      _showErrorSnackbar('Audio tidak tersedia untuk surah ini.');
       return;
     }
 
@@ -77,9 +89,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         isPlaying = true;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error playing audio: $e')),
-      );
+      _showErrorSnackbar('Gagal memutar audio. Mohon coba lagi.');
     }
   }
 
@@ -90,9 +100,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         isPlaying = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error pausing audio: $e')),
-      );
+      _showErrorSnackbar('Gagal menjeda audio. Mohon coba lagi.');
     }
   }
 
@@ -115,6 +123,33 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       });
     }
     await prefs.setStringList('bookmarkedAyat', bookmarkedAyat);
+  }
+
+  // Fungsi untuk menampilkan SnackBar dengan pesan error
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF004C7E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Widget _buildHeader() {

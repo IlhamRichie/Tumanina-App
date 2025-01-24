@@ -122,11 +122,3 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
     );
   }
 }
-
-// Cara Menggunakan Widget Ini
-// Gunakan widget ini di mana saja dalam aplikasi Anda seperti ini:
-// NoInternetScreen(
-//   onRetry: () {
-//     // Aksi yang ingin dijalankan setelah loading selesai
-//   },
-// );

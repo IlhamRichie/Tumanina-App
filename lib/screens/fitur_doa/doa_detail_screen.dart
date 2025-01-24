@@ -36,8 +36,7 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
 ''';
 
     final String encodedMessage = Uri.encodeComponent(message);
-    final Uri whatsappUrl =
-        Uri.parse('https://api.whatsapp.com/send?text=$encodedMessage');
+    final Uri whatsappUrl = Uri.parse('whatsapp://send?text=$encodedMessage');
 
     if (await canLaunchUrl(whatsappUrl)) {
       try {
@@ -47,7 +46,7 @@ Temukan berbagai doa harian, panduan ibadah, dan fitur belajar sholat yang inter
         _showErrorSnackbar(context, 'Gagal membuka WhatsApp!');
       }
     } else {
-      debugPrint('WhatsApp URL tidak valid.');
+      debugPrint('WhatsApp URL tidak valid atau WhatsApp tidak terinstal.');
       _showErrorSnackbar(context, 'Tidak dapat membuka WhatsApp!');
     }
   }

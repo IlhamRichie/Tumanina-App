@@ -51,14 +51,39 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Fungsi untuk menampilkan SnackBar dengan style Islami
+  void _showSnackbar(String message, {bool isError = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              message,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isError ? const Color(0xFF004C7E) : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email dan kata sandi tidak boleh kosong.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      _showSnackbar('Email dan kata sandi tidak boleh kosong.');
       return;
     }
 
@@ -72,12 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
         passwordController.text.trim(),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login berhasil!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showSnackbar('Login berhasil!', isError: false);
 
       // Navigate ke halaman berikutnya
       Navigator.pushReplacement(
@@ -85,14 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString().replaceAll('Exception: ', ''),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackbar(e.toString().replaceAll('Exception: ', ''));
     } finally {
       setState(() {
         isLoading = false; // Nonaktifkan indikator loading
@@ -126,6 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
+                    overflow:
+                        TextOverflow.ellipsis, // Handle overflow with ellipsis
                   ),
                 ],
               ),
@@ -166,7 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : _login, // Disable tombol saat loading
+                  onPressed:
+                      isLoading ? null : _login, // Disable tombol saat loading
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0xFF2DDCBE),

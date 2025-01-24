@@ -49,8 +49,9 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Colors.white,
         centerTitle: true,
+        elevation: 0,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _threads,
@@ -62,10 +63,14 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
               onRetry: _refreshThreads,
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Belum ada diskusi.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600,
+                ),
               ),
             );
           } else {
@@ -78,20 +83,13 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
                 itemBuilder: (context, index) {
                   final thread = threads[index];
                   return Card(
-                    elevation: 3,
+                    elevation: 2,
                     margin: const EdgeInsets.only(bottom: 16.0),
-                    child: ListTile(
-                      title: Text(
-                        thread['title'] ?? 'Judul tidak tersedia',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Oleh: ${thread['author_username'] ?? 'Tidak diketahui'}',
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12.0),
                       onTap: () {
                         Navigator.push(
                           context,
@@ -102,6 +100,57 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
                           ),
                         );
                       },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Ikon atau gambar
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: const Icon(
+                                Icons.chat_bubble_outline,
+                                color: Color(0xFF004C7E),
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16.0),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    thread['title'] ?? 'Judul tidak tersedia',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    'Oleh: ${thread['author_username'] ?? 'Tidak diketahui'}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -120,23 +169,43 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
       itemCount: 6,
       itemBuilder: (context, index) {
         return Card(
-          elevation: 3,
+          elevation: 2,
           margin: const EdgeInsets.only(bottom: 16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Skeleton untuk ikon
                 Container(
-                  width: double.infinity,
-                  height: 16.0,
-                  color: Colors.grey.shade300,
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                 ),
-                const SizedBox(height: 8.0),
-                Container(
-                  width: 150.0,
-                  height: 16.0,
-                  color: Colors.grey.shade300,
+                const SizedBox(width: 16.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 16.0,
+                        color: Colors.grey.shade300,
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        width: 150.0,
+                        height: 16.0,
+                        color: Colors.grey.shade300,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

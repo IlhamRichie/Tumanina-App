@@ -74,6 +74,8 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   }
 
   Future<void> _initializeData() async {
+    if (!mounted) return; // Pastikan widget masih mounted
+
     setState(() {
       isLoading = true;
     });
@@ -83,29 +85,25 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     try {
       await Future.wait([fetchPrayerTimes(), loadProgress()]);
     } catch (e) {
-      setState(() {
-        hasInternet = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-        ),
-      );
+      if (mounted) {
+        setState(() {
+          hasInternet = false;
+        });
+        _showErrorSnackbar('Error: $e');
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _requestLocationPermission() async {
     bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Layanan lokasi tidak aktif. Silakan aktifkan.'),
-        ),
-      );
+      _showErrorSnackbar('Layanan lokasi tidak aktif. Silakan aktifkan.');
       return;
     }
 
@@ -113,21 +111,13 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     if (permission == geo.LocationPermission.denied) {
       permission = await geo.Geolocator.requestPermission();
       if (permission == geo.LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Izin lokasi ditolak.'),
-          ),
-        );
+        _showErrorSnackbar('Izin lokasi ditolak.');
         return;
       }
     }
 
     if (permission == geo.LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Izin lokasi ditolak selamanya.'),
-        ),
-      );
+      _showErrorSnackbar('Izin lokasi ditolak selamanya.');
       return;
     }
   }
@@ -146,34 +136,40 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final timings = data['data']['timings'];
-        setState(() {
-          prayerTimes = {
-            'subuh': timings['Fajr'],
-            'dzuhur': timings['Dhuhr'],
-            'ashar': timings['Asr'],
-            'maghrib': timings['Maghrib'],
-            'isya': timings['Isha'],
-            'sunrise': timings['Sunrise'],
-          };
-          hasInternet = true;
-        });
+        if (mounted) {
+          setState(() {
+            prayerTimes = {
+              'subuh': timings['Fajr'],
+              'dzuhur': timings['Dhuhr'],
+              'ashar': timings['Asr'],
+              'maghrib': timings['Maghrib'],
+              'isya': timings['Isha'],
+              'sunrise': timings['Sunrise'],
+            };
+            hasInternet = true;
+          });
+        }
       } else {
         throw Exception('Gagal mengambil waktu sholat');
       }
     } catch (e) {
-      setState(() {
-        hasInternet = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-        ),
-      );
+      if (mounted) {
+        setState(() {
+          hasInternet = false;
+        });
+        _showErrorSnackbar('Error: $e');
+      }
     }
   }
 
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Hapus data yang lebih lama dari 7 hari
+    if (prayerLog.length > 7) {
+      prayerLog.removeRange(0, prayerLog.length - 7);
+    }
+
     final jsonLog = json.encode(prayerLog);
     await prefs.setString('prayerLog', jsonLog);
   }
@@ -184,40 +180,50 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     final today = DateTime.now().toString().split(' ')[0];
 
     if (jsonLog != null) {
-      setState(() {
-        prayerLog = List<Map<String, dynamic>>.from(json.decode(jsonLog));
-        final todayEntry = prayerLog.firstWhere(
-          (log) => log['date'] == today,
-          orElse: () => {
-            'date': today,
-            'subuh': false,
-            'dzuhur': false,
-            'ashar': false,
-            'maghrib': false,
-            'isya': false,
-          },
-        );
-        todayLog = {
-          'subuh': todayEntry['subuh'],
-          'dzuhur': todayEntry['dzuhur'],
-          'ashar': todayEntry['ashar'],
-          'maghrib': todayEntry['maghrib'],
-          'isya': todayEntry['isya'],
-        };
-      });
-    } else {
-      setState(() {
-        prayerLog = [
-          {
-            'date': today,
-            'subuh': false,
-            'dzuhur': false,
-            'ashar': false,
-            'maghrib': false,
-            'isya': false,
+      if (mounted) {
+        setState(() {
+          prayerLog = List<Map<String, dynamic>>.from(json.decode(jsonLog));
+
+          // Hapus data yang lebih lama dari 7 hari
+          if (prayerLog.length > 7) {
+            prayerLog.removeRange(0, prayerLog.length - 7);
           }
-        ];
-      });
+
+          final todayEntry = prayerLog.firstWhere(
+            (log) => log['date'] == today,
+            orElse: () => {
+              'date': today,
+              'subuh': false,
+              'dzuhur': false,
+              'ashar': false,
+              'maghrib': false,
+              'isya': false,
+            },
+          );
+          todayLog = {
+            'subuh': todayEntry['subuh'],
+            'dzuhur': todayEntry['dzuhur'],
+            'ashar': todayEntry['ashar'],
+            'maghrib': todayEntry['maghrib'],
+            'isya': todayEntry['isya'],
+          };
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          prayerLog = [
+            {
+              'date': today,
+              'subuh': false,
+              'dzuhur': false,
+              'ashar': false,
+              'maghrib': false,
+              'isya': false,
+            }
+          ];
+        });
+      }
     }
   }
 
@@ -313,22 +319,24 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   void updateLog(String prayer, bool value) {
     final today = DateTime.now().toString().split(' ')[0];
 
-    setState(() {
-      todayLog[prayer] = value;
+    if (mounted) {
+      setState(() {
+        todayLog[prayer] = value;
 
-      final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
-      if (todayIndex != -1) {
-        prayerLog[todayIndex] = {
-          'date': today,
-          ...todayLog,
-        };
-      } else {
-        prayerLog.add({
-          'date': today,
-          ...todayLog,
-        });
-      }
-    });
+        final todayIndex = prayerLog.indexWhere((log) => log['date'] == today);
+        if (todayIndex != -1) {
+          prayerLog[todayIndex] = {
+            'date': today,
+            ...todayLog,
+          };
+        } else {
+          prayerLog.add({
+            'date': today,
+            ...todayLog,
+          });
+        }
+      });
+    }
 
     widget.onUpdate(todayLog);
 
@@ -344,6 +352,39 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
     final month = DateFormat('MMMM', 'id_ID').format(now); // Bulan (e.g., "Oktober")
     final year = DateFormat('y').format(now); // Tahun (e.g., "2023")
     return '$dayName, $date $month $year';
+  }
+
+  // Fungsi untuk menampilkan SnackBar dengan pesan error
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF004C7E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // Fungsi untuk mengecek apakah hari ini adalah Jumat
+  bool isFriday() {
+    final now = DateTime.now();
+    return now.weekday == DateTime.friday;
   }
 
   @override
@@ -410,6 +451,9 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                           const SizedBox(height: 16),
                           ...todayLog.entries.map((entry) {
                             final prayerTimeInfo = getNextPrayerInfo(entry.key);
+                            final prayerName = entry.key == 'dzuhur' && isFriday()
+                                ? 'Dzuhur/Jumat'
+                                : entry.key.capitalize();
                             return ListTile(
                               leading: Icon(
                                 getPrayerIcon(entry.key),
@@ -421,7 +465,7 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    entry.key.capitalize(),
+                                    prayerName,
                                     style: TextStyle(
                                       color: isTimeValid(entry.key)
                                           ? const Color(0xFF2DDCBE)
@@ -452,21 +496,13 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                               ),
                               onTap: () {
                                 if (entry.key == 'subuh' && !isSubuhValid()) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Tidak dapat mencentang Subuh setelah waktu matahari terbit!'),
-                                    ),
-                                  );
+                                  _showErrorSnackbar(
+                                      'Tidak dapat mencentang Subuh setelah waktu matahari terbit!');
                                 } else if (isTimeValid(entry.key)) {
                                   updateLog(entry.key, !entry.value);
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Waktu untuk ${entry.key.capitalize()} telah berlalu atau belum waktunya.'),
-                                    ),
-                                  );
+                                  _showErrorSnackbar(
+                                      'Waktu untuk ${entry.key.capitalize()} telah berlalu atau belum waktunya.');
                                 }
                               },
                             );
@@ -474,6 +510,19 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                         ],
                       ),
                     ),
+                    // Teks sebelum chart
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Progres Sholat Minggu Ini',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF004C7E),
+                        ),
+                      ),
+                    ),
+                    // Chart
                     PrayerChart(prayerLog: prayerLog),
                   ],
                 ),
@@ -549,14 +598,25 @@ class PrayerChart extends StatelessWidget {
 
   const PrayerChart({super.key, required this.prayerLog});
 
+  // Fungsi untuk memformat tanggal
+  String formatDate(String date) {
+    final DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('E, d MMM', 'id_ID').format(parsedDate);
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<_ChartData> chartData = prayerLog.map((data) {
+    // Ambil hanya 7 hari terakhir
+    final last7Days = prayerLog.length > 7
+        ? prayerLog.sublist(prayerLog.length - 7)
+        : prayerLog;
+
+    List<_ChartData> chartData = last7Days.map((data) {
       int completedPrayers = data.entries
           .where((entry) => entry.key != 'date' && entry.value == true)
           .length;
       return _ChartData(
-        data['date'] as String,
+        formatDate(data['date']), // Format tanggal
         completedPrayers,
         data,
       );
