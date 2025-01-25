@@ -8,6 +8,8 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '/widgets/no_internet.dart'; // Sesuaikan path-nya
 import 'package:intl/intl.dart'; // Untuk format tanggal
+import 'package:intl/date_symbol_data_local.dart'; // Untuk inisialisasi locale
+import 'package:geocoding/geocoding.dart'; // Untuk geocoding
 
 class WaktuSholatScreen extends StatefulWidget {
   final http.Client client;
@@ -20,21 +22,51 @@ class WaktuSholatScreen extends StatefulWidget {
 
 class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Map<String, String> prayerTimes = {};
+  Map<String, bool> prayerNotifications =
+      {}; // State untuk menyimpan status notifikasi
   String errorMessage = '';
   bool _isDisposed = false;
   DateTime selectedDate = DateTime.now();
   bool _isOnline = true; // Status koneksi internet
   String hijriDate = ''; // Variabel untuk menyimpan tanggal dan bulan Hijriyah
+  String userLocation =
+      'Mengambil lokasi...'; // Variabel untuk menyimpan lokasi user
+  String nextPrayer = ''; // Variabel untuk menyimpan sholat berikutnya
+  Duration timeUntilNextPrayer =
+      Duration.zero; // Variabel untuk menyimpan waktu hingga sholat berikutnya
 
   bool isFriday(DateTime date) {
     return date.weekday == DateTime.friday;
   }
 
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  }
+
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('id_ID', null); // Inisialisasi locale Indonesia
     _checkInternetConnection(); // Cek koneksi internet saat init
     fetchPrayerTimesWithCache(widget.client, selectedDate);
+    _getUserLocation(); // Ambil lokasi user
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        _calculateNextPrayer(); // Perbarui hitung mundur setiap detik
+      }
+    });
+
+    // Inisialisasi status notifikasi
+    prayerNotifications = {
+      'Subuh': false,
+      'Dzuhur': false,
+      'Ashar': false,
+      'Maghrib': false,
+      'Isya': false,
+    };
   }
 
   @override
@@ -43,12 +75,61 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     super.dispose();
   }
 
+  // Fungsi untuk toggle notifikasi
+  void _toggleNotification(String prayerName) {
+    setState(() {
+      prayerNotifications[prayerName] = !prayerNotifications[prayerName]!;
+    });
+  }
+
   // Fungsi untuk mengecek koneksi internet
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     setState(() {
       _isOnline = connectivityResult != ConnectivityResult.none;
     });
+  }
+
+  // Fungsi untuk mengambil lokasi user
+  Future<void> _getUserLocation() async {
+    try {
+      Position position = await _getCurrentLocation();
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          // Hanya menampilkan nama kota (locality)
+          userLocation = place.locality ?? 'Lokasi tidak ditemukan';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        userLocation = 'Lokasi tidak ditemukan';
+      });
+    }
+  }
+
+  // Fungsi untuk menentukan sholat berikutnya dan hitung mundur
+  void _calculateNextPrayer() {
+    DateTime now = DateTime.now();
+    Map<String, String> sortedPrayerTimes = Map.fromEntries(
+      prayerTimes.entries.toList()..sort((a, b) => a.value.compareTo(b.value)),
+    );
+
+    for (var entry in sortedPrayerTimes.entries) {
+      DateTime prayerTime = DateFormat('HH:mm').parse(entry.value);
+      DateTime prayerDateTime = DateTime(
+          now.year, now.month, now.day, prayerTime.hour, prayerTime.minute);
+
+      if (prayerDateTime.isAfter(now)) {
+        setState(() {
+          nextPrayer = entry.key;
+          timeUntilNextPrayer = prayerDateTime.difference(now);
+        });
+        break;
+      }
+    }
   }
 
   Future<Position> _getCurrentLocation() async {
@@ -142,6 +223,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
             hijriDate = '$hijriDay $hijriMonth'; // Gabungkan tanggal dan bulan
             errorMessage = '';
           });
+          _calculateNextPrayer(); // Hitung sholat berikutnya setelah data diperbarui
         }
       } else {
         if (mounted) {
@@ -209,194 +291,211 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
         title: Text(
           'Waktu Sholat',
           style: GoogleFonts.poppins(
-            color: const Color(0xFF004C7E),
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF004C7E),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 140, // Tinggi container diubah agar lebih lebar
-            child: Stack(
-              children: [
-                ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40.0), // Padding untuk memberi ruang arrow
-                  children: List.generate(5, (index) {
-                    final day = selectedDate.add(Duration(
-                        days: index - 2)); // Sesuaikan perhitungan tanggal
-                    final isToday =
-                        day.day == DateTime.now().day; // Cek apakah hari ini
-                    return GestureDetector(
-                      onTap: () => _changeDate(
-                          index - 2), // Sesuaikan perhitungan tanggal
-                      child: Container(
-                        width: isToday
-                            ? 160
-                            : 120, // Lebar card hari ini lebih panjang
-                        margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: isToday
-                              ? const Color(0xFF004C7E) // Warna card hari ini
-                              : Colors.white, // Warna card kemarin dan besok
-                          borderRadius: BorderRadius.circular(12),
-                          border: isToday
-                              ? null
-                              : Border.all(
-                                  color:
-                                      const Color(0xFF004C7E), // Warna border
-                                  width: 2,
-                                ),
-                        ),
-                        child: Column(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header dengan lokasi dan waktu sholat berikutnya
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(0),
+              height: 170,
+              color: const Color(0xFF004C7E),
+              child: Stack(
+                children: [
+                  // Vektor siluet masjid
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Opacity(
+                      opacity: 0.3,
+                      child: Image.asset(
+                        'assets/kiblat/masjid.png',
+                        width: 500,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  // Konten utama (3 teks)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Lokasi
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
                             Text(
-                              day.day.toString(),
+                              userLocation,
                               style: GoogleFonts.poppins(
-                                color: isToday
-                                    ? Colors.white
-                                    : Colors.black, // Warna teks
+                                color: Colors.white,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                fontSize: isToday
-                                    ? 20
-                                    : 18, // Ukuran teks hari ini lebih besar
-                              ),
-                            ),
-                            Text(
-                              [
-                                'Minggu',
-                                'Senin',
-                                'Selasa',
-                                'Rabu',
-                                'Kamis',
-                                'Jumat',
-                                'Sabtu'
-                              ][day.weekday % 7],
-                              style: GoogleFonts.poppins(
-                                color: isToday
-                                    ? Colors.white70
-                                    : Colors.black54, // Warna teks
-                                fontSize: isToday
-                                    ? 18
-                                    : 16, // Ukuran teks hari ini lebih besar
-                              ),
-                            ),
-                            // Tambahkan tanggal dan bulan Hijriyah di sini
-                            Text(
-                              hijriDate, // Tampilkan tanggal dan bulan Hijriyah
-                              style: GoogleFonts.poppins(
-                                color: isToday
-                                    ? Colors.white70
-                                    : Colors.black54, // Warna teks
-                                fontSize: 14,
-                              ),
-                            ),
-                            // Tambahkan bulan Masehi di sini
-                            Text(
-                              DateFormat('MMMM').format(day), // Tampilkan bulan Masehi
-                              style: GoogleFonts.poppins(
-                                color: isToday
-                                    ? Colors.white70
-                                    : Colors.black54, // Warna teks
-                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  }),
-                ),
-                // Icon arrow kiri
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: IconButton(
-                      icon:
-                          const Icon(Icons.arrow_back_ios, color: Colors.black),
-                      onPressed: () {
-                        _changeDate(-1); // Pindah ke tanggal sebelumnya
-                      },
-                    ),
-                  ),
-                ),
-                // Icon arrow kanan
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios,
-                          color: Colors.black),
-                      onPressed: () {
-                        _changeDate(1); // Pindah ke tanggal berikutnya
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                ...prayerTimes.entries.map((entry) {
-                  final prayerName =
-                      entry.key == 'Dzuhur' && isFriday(selectedDate)
-                          ? 'Dzuhur/Jumat'
-                          : entry.key;
-
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    color: const Color(0xFF2DDCBE),
-                    child: ListTile(
-                      leading: Icon(
-                        _getPrayerIcon(entry.key),
-                        size: 32,
-                        color: Colors.white,
-                      ),
-                      title: Text(
-                        prayerName,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.white,
+                        const SizedBox(height: 12),
+                        // Sholat berikutnya
+                        Text(
+                          'Sholat berikutnya: $nextPrayer',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                      trailing: Text(
+                        const SizedBox(height: 12),
+                        // Waktu tersisa
+                        Text(
+                          'Waktu tersisa: ${timeUntilNextPrayer.inHours} : ${timeUntilNextPrayer.inMinutes.remainder(60)} : ${timeUntilNextPrayer.inSeconds.remainder(60)}',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Slider Tanggal
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 0),
+              height: 140,
+              color: const Color(0xFF003557),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Tombol panah kiri
+                  IconButton(
+                    icon: Icon(Icons.arrow_left, size: 40, color: Colors.white),
+                    onPressed: () => _changeDate(-1),
+                  ),
+                  // Card tanggal
+                  Container(
+                    height: 100,
+                    width: 230,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: _isToday(selectedDate)
+                          ? Color(0xFF2DDCBE)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: _isToday(selectedDate)
+                          ? null
+                          : Border.all(color: Color(0xFF004C7E), width: 2),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Tanggal Masehi
+                        Text(
+                          DateFormat('EEEE, dd MMMM yyyy', 'id_ID')
+                              .format(selectedDate),
+                          style: GoogleFonts.poppins(
+                            color: _isToday(selectedDate)
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        // Tanggal Hijriah
+                        Text(
+                          hijriDate,
+                          style: GoogleFonts.poppins(
+                            color: _isToday(selectedDate)
+                                ? Colors.white70
+                                : Colors.black54,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Tombol panah kanan
+                  IconButton(
+                    icon:
+                        Icon(Icons.arrow_right, size: 40, color: Colors.white),
+                    onPressed: () => _changeDate(1),
+                  ),
+                ],
+              ),
+            ),
+            // Daftar waktu sholat
+            ...prayerTimes.entries.map((entry) {
+              final prayerName = entry.key == 'Dzuhur' && isFriday(selectedDate)
+                  ? 'Dzuhur/Jumat'
+                  : entry.key;
+
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: const Color(0xFF2DDCBE),
+                child: ListTile(
+                  leading: Icon(
+                    _getPrayerIcon(entry.key),
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                  title: Text(
+                    prayerName,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
                         entry.value,
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: Colors.white,
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-                const SizedBox(height: 20),
-                // Sekat di bawah waktu Isya
-                const Divider(
-                  color: Colors.grey,
-                  thickness: 1,
+                      IconButton(
+                        iconSize: 30, // Ukuran ikon diperbesar
+                        padding:
+                            EdgeInsets.only(left: 16), // Geser ikon ke kanan
+                        icon: Icon(
+                          prayerNotifications[entry.key] ?? false
+                              ? Icons.notifications
+                              : Icons.notifications_none,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => _toggleNotification(entry.key),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ],
+              );
+            }).toList(),
+          ],
+        ),
       ),
     );
   }
