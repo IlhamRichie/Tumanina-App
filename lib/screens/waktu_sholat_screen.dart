@@ -22,18 +22,15 @@ class WaktuSholatScreen extends StatefulWidget {
 
 class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Map<String, String> prayerTimes = {};
-  Map<String, bool> prayerNotifications =
-      {}; // State untuk menyimpan status notifikasi
+  Map<String, int> prayerNotifications = {};
   String errorMessage = '';
   bool _isDisposed = false;
   DateTime selectedDate = DateTime.now();
   bool _isOnline = true; // Status koneksi internet
   String hijriDate = ''; // Variabel untuk menyimpan tanggal dan bulan Hijriyah
-  String userLocation =
-      'Mengambil lokasi...'; // Variabel untuk menyimpan lokasi user
+  String userLocation = 'Mengambil lokasi...'; // Variabel untuk menyimpan lokasi user
   String nextPrayer = ''; // Variabel untuk menyimpan sholat berikutnya
-  Duration timeUntilNextPrayer =
-      Duration.zero; // Variabel untuk menyimpan waktu hingga sholat berikutnya
+  Duration timeUntilNextPrayer = Duration.zero; // Variabel untuk menyimpan waktu hingga sholat berikutnya
 
   bool isFriday(DateTime date) {
     return date.weekday == DateTime.friday;
@@ -41,9 +38,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+    return date.year == now.year && date.month == now.month && date.day == now.day;
   }
 
   @override
@@ -61,11 +56,11 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
     // Inisialisasi status notifikasi
     prayerNotifications = {
-      'Subuh': false,
-      'Dzuhur': false,
-      'Ashar': false,
-      'Maghrib': false,
-      'Isya': false,
+      'Subuh': 0,
+      'Dzuhur': 0,
+      'Ashar': 0,
+      'Maghrib': 0,
+      'Isya': 0,
     };
   }
 
@@ -78,7 +73,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   // Fungsi untuk toggle notifikasi
   void _toggleNotification(String prayerName) {
     setState(() {
-      prayerNotifications[prayerName] = !prayerNotifications[prayerName]!;
+      prayerNotifications[prayerName] = (prayerNotifications[prayerName]! + 1) % 3;
     });
   }
 
@@ -94,8 +89,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Future<void> _getUserLocation() async {
     try {
       Position position = await _getCurrentLocation();
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
         setState(() {
@@ -119,8 +113,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
     for (var entry in sortedPrayerTimes.entries) {
       DateTime prayerTime = DateFormat('HH:mm').parse(entry.value);
-      DateTime prayerDateTime = DateTime(
-          now.year, now.month, now.day, prayerTime.hour, prayerTime.minute);
+      DateTime prayerDateTime = DateTime(now.year, now.month, now.day, prayerTime.hour, prayerTime.minute);
 
       if (prayerDateTime.isAfter(now)) {
         setState(() {
@@ -172,15 +165,13 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     };
   }
 
-  Future<void> fetchPrayerTimesWithCache(
-      http.Client client, DateTime date) async {
+  Future<void> fetchPrayerTimesWithCache(http.Client client, DateTime date) async {
     setState(() {
       prayerTimes = {}; // Reset data sementara
     });
 
     try {
-      prayerTimes =
-          await loadPrayerTimesFromCache(); // Tampilkan cache terlebih dahulu
+      prayerTimes = await loadPrayerTimesFromCache(); // Tampilkan cache terlebih dahulu
       await fetchPrayerTimes(client, date); // Perbarui data dari server
       await savePrayerTimesToCache(prayerTimes); // Simpan ke cache
     } catch (e) {
@@ -202,9 +193,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
         'http://api.aladhan.com/v1/timings/$formattedDate?latitude=$latitude&longitude=$longitude&method=4',
       );
 
-      final response = await client
-          .get(url)
-          .timeout(const Duration(seconds: 10)); // Timeout handling
+      final response = await client.get(url).timeout(const Duration(seconds: 10)); // Timeout handling
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -271,6 +260,19 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     }
   }
 
+  IconData _getNotificationIcon(int status) {
+    switch (status) {
+      case 0:
+        return Icons.notifications_off;
+      case 1:
+        return Icons.notifications;
+      case 2:
+        return Icons.volume_up;
+      default:
+        return Icons.notifications_off;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Jika tidak ada koneksi internet, tampilkan NoInternetScreen
@@ -279,14 +281,13 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
         onRetry: () {
           // Fungsi yang akan dijalankan saat tombol "Coba Lagi" ditekan
           _checkInternetConnection(); // Cek koneksi internet lagi
-          fetchPrayerTimesWithCache(
-              widget.client, selectedDate); // Coba ambil data lagi
+          fetchPrayerTimesWithCache(widget.client, selectedDate); // Coba ambil data lagi
         },
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFF003557), // Ubah warna latar belakang Scaffold
       appBar: AppBar(
         title: Text(
           'Waktu Sholat',
@@ -389,30 +390,23 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   ),
                   // Card tanggal
                   Container(
-                    height: 100,
+                    height: 80,
                     width: 230,
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: _isToday(selectedDate)
-                          ? Color(0xFF2DDCBE)
-                          : Colors.white,
+                      color: _isToday(selectedDate) ? Color(0xFF2DDCBE) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: _isToday(selectedDate)
-                          ? null
-                          : Border.all(color: Color(0xFF004C7E), width: 2),
+                      border: _isToday(selectedDate) ? null : Border.all(color: Color(0xFF004C7E), width: 2),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Tanggal Masehi
                         Text(
-                          DateFormat('EEEE, dd MMMM yyyy', 'id_ID')
-                              .format(selectedDate),
+                          DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(selectedDate),
                           style: GoogleFonts.poppins(
-                            color: _isToday(selectedDate)
-                                ? Colors.white
-                                : Colors.black,
-                            fontSize: 14,
+                            color: _isToday(selectedDate) ? Colors.white : const Color(0xFF004C7E),
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -422,10 +416,8 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                         Text(
                           hijriDate,
                           style: GoogleFonts.poppins(
-                            color: _isToday(selectedDate)
-                                ? Colors.white70
-                                : Colors.black54,
-                            fontSize: 14,
+                            color: _isToday(selectedDate) ? const Color(0xB3FFFFFF) : Colors.black54,
+                            fontSize: 16,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -434,8 +426,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                   ),
                   // Tombol panah kanan
                   IconButton(
-                    icon:
-                        Icon(Icons.arrow_right, size: 40, color: Colors.white),
+                    icon: Icon(Icons.arrow_right, size: 40, color: Colors.white),
                     onPressed: () => _changeDate(1),
                   ),
                 ],
@@ -443,9 +434,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
             ),
             // Daftar waktu sholat
             ...prayerTimes.entries.map((entry) {
-              final prayerName = entry.key == 'Dzuhur' && isFriday(selectedDate)
-                  ? 'Dzuhur/Jumat'
-                  : entry.key;
+              final prayerName = entry.key == 'Dzuhur' && isFriday(selectedDate) ? 'Dzuhur/Jumat' : entry.key;
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -463,7 +452,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                     prayerName,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 16,
                       color: Colors.white,
                     ),
                   ),
@@ -479,12 +468,9 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                       ),
                       IconButton(
                         iconSize: 30, // Ukuran ikon diperbesar
-                        padding:
-                            EdgeInsets.only(left: 16), // Geser ikon ke kanan
+                        padding: EdgeInsets.only(left: 16), // Geser ikon ke kanan
                         icon: Icon(
-                          prayerNotifications[entry.key] ?? false
-                              ? Icons.notifications
-                              : Icons.notifications_none,
+                          _getNotificationIcon(prayerNotifications[entry.key] ?? 0),
                           color: Colors.white,
                         ),
                         onPressed: () => _toggleNotification(entry.key),
