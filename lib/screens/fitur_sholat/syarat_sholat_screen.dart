@@ -7,8 +7,13 @@ class SyaratSholatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Syarat Sholat', style: TextStyle(color: Colors.black)),
+        title: const Text(
+          'Syarat Sholat',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -20,7 +25,7 @@ class SyaratSholatScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        color: Colors.white, // Set the background color to white
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -34,15 +39,15 @@ class SyaratSholatScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF004C7E), // Font color updated
+                        color: Color(0xFF004C7E),
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 8),
                     Text(
                       'Persiapkan diri Anda dengan memenuhi syarat-syarat berikut sebelum melaksanakan sholat.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Color(0xFF004C7E), // Font color updated
+                        color: Color(0xFF004C7E),
                       ),
                     ),
                   ],
@@ -140,51 +145,54 @@ class _RequirementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _GradientBorderCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: _GradientBorderCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 28,
+                color: Colors.white,
               ),
             ),
-            child: Icon(
-              icon,
-              size: 32,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF004C7E),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF004C7E),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF004C7E),
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF004C7E),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

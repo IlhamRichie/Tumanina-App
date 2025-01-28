@@ -17,6 +17,7 @@ import 'fitur_alquran/ayat_al_quran_screen.dart';
 import 'profil/profile_screen.dart';
 import 'fitur_doa/doa_screen.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -33,8 +34,24 @@ class _HomeScreenState extends State<HomeScreen> {
   String timeRemaining = '';
   List<Surah> surahList = [];
   bool isLoading = false;
-  bool hasInternet = true; // Status internet default
-  List<String> bookmarkedAyat = []; // Tambahkan ini di kelas _HomeScreenState
+  bool hasInternet = true;
+  List<String> bookmarkedAyat = [];
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _validateMilestones();
+    fetchPrayerTimes();
+    fetchArticles();
+    fetchSurahList();
+    _loadSholatMilestones();
+    loadBookmarks(); // Tambahkan ini
+    _loadUsername(); // Muat nama pengguna
+    _checkLocationPermission();
+    print('Internet status: $hasInternet'); // Debugging
+    _startTimer();
+  }
 
   // Milestone status untuk setiap sholat
   Map<String, bool> sholatMilestones = {
@@ -55,17 +72,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _validateMilestones();
-    fetchPrayerTimes();
-    fetchArticles();
-    fetchSurahList();
-    _loadSholatMilestones();
-    loadBookmarks(); // Tambahkan ini
-    _loadUsername(); // Muat nama pengguna
-    _checkLocationPermission();
-    print('Internet status: $hasInternet'); // Debugging
+  void dispose() {
+    _timer?.cancel(); // Hentikan timer saat widget dihapus
+    super.dispose();
   }
 
   Future<void> _checkLocationPermission() async {
@@ -247,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           prayerTimes =
               Map<String, String>.from(json.decode(cachedPrayerTimes));
-          calculateNextPrayer();
+          calculateNextPrayer(); // Perbarui waktu setelah data diperbarui
           isLoading = false;
         });
         return;
@@ -274,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
             'Maghrib': data['data']['timings']['Maghrib'],
             'Isya': data['data']['timings']['Isha'],
           };
-          calculateNextPrayer();
+          calculateNextPrayer(); // Perbarui waktu setelah data diperbarui
           isLoading = false;
         });
 
@@ -327,31 +336,63 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          calculateNextPrayer(); // Perbarui waktu setiap detik
+        });
+      }
+    });
+  }
+
   void calculateNextPrayer() {
     final now = DateTime.now();
-    DateTime? nearestTime;
-    String nearestPrayer = '';
+    DateTime? nextPrayerTime;
+    String nextPrayerName = '';
+    String currentPrayerName = '';
+    DateTime? currentPrayerTime;
 
+    // Iterasi melalui semua waktu sholat
     prayerTimes.forEach((prayer, time) {
       final prayerTimeToday = DateFormat('HH:mm').parse(time);
       final prayerDateTime = DateTime(now.year, now.month, now.day,
           prayerTimeToday.hour, prayerTimeToday.minute);
 
+      // Cek apakah waktu sholat saat ini sedang berlangsung
+      if (prayerDateTime.isBefore(now) &&
+          (currentPrayerTime == null ||
+              prayerDateTime.isAfter(currentPrayerTime!))) {
+        currentPrayerTime = prayerDateTime;
+        currentPrayerName = prayer;
+      }
+
+      // Cek waktu sholat berikutnya
       if (prayerDateTime.isAfter(now) &&
-          (nearestTime == null || prayerDateTime.isBefore(nearestTime!))) {
-        nearestTime = prayerDateTime;
-        nearestPrayer = prayer;
+          (nextPrayerTime == null ||
+              prayerDateTime.isBefore(nextPrayerTime!))) {
+        nextPrayerTime = prayerDateTime;
+        nextPrayerName = prayer;
       }
     });
 
-    if (nearestTime != null) {
-      setState(() {
-        nextPrayer = nearestPrayer;
-        final difference = nearestTime!.difference(now);
+    // Set state untuk waktu sholat saat ini
+    setState(() {
+      if (currentPrayerTime != null) {
+        nextPrayer = currentPrayerName; // Waktu sholat saat ini
+      } else {
+        nextPrayer = 'Tidak ada sholat yang sedang berlangsung';
+      }
+
+      // Hitung countdown menuju waktu sholat berikutnya
+      if (nextPrayerTime != null) {
+        final difference = nextPrayerTime!.difference(now);
         timeRemaining =
-            '${difference.inHours} jam ${difference.inMinutes % 60} menit Menuju Waktu Sholat';
-      });
-    }
+            '${difference.inHours} jam ${difference.inMinutes % 60} menit ${difference.inSeconds % 60} detik menuju $nextPrayerName';
+      } else {
+        timeRemaining = 'Tidak ada sholat berikutnya hari ini';
+      }
+    });
   }
 
   void _validateMilestones() {
@@ -626,8 +667,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Waktu Sholat Saat Ini dengan teks "Sekarang"
           Text(
-            nextPrayer.isNotEmpty ? nextPrayer : 'Mengambil data...',
+            nextPrayer.isNotEmpty
+                ? 'Saat ini $nextPrayer'
+                : 'Mengambil data...',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -635,6 +679,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 8),
+          // Countdown Menuju Waktu Sholat Berikutnya
           Text(
             timeRemaining.isNotEmpty
                 ? timeRemaining

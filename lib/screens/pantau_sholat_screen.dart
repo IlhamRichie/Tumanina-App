@@ -497,12 +497,12 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                               onTap: () {
                                 if (entry.key == 'subuh' && !isSubuhValid()) {
                                   _showErrorSnackbar(
-                                      'Tidak dapat mencentang Subuh setelah waktu matahari terbit!');
+                                      'Tidak dapat mencentang Subuh \nsetelah waktu matahari terbit!');
                                 } else if (isTimeValid(entry.key)) {
                                   updateLog(entry.key, !entry.value);
                                 } else {
                                   _showErrorSnackbar(
-                                      'Waktu untuk ${entry.key.capitalize()} telah berlalu atau belum waktunya.');
+                                      'Waktu untuk ${entry.key.capitalize()} telah berlalu \natau belum waktunya.');
                                 }
                               },
                             );

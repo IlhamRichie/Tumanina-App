@@ -9,7 +9,10 @@ class MengenalSholatScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Mengenal Sholat',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -22,7 +25,7 @@ class MengenalSholatScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        color: Colors.white, // Set the background color to white
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
@@ -38,9 +41,9 @@ class MengenalSholatScreen extends StatelessWidget {
                         const Text(
                           'Mengenal Sholat',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF004C7E), // Font color updated
+                            color: Color(0xFF004C7E),
                           ),
                         ),
                       ],
@@ -50,7 +53,7 @@ class MengenalSholatScreen extends StatelessWidget {
                       'Sholat adalah ibadah wajib yang harus dilaksanakan oleh umat Muslim. Sholat terbagi menjadi beberapa jenis, seperti:',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Color(0xFF004C7E), // Font color updated
+                        color: Color(0xFF004C7E),
                       ),
                     ),
                   ],
@@ -63,6 +66,7 @@ class MengenalSholatScreen extends StatelessWidget {
                     'Sholat lima waktu yang harus dilaksanakan setiap hari (Subuh, Dzuhur, Ashar, Maghrib, dan Isya).',
                 icon: Icons.timer,
               ),
+              const SizedBox(height: 12),
               _SholatCard(
                 title: 'Sholat Sunnah',
                 description:
@@ -75,7 +79,7 @@ class MengenalSholatScreen extends StatelessWidget {
                   'Dengan mengenal jenis-jenis sholat, diharapkan kita dapat lebih memahami pentingnya menjaga sholat dalam kehidupan sehari-hari.',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF004C7E), // Font color updated
+                    color: Color(0xFF004C7E),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -130,36 +134,39 @@ class _SholatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _GradientBorderCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _IconCircle(icon: icon),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF004C7E),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12), // Add margin between cards
+      child: _GradientBorderCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _IconCircle(icon: icon),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF004C7E),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF004C7E),
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF004C7E),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -184,7 +191,7 @@ class _IconCircle extends StatelessWidget {
       ),
       child: Icon(
         icon,
-        size: 32,
+        size: 28, // Adjusted icon size for better proportion
         color: Colors.white,
       ),
     );

@@ -151,17 +151,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           thickness: 1,
                           color: Color.fromRGBO(224, 224, 224, 1)),
                       _buildProfileOption(
-                        icon: Icons.notifications_outlined,
-                        text: 'Notifikasi',
-                        onTap: () {
-                          // Tambahkan aksi untuk menangani notifikasi
-                        },
-                      ),
-                      const Divider(
-                          height: 20,
-                          thickness: 1,
-                          color: Color.fromRGBO(224, 224, 224, 1)),
-                      _buildProfileOption(
                         icon: Icons.feedback_outlined,
                         text: 'Feedback',
                         onTap: () {

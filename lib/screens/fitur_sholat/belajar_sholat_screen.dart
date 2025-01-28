@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'gerakan_sholat/sholat_screen.dart';
+import 'kesalahan_sholat_screen.dart';
+import 'keutamaan_sholat_screen.dart';
 import 'mengenal_sholat_screen.dart';
 import 'rukun_sholat_screen.dart';
 import 'syarat_sholat_screen.dart';
@@ -13,6 +15,18 @@ class BelajarSholatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> belajarSholatItems = [
+      {
+        'title': 'Gerakan dan Bacaan Sholat',
+        'icon': Icons.directions_walk,
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SholatScreen(),
+            ),
+          );
+        },
+      },
       {
         'title': 'Mengenal Sholat dan Jenis Sholat',
         'icon': Icons.book,
@@ -62,13 +76,25 @@ class BelajarSholatScreen extends StatelessWidget {
         },
       },
       {
-        'title': 'Gerakan dan Bacaan Sholat',
-        'icon': Icons.directions_walk,
+        'title': 'Keutamaan Sholat',
+        'icon': Icons.star,
         'action': () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const SholatScreen(),
+              builder: (context) => const KeutamaanSholatScreen(),
+            ),
+          );
+        },
+      },
+      {
+        'title': 'Kesalahan Umum dalam Sholat',
+        'icon': Icons.warning,
+        'action': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const KesalahanSholatScreen(),
             ),
           );
         },
@@ -111,7 +137,7 @@ class BelajarSholatScreen extends StatelessWidget {
               ),
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF2DDCBE), Color(0xFF004C7E)],

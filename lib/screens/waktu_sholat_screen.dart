@@ -24,13 +24,13 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   Map<String, String> prayerTimes = {};
   Map<String, int> prayerNotifications = {};
   String errorMessage = '';
-  bool _isDisposed = false;
   DateTime selectedDate = DateTime.now();
   bool _isOnline = true; // Status koneksi internet
   String hijriDate = ''; // Variabel untuk menyimpan tanggal dan bulan Hijriyah
   String userLocation = 'Mengambil lokasi...'; // Variabel untuk menyimpan lokasi user
   String nextPrayer = ''; // Variabel untuk menyimpan sholat berikutnya
   Duration timeUntilNextPrayer = Duration.zero; // Variabel untuk menyimpan waktu hingga sholat berikutnya
+  Timer? _timer; // Timer untuk perhitungan waktu sholat berikutnya
 
   bool isFriday(DateTime date) {
     return date.weekday == DateTime.friday;
@@ -48,7 +48,9 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     _checkInternetConnection(); // Cek koneksi internet saat init
     fetchPrayerTimesWithCache(widget.client, selectedDate);
     _getUserLocation(); // Ambil lokasi user
-    Timer.periodic(Duration(seconds: 1), (timer) {
+
+    // Timer untuk perhitungan waktu sholat berikutnya
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (mounted) {
         _calculateNextPrayer(); // Perbarui hitung mundur setiap detik
       }
@@ -66,23 +68,27 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
   @override
   void dispose() {
-    _isDisposed = true;
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }
 
   // Fungsi untuk toggle notifikasi
   void _toggleNotification(String prayerName) {
-    setState(() {
-      prayerNotifications[prayerName] = (prayerNotifications[prayerName]! + 1) % 3;
-    });
+    if (mounted) {
+      setState(() {
+        prayerNotifications[prayerName] = (prayerNotifications[prayerName]! + 1) % 3;
+      });
+    }
   }
 
   // Fungsi untuk mengecek koneksi internet
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-    setState(() {
-      _isOnline = connectivityResult != ConnectivityResult.none;
-    });
+    if (mounted) {
+      setState(() {
+        _isOnline = connectivityResult != ConnectivityResult.none;
+      });
+    }
   }
 
   // Fungsi untuk mengambil lokasi user
@@ -92,15 +98,19 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
-        setState(() {
-          // Hanya menampilkan nama kota (locality)
-          userLocation = place.locality ?? 'Lokasi tidak ditemukan';
-        });
+        if (mounted) {
+          setState(() {
+            // Hanya menampilkan nama kota (locality)
+            userLocation = place.locality ?? 'Lokasi tidak ditemukan';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        userLocation = 'Lokasi tidak ditemukan';
-      });
+      if (mounted) {
+        setState(() {
+          userLocation = 'Lokasi tidak ditemukan';
+        });
+      }
     }
   }
 
@@ -116,10 +126,12 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       DateTime prayerDateTime = DateTime(now.year, now.month, now.day, prayerTime.hour, prayerTime.minute);
 
       if (prayerDateTime.isAfter(now)) {
-        setState(() {
-          nextPrayer = entry.key;
-          timeUntilNextPrayer = prayerDateTime.difference(now);
-        });
+        if (mounted) {
+          setState(() {
+            nextPrayer = entry.key;
+            timeUntilNextPrayer = prayerDateTime.difference(now);
+          });
+        }
         break;
       }
     }
@@ -166,9 +178,11 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   }
 
   Future<void> fetchPrayerTimesWithCache(http.Client client, DateTime date) async {
-    setState(() {
-      prayerTimes = {}; // Reset data sementara
-    });
+    if (mounted) {
+      setState(() {
+        prayerTimes = {}; // Reset data sementara
+      });
+    }
 
     try {
       prayerTimes = await loadPrayerTimesFromCache(); // Tampilkan cache terlebih dahulu
@@ -197,7 +211,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (!_isDisposed && mounted) {
+        if (mounted) {
           setState(() {
             prayerTimes = {
               'Subuh': data['data']['timings']['Fajr'],
@@ -237,10 +251,12 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   }
 
   void _changeDate(int days) {
-    setState(() {
-      selectedDate = selectedDate.add(Duration(days: days));
-    });
-    fetchPrayerTimesWithCache(widget.client, selectedDate);
+    if (mounted) {
+      setState(() {
+        selectedDate = selectedDate.add(Duration(days: days));
+      });
+      fetchPrayerTimesWithCache(widget.client, selectedDate);
+    }
   }
 
   IconData _getPrayerIcon(String prayerName) {
