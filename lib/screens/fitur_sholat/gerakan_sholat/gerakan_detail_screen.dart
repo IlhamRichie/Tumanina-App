@@ -97,9 +97,12 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
               _buildBubbleContainer(
                 title: "Video Tutorial",
                 content: null,
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: WebViewWidget(controller: _webViewController),
+                child: GestureDetector(
+                  onTap: () => _showVideoPopup(context),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: WebViewWidget(controller: _webViewController),
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -154,6 +157,23 @@ class _GerakanDetailScreenState extends State<GerakanDetailScreen>
           ),
         ),
       ),
+    );
+  }
+
+  void _showVideoPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: WebViewWidget(
+              controller: _webViewController,
+            ),
+          ),
+        );
+      },
     );
   }
 

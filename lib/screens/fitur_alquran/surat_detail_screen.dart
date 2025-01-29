@@ -27,9 +27,10 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   String surahAudioUrl = '';
   bool isLoading = true;
   bool isPlaying = false;
-  bool hasInternet = true; // Status koneksi internet
-
-  List<String> bookmarkedAyat = []; // List untuk bookmark
+  bool hasInternet = true;
+  String surahArt = ''; // Untuk menyimpan arti surat
+  int surahNumber = 0; // Untuk menyimpan nomor surat
+  List<String> bookmarkedAyat = [];
 
   @override
   void initState() {
@@ -43,15 +44,15 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         hasInternet = false;
-        isLoading = false;
       });
-      _showErrorSnackbar('Tidak ada koneksi internet. Mohon periksa jaringan Anda.');
+      _loadCachedData(); // Muat data dari cache jika tidak ada internet
     } else {
-      fetchSurahDetail();
-      loadBookmarks();
+      fetchSurahDetail(); // Ambil data dari API jika ada internet
     }
+    loadBookmarks();
   }
 
+  // Fungsi untuk mengambil data dari API
   Future<void> fetchSurahDetail() async {
     try {
       final url =
@@ -63,8 +64,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         setState(() {
           ayatList = data['ayat'];
           surahAudioUrl = data['audio'];
+          surahArt = data['arti']; // Simpan arti surat
+          surahNumber = data['nomor']; // Simpan nomor surat
           isLoading = false;
         });
+        _saveDataToCache(data);
       } else {
         throw Exception('Gagal memuat detail surah');
       }
@@ -76,9 +80,40 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
   }
 
+  // Fungsi untuk menyimpan data ke SharedPreferences
+  Future<void> _saveDataToCache(Map<String, dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    print("Menyimpan data: ${json.encode(data)}"); // Debugging
+    prefs.setString('surah_${widget.surahNumber}', json.encode(data));
+  }
+
+  Future<void> _loadCachedData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? cachedData = prefs.getString('surah_${widget.surahNumber}');
+    print("Data yang diambil dari cache: $cachedData"); // Debugging
+
+    if (cachedData != null) {
+      final data = json.decode(cachedData);
+      print("Data setelah decode: $data"); // Debugging
+      if (data['ayat'] != null) {
+        setState(() {
+          ayatList = data['ayat'];
+          surahAudioUrl = data['audio'] ?? '';
+          surahArt = data['arti'] ?? '';
+          surahNumber = data['nomor'] ?? 0;
+          isLoading = false;
+        });
+      } else {
+        _showErrorSnackbar('Data ayat tidak tersedia.');
+      }
+    } else {
+      _showErrorSnackbar('Tidak ada data tersimpan untuk surah ini.');
+    }
+  }
+
   Future<void> playSurahAudio() async {
     if (surahAudioUrl.isEmpty) {
-      _showErrorSnackbar('Audio tidak tersedia untuk surah ini.');
+      _showErrorSnackbar('Audio tersedia saat online.');
       return;
     }
 
@@ -177,7 +212,15 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Surah Number: ${widget.surahNumber}',
+            'Arti: $surahArt', // Tampilkan arti surat
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Nomor Surat: $surahNumber', // Tampilkan nomor surat
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white70,
@@ -196,59 +239,103 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         String ayatData = '${widget.surahNumber}:${ayat['nomor']}';
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          padding: const EdgeInsets.all(2.0),
+          margin: const EdgeInsets.symmetric(
+              vertical: 6.0), // Mengurangi jarak antar kartu
+          padding: const EdgeInsets.all(
+              2.0), // Mengurangi padding luar agar lebih tipis
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6), // Menipiskan border luar
           ),
           child: Container(
+            padding: const EdgeInsets.all(
+                12.0), // Mengurangi padding dalam agar lebih ringkas
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(4), // Menipiskan border card
             ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16.0),
-              title: Text(
-                ayat['ar'],
-                style: GoogleFonts.amiri(
-                  fontSize: 16,
-                  color: const Color(0xFF004C7E),
-                  fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment
+                  .start, // Supaya transliterasi dan arti rata kiri
+              children: [
+                // Row untuk nomor ayat dan bookmark
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: const Color(0xFF2DDCBE),
+                      radius: 14,
+                      child: Text(
+                        '${ayat['nomor']}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        bookmarkedAyat.contains(ayatData)
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
+                        color: bookmarkedAyat.contains(ayatData)
+                            ? const Color(0xFF2DDCBE)
+                            : Colors.grey,
+                      ),
+                      onPressed: () {
+                        toggleBookmark(ayatData);
+                      },
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.right,
-              ),
-              subtitle: Text(
-                ayat['idn'],
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.black87,
+
+                const SizedBox(height: 8),
+
+                // Ayat Arab (rata kanan)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    ayat['ar'],
+                    style: GoogleFonts.amiri(
+                      fontSize: 18,
+                      color: const Color(0xFF004C7E),
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
                 ),
-              ),
-              leading: CircleAvatar(
-                backgroundColor: const Color(0xFF2DDCBE),
-                child: Text(
-                  '${ayat['nomor']}',
-                  style: const TextStyle(color: Colors.white),
+
+                const SizedBox(height: 12),
+                
+
+                // Transliterasi Latin (rata kiri)
+                Text(
+                  ayat['tr'],
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[700],
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-              ),
-              trailing: IconButton(
-                icon: Icon(
-                  bookmarkedAyat.contains(ayatData)
-                      ? Icons.bookmark
-                      : Icons.bookmark_border,
-                  color: bookmarkedAyat.contains(ayatData)
-                      ? const Color(0xFF2DDCBE)
-                      : Colors.grey,
+
+                const SizedBox(height: 6),
+
+                // Terjemahan Indonesia (rata kiri)
+                Text(
+                  ayat['idn'],
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-                onPressed: () {
-                  toggleBookmark(ayatData);
-                },
-              ),
+              ],
             ),
           ),
         );
