@@ -121,6 +121,25 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       prayerTimes.entries.toList()..sort((a, b) => a.value.compareTo(b.value)),
     );
 
+    // Cek jika waktu saat ini sudah melewati sholat Isya
+    DateTime isyaTime = DateFormat('HH:mm').parse(prayerTimes['Isya'] ?? '00:00');
+    DateTime isyaDateTime = DateTime(now.year, now.month, now.day, isyaTime.hour, isyaTime.minute);
+
+    if (now.isAfter(isyaDateTime)) {
+      // Jika sudah melewati Isya, sholat berikutnya adalah Subuh hari esok
+      DateTime subuhTime = DateFormat('HH:mm').parse(prayerTimes['Subuh'] ?? '00:00');
+      DateTime subuhDateTime = DateTime(now.year, now.month, now.day + 1, subuhTime.hour, subuhTime.minute);
+
+      if (mounted) {
+        setState(() {
+          nextPrayer = 'Subuh (Besok)';
+          timeUntilNextPrayer = subuhDateTime.difference(now);
+        });
+      }
+      return;
+    }
+
+    // Jika belum melewati Isya, cari sholat berikutnya hari ini
     for (var entry in sortedPrayerTimes.entries) {
       DateTime prayerTime = DateFormat('HH:mm').parse(entry.value);
       DateTime prayerDateTime = DateTime(now.year, now.month, now.day, prayerTime.hour, prayerTime.minute);

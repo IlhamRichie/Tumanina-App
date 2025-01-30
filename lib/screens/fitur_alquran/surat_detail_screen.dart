@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path; // Add prefix here
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final int surahNumber;
@@ -28,8 +31,8 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
   bool isLoading = true;
   bool isPlaying = false;
   bool hasInternet = true;
-  String surahArt = ''; // Untuk menyimpan arti surat
-  int surahNumber = 0; // Untuk menyimpan nomor surat
+  String surahArt = '';
+  int surahNumber = 0;
   List<String> bookmarkedAyat = [];
 
   @override
@@ -38,37 +41,35 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     _checkInternetConnection();
   }
 
-  // Fungsi untuk memeriksa koneksi internet
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         hasInternet = false;
       });
-      _loadCachedData(); // Muat data dari cache jika tidak ada internet
+      _loadCachedData();
     } else {
-      fetchSurahDetail(); // Ambil data dari API jika ada internet
+      fetchSurahDetail();
     }
     loadBookmarks();
   }
 
-  // Fungsi untuk mengambil data dari API
   Future<void> fetchSurahDetail() async {
     try {
-      final url =
-          Uri.parse('https://equran.id/api/surat/${widget.surahNumber}');
+      final url = Uri.parse('https://equran.id/api/surat/${widget.surahNumber}');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        await _saveDataToFile(json.encode(data), 'surah_${widget.surahNumber}.json');
+
         setState(() {
           ayatList = data['ayat'];
           surahAudioUrl = data['audio'];
-          surahArt = data['arti']; // Simpan arti surat
-          surahNumber = data['nomor']; // Simpan nomor surat
+          surahArt = data['arti'];
+          surahNumber = data['nomor'];
           isLoading = false;
         });
-        _saveDataToCache(data);
       } else {
         throw Exception('Gagal memuat detail surah');
       }
@@ -80,21 +81,11 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     }
   }
 
-  // Fungsi untuk menyimpan data ke SharedPreferences
-  Future<void> _saveDataToCache(Map<String, dynamic> data) async {
-    final prefs = await SharedPreferences.getInstance();
-    print("Menyimpan data: ${json.encode(data)}"); // Debugging
-    prefs.setString('surah_${widget.surahNumber}', json.encode(data));
-  }
-
   Future<void> _loadCachedData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? cachedData = prefs.getString('surah_${widget.surahNumber}');
-    print("Data yang diambil dari cache: $cachedData"); // Debugging
+    final String? cachedData = await _loadDataFromFile('surah_${widget.surahNumber}.json');
 
     if (cachedData != null) {
       final data = json.decode(cachedData);
-      print("Data setelah decode: $data"); // Debugging
       if (data['ayat'] != null) {
         setState(() {
           ayatList = data['ayat'];
@@ -109,6 +100,25 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     } else {
       _showErrorSnackbar('Tidak ada data tersimpan untuk surah ini.');
     }
+  }
+
+  Future<File> _saveDataToFile(String data, String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File(path.join(directory.path, fileName));
+    return file.writeAsString(data);
+  }
+
+  Future<String?> _loadDataFromFile(String fileName) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File(path.join(directory.path, fileName));
+      if (await file.exists()) {
+        return await file.readAsString();
+      }
+    } catch (e) {
+      print("Error reading file: $e");
+    }
+    return null;
   }
 
   Future<void> playSurahAudio() async {
@@ -160,7 +170,6 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
     await prefs.setStringList('bookmarkedAyat', bookmarkedAyat);
   }
 
-  // Fungsi untuk menampilkan SnackBar dengan pesan error
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -212,7 +221,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Arti: $surahArt', // Tampilkan arti surat
+            'Arti: $surahArt',
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white70,
@@ -220,7 +229,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Nomor Surat: $surahNumber', // Tampilkan nomor surat
+            'Nomor Surat: $surahNumber',
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: Colors.white70,
@@ -239,30 +248,25 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
         String ayatData = '${widget.surahNumber}:${ayat['nomor']}';
 
         return Container(
-          margin: const EdgeInsets.symmetric(
-              vertical: 6.0), // Mengurangi jarak antar kartu
-          padding: const EdgeInsets.all(
-              2.0), // Mengurangi padding luar agar lebih tipis
+          margin: const EdgeInsets.symmetric(vertical: 6.0),
+          padding: const EdgeInsets.all(2.0),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF004C7E), Color(0xFF2DDCBE)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(6), // Menipiskan border luar
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Container(
-            padding: const EdgeInsets.all(
-                12.0), // Mengurangi padding dalam agar lebih ringkas
+            padding: const EdgeInsets.all(12.0),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(4), // Menipiskan border card
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment
-                  .start, // Supaya transliterasi dan arti rata kiri
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Row untuk nomor ayat dan bookmark
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -293,10 +297,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 8),
-
-                // Ayat Arab (rata kanan)
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
@@ -309,11 +310,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                     textAlign: TextAlign.right,
                   ),
                 ),
-
                 const SizedBox(height: 12),
-                
-
-                // Transliterasi Latin (rata kiri)
                 Text(
                   ayat['tr'],
                   style: GoogleFonts.poppins(
@@ -323,10 +320,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
                   ),
                   textAlign: TextAlign.left,
                 ),
-
                 const SizedBox(height: 6),
-
-                // Terjemahan Indonesia (rata kiri)
                 Text(
                   ayat['idn'],
                   style: GoogleFonts.poppins(

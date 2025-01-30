@@ -379,7 +379,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // Set state untuk waktu sholat saat ini
     setState(() {
       if (currentPrayerTime != null) {
-        nextPrayer = currentPrayerName; // Waktu sholat saat ini
+        // Cek khusus untuk Shubuh
+        if (currentPrayerName == 'Shubuh' && now.hour >= 7) {
+          nextPrayer = 'Shubuh Telah Berlalu';
+        } else {
+          nextPrayer = 'Saat ini $currentPrayerName';
+        }
       } else {
         nextPrayer = 'Tidak ada sholat yang sedang berlangsung';
       }
@@ -390,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
         timeRemaining =
             '${difference.inHours} jam ${difference.inMinutes % 60} menit ${difference.inSeconds % 60} detik menuju $nextPrayerName';
       } else {
-        timeRemaining = 'Tidak ada sholat berikutnya hari ini';
+        timeRemaining = 'Menunggu sholat Shubuh berikutnya hari esok';
       }
     });
   }
@@ -670,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Waktu Sholat Saat Ini dengan teks "Sekarang"
           Text(
             nextPrayer.isNotEmpty
-                ? 'Saat ini $nextPrayer'
+                ? nextPrayer // Tampilkan teks sesuai kondisi
                 : 'Mengambil data...',
             style: const TextStyle(
               color: Colors.white,

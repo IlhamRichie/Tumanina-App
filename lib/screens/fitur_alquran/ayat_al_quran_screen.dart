@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path; // Add prefix here
+
 
 const Map<int, String> latinNames = {
   1: "Al-Fatihah",
@@ -144,8 +146,7 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
   }
 
   Future<void> loadSurahList() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? cachedData = prefs.getString('surahList');
+    final String? cachedData = await _loadDataFromFile('surahList.json');
 
     if (cachedData != null) {
       final List<dynamic> data = json.decode(cachedData);
@@ -171,8 +172,7 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setString('surahList', json.encode(data));
+        await _saveDataToFile(json.encode(data), 'surahList.json');
 
         setState(() {
           surahList = data.map((item) => Surah.fromJson(item)).toList();
@@ -193,6 +193,25 @@ class _AyatAlQuranScreenState extends State<AyatAlQuranScreen> {
         errorMessage = 'Error: $e';
       });
     }
+  }
+
+  Future<File> _saveDataToFile(String data, String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File(path.join(directory.path, fileName));
+    return file.writeAsString(data);
+  }
+
+  Future<String?> _loadDataFromFile(String fileName) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File(path.join(directory.path, fileName));
+      if (await file.exists()) {
+        return await file.readAsString();
+      }
+    } catch (e) {
+      print("Error reading file: $e");
+    }
+    return null;
   }
 
   void _filterSurahList(String query) {

@@ -4,7 +4,7 @@ import 'package:Tumanina/services/api_service.dart';
 import 'package:Tumanina/screens/home_screen.dart';
 import 'package:Tumanina/screens/artikel/artikel_screen.dart';
 import 'package:Tumanina/screens/profil/profile_screen.dart';
-import '/widgets/no_internet.dart';
+import '../../widgets/coming_soon.dart';
 
 class DiskusiScreen extends StatefulWidget {
   const DiskusiScreen({super.key});
@@ -59,7 +59,7 @@ class _DiskusiScreenState extends State<DiskusiScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildSkeletonList();
           } else if (snapshot.hasError) {
-            return NoInternetScreen(
+            return ComingSoonScreen(
               onRetry: _refreshThreads,
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
