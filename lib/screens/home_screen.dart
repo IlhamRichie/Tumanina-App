@@ -186,39 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _saveReadingHistory(Surah surah) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      List<String> history = prefs.getStringList('readingHistory') ?? [];
-
-      // Data surah yang akan disimpan
-      final String surahData = json.encode({
-        'id': surah.id,
-        'name': surah.name,
-        'translation': surah.translation,
-        'ayatCount': surah.ayatCount,
-      });
-
-      // Cek apakah surah sudah ada dalam riwayat
-      if (!history.any((item) => json.decode(item)['id'] == surah.id)) {
-        history.add(surahData);
-        await prefs.setStringList('readingHistory', history);
-      }
-    } catch (e) {
-      print('Error saving reading history: $e');
-    }
-  }
-
-  Future<void> _setNotificationShown() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notificationShown', true);
-  }
-
-  Future<bool> _getNotificationShown() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('notificationShown') ?? false;
-  }
-
   Future<void> _saveSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
     print('Saving milestones: $sholatMilestones');
@@ -869,74 +836,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMenuButton() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: 0,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.article_rounded),
-            label: 'Artikel',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mark_chat_unread),
-            label: 'Diskusi',
-            backgroundColor: Color(0xFF004C7E), // Warna untuk Diskusi
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Profil',
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            // Tetap di HomeScreen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          } else if (index == 1) {
-            // Navigasi ke ArtikelScreen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ArtikelScreen()),
-            );
-          } else if (index == 2) {
-            // Navigasi ke ProfilScreen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const DiskusiScreen()),
-            );
-          } else if (index == 3) {
-            // Navigasi ke ProfilScreen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          }
-        },
       ),
     );
   }

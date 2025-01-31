@@ -4,9 +4,13 @@ import 'package:intl/date_symbol_data_local.dart'; // Import untuk inisialisasi 
 import 'screens/intro_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/api_service.dart';
+import 'services/notif_service.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init(); // Inisialisasi notification service
+  tz.initializeTimeZones(); // Inisialisasi timezone
 
   // Inisialisasi locale untuk format tanggal
   await initializeDateFormatting(
