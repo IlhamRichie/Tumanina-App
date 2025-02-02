@@ -347,9 +347,11 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
   String _getTodayDetails() {
     final now = DateTime.now();
     // Set locale ke 'id_ID' untuk bahasa Indonesia
-    final dayName = DateFormat('EEEE', 'id_ID').format(now); // Format hari (e.g., "Senin")
+    final dayName =
+        DateFormat('EEEE', 'id_ID').format(now); // Format hari (e.g., "Senin")
     final date = DateFormat('d').format(now); // Tanggal (e.g., "1")
-    final month = DateFormat('MMMM', 'id_ID').format(now); // Bulan (e.g., "Oktober")
+    final month =
+        DateFormat('MMMM', 'id_ID').format(now); // Bulan (e.g., "Oktober")
     final year = DateFormat('y').format(now); // Tahun (e.g., "2023")
     return '$dayName, $date $month $year';
   }
@@ -451,9 +453,10 @@ class _PantauSholatScreenState extends State<PantauSholatScreen> {
                           const SizedBox(height: 16),
                           ...todayLog.entries.map((entry) {
                             final prayerTimeInfo = getNextPrayerInfo(entry.key);
-                            final prayerName = entry.key == 'dzuhur' && isFriday()
-                                ? 'Dzuhur/Jumat'
-                                : entry.key.capitalize();
+                            final prayerName =
+                                entry.key == 'dzuhur' && isFriday()
+                                    ? 'Dzuhur/Jumat'
+                                    : entry.key.capitalize();
                             return ListTile(
                               leading: Icon(
                                 getPrayerIcon(entry.key),

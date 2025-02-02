@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -9,36 +10,43 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  bool _isInitialized = false;
+
   // Initialize the notification service
   Future<void> init() async {
+    if (_isInitialized) return;
+
     try {
-      // Set up Android-specific settings
+      tz.initializeTimeZones();
+
       const AndroidInitializationSettings initializationSettingsAndroid =
           AndroidInitializationSettings('@mipmap/ic_launcher');
 
       const InitializationSettings initializationSettings =
           InitializationSettings(android: initializationSettingsAndroid);
 
-      // Create notification channel
+      // Buat channel notification dengan suara default
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
         'tumanina_notifications', // Channel ID
         'Tumanina Notifications', // Channel Name
         importance: Importance.max,
-        enableLights: true,
-        enableVibration: true,
         playSound: true,
+        sound: RawResourceAndroidNotificationSound(
+            'notification'), // Suara default
       );
 
-      // Initialize local notifications plugin
       await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-      // Register the notification channel
       await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(channel);
+
+      _isInitialized = true;
+      print("Notification service initialized successfully");
     } catch (e) {
       print("Error initializing notifications: $e");
+      _isInitialized = false;
     }
   }
 
@@ -50,24 +58,29 @@ class NotificationService {
     required DateTime scheduledTime,
     required String sound,
   }) async {
+    if (!_isInitialized) {
+      print("Notification service is not initialized");
+      return;
+    }
+
     try {
-      // Ensure the scheduled time is in the future
       if (scheduledTime.isBefore(DateTime.now())) {
         print("Scheduled time must be in the future");
         return;
       }
 
-      // Convert scheduled time to TZDateTime for time zone support
-      final tz.TZDateTime scheduledTZTime = tz.TZDateTime.from(scheduledTime, tz.local);
+      final tz.TZDateTime scheduledTZTime =
+          tz.TZDateTime.from(scheduledTime, tz.local);
 
-      // Android-specific notification settings
+      // Gunakan suara yang dipilih
       final AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
         'prayer_notifications', // Channel ID
         'Prayer Notifications', // Channel Name
         importance: Importance.max,
         priority: Priority.high,
-        sound: RawResourceAndroidNotificationSound(sound),
+        sound: RawResourceAndroidNotificationSound(
+            sound), // Gunakan suara yang dipilih
         playSound: true,
         enableLights: true,
         enableVibration: true,
@@ -76,17 +89,19 @@ class NotificationService {
       final NotificationDetails platformChannelSpecifics =
           NotificationDetails(android: androidPlatformChannelSpecifics);
 
-      // Schedule the notification
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        scheduledTZTime, // Use TZDateTime
+        scheduledTZTime,
         platformChannelSpecifics,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, // Allow notification while idle
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
+
+      print(
+          "Notification scheduled successfully for $scheduledTZTime with sound: $sound");
     } catch (e) {
       print("Error scheduling notification: $e");
     }
@@ -94,8 +109,14 @@ class NotificationService {
 
   // Cancel a notification by ID
   Future<void> cancelNotification(int id) async {
+    if (!_isInitialized) {
+      print("Notification service is not initialized");
+      return;
+    }
+
     try {
       await flutterLocalNotificationsPlugin.cancel(id);
+      print("Notification with id $id canceled successfully");
     } catch (e) {
       print("Error canceling notification: $e");
     }

@@ -8,6 +8,7 @@ import 'edit_profile_screen.dart';
 import 'feedback_form.dart';
 import '../fitur_diskusi/diskusi_screen.dart';
 import '../../services/api_service.dart';
+import 'test_notification_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -166,6 +167,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         text: 'Keluar',
                         onTap: () {
                           _showIslamicLogoutDialog(context);
+                        },
+                      ),
+                      _buildProfileOption(
+                        icon: Icons.notification_important,
+                        text: 'Test Notifikasi',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TestNotificationScreen(),
+                            ),
+                          );
                         },
                       ),
                     ],

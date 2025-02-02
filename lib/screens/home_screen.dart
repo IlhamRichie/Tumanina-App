@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchArticles();
     fetchSurahList();
     _loadSholatMilestones();
+    _checkAndResetMilestones();
     loadBookmarks(); // Tambahkan ini
     _loadUsername(); // Muat nama pengguna
     _checkLocationPermission();
@@ -188,17 +189,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
-    print('Saving milestones: $sholatMilestones');
     await prefs.setString('sholatMilestones', json.encode(sholatMilestones));
   }
 
   Future<void> _loadSholatMilestones() async {
     final prefs = await SharedPreferences.getInstance();
     final String? milestonesData = prefs.getString('sholatMilestones');
+
     if (milestonesData != null) {
       setState(() {
         sholatMilestones = Map<String, bool>.from(json.decode(milestonesData));
       });
+    } else {
+      // Jika belum ada data, inisialisasi dengan nilai default
+      setState(() {
+        sholatMilestones = {
+          'Shubuh': false,
+          'Dzuhur': false,
+          'Ashar': false,
+          'Maghrib': false,
+          'Isya': false,
+        };
+      });
+    }
+  }
+
+  Future<void> _checkAndResetMilestones() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? lastResetDate = prefs.getString('lastResetDate');
+    final DateTime now = DateTime.now();
+
+    // Jika belum ada tanggal terakhir reset, simpan tanggal hari ini
+    if (lastResetDate == null) {
+      await prefs.setString('lastResetDate', now.toIso8601String());
+      return;
+    }
+
+    // Bandingkan tanggal terakhir reset dengan tanggal sekarang
+    final DateTime lastReset = DateTime.parse(lastResetDate);
+    if (now.day != lastReset.day) {
+      // Jika hari sudah berganti, reset milestones
+      setState(() {
+        sholatMilestones = {
+          'Shubuh': false,
+          'Dzuhur': false,
+          'Ashar': false,
+          'Maghrib': false,
+          'Isya': false,
+        };
+      });
+
+      // Simpan status reset dan tanggal terbaru
+      await _saveSholatMilestones();
+      await prefs.setString('lastResetDate', now.toIso8601String());
     }
   }
 
@@ -503,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const BelajarSholatScreen(),
+                builder: (context) => BelajarSholatScreen(),
               ),
             );
           }),

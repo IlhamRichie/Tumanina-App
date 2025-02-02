@@ -53,19 +53,17 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('id_ID', null); // Inisialisasi locale Indonesia
-    tz.initializeTimeZones(); // Inisialisasi timezone
-    _checkInternetConnection(); // Cek koneksi internet saat init
+    initializeDateFormatting('id_ID', null);
+    tz.initializeTimeZones();
+    _checkInternetConnection();
     print("📥 Memuat status notifikasi...");
     _loadNotificationStatuses(); // Muat status notifikasi dari SharedPreferences
-    _getUserLocation(); // Ambil lokasi user
+    _getUserLocation();
     fetchPrayerTimesWithCache(widget.client, selectedDate);
-    _notificationService.init(); // Inisialisasi NotificationService
-
-    // Timer untuk perhitungan waktu sholat berikutnya
+    _notificationService.init();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (mounted) {
-        _calculateNextPrayer(); // Perbarui hitung mundur setiap detik
+        _calculateNextPrayer();
       }
     });
   }
@@ -74,20 +72,6 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   void dispose() {
     _timer?.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
-  }
-
-  // Fungsi untuk memuat semua status notifikasi dari SharedPreferences
-  Future<void> _loadNotificationStatuses() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prayerNotifications = {
-        'Subuh': _getIntFromPrefs(prefs, 'Subuh'),
-        'Dzuhur': _getIntFromPrefs(prefs, 'Dzuhur'),
-        'Ashar': _getIntFromPrefs(prefs, 'Ashar'),
-        'Maghrib': _getIntFromPrefs(prefs, 'Maghrib'),
-        'Isya': _getIntFromPrefs(prefs, 'Isya'),
-      };
-    });
   }
 
   // Fungsi untuk mengambil nilai dari SharedPreferences dengan penanganan error
@@ -116,10 +100,9 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       prayerNotifications[prayerName] = newStatus;
     });
 
-    // Simpan status ke SharedPreferences
+    // Simpan status notifikasi ke SharedPreferences
     await _saveNotificationStatus(prayerName, newStatus);
 
-    // Atur notifikasi berdasarkan status
     DateTime prayerTime =
         DateFormat('HH:mm').parse(prayerTimes[prayerName] ?? '00:00');
     DateTime scheduledTime = DateTime(
@@ -130,21 +113,21 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
       prayerTime.minute,
     );
 
-    String sound = 'notification';
+    String sound = 'notification'; // Default sound
 
     if (newStatus == 1) {
-      sound = 'notification';
+      sound = 'notification'; // Notifikasi biasa
       await _notificationService.scheduleNotification(
         id: prayerName.hashCode,
         title: 'Waktu Sholat $prayerName',
-        body: 'Sholat $prayerName akan dimulai dalam 5 menit.',
+        body: 'Sholat $prayerName akan dimulai \ndalam 5 menit.',
         scheduledTime: scheduledTime.subtract(Duration(minutes: 5)),
         sound: sound,
       );
       _showModernSnackbar(
-          'Notifikasi $prayerName diaktifkan dalam 5 menit sebelum waktu sholat.');
+          'Notifikasi $prayerName diaktifkan dalam \n5 menit sebelum waktu sholat.');
     } else if (newStatus == 2) {
-      sound = (prayerName == 'Subuh') ? 'adzansubuh_mansour' : 'adzan_mansour';
+      sound = (prayerName == 'Subuh') ? 'adzansubuh' : 'adzan'; // Suara adzan
       await _notificationService.scheduleNotification(
         id: prayerName.hashCode,
         title: 'Waktu Sholat $prayerName',
@@ -153,7 +136,7 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
         sound: sound,
       );
       _showModernSnackbar(
-          'Notifikasi $prayerName diaktifkan pada waktu sholat.');
+          'Notifikasi $prayerName diaktifkan pada \nwaktu sholat.');
     } else {
       await _notificationService.cancelNotification(prayerName.hashCode);
       _showModernSnackbar('Notifikasi $prayerName dinonaktifkan.');
@@ -164,16 +147,25 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
   void _showModernSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: GoogleFonts.poppins(color: Colors.white),
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        backgroundColor: const Color(0xFF004C7E),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -183,6 +175,20 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(prayerName, status);
     print("💾 Menyimpan status notifikasi: $prayerName -> $status");
+  }
+
+// Fungsi untuk memuat semua status notifikasi dari SharedPreferences
+  Future<void> _loadNotificationStatuses() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prayerNotifications = {
+        'Subuh': _getIntFromPrefs(prefs, 'Subuh'),
+        'Dzuhur': _getIntFromPrefs(prefs, 'Dzuhur'),
+        'Ashar': _getIntFromPrefs(prefs, 'Ashar'),
+        'Maghrib': _getIntFromPrefs(prefs, 'Maghrib'),
+        'Isya': _getIntFromPrefs(prefs, 'Isya'),
+      };
+    });
   }
 
   // Fungsi untuk mengecek koneksi internet
@@ -563,15 +569,17 @@ class WaktuSholatScreenState extends State<WaktuSholatScreen> {
                                   color: Colors.white,
                                   fontSize: 14,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 12),
                               // Waktu tersisa
                               Text(
-                                'Waktu tersisa: ${timeUntilNextPrayer.inHours} : ${timeUntilNextPrayer.inMinutes.remainder(60)} : ${timeUntilNextPrayer.inSeconds.remainder(60)}',
+                                'Waktu tersisa: \n${timeUntilNextPrayer.inHours} : ${timeUntilNextPrayer.inMinutes.remainder(60)} : ${timeUntilNextPrayer.inSeconds.remainder(60)}',
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: 16,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),

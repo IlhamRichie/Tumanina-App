@@ -40,7 +40,7 @@ dependencies:
   vibration: ^2.0.1
   path_provider: ^2.1.5
   audioplayers: ^5.2.1
-  shared_preferences: ^2.1.0
+  shared_preferences: ^2.5.1
   geolocator: ^13.0.2
   flutter_compass: ^0.8.1
   carousel_slider: ^5.0.0
@@ -57,12 +57,11 @@ dependencies:
   build_runner: ^2.4.10
   dio: ^5.2.1
   flutter_launcher_icons: ^0.13.1
-  webview_flutter: ^4.10.0
+  webview_flutter: ^4.0.1
   flutter_local_notifications: ^18.0.1
   flutter_localization: ^0.3.1
   geocoding: ^3.0.0  
   timezone: ^0.10.0
-
 
 dev_dependencies:
   flutter_test:
@@ -99,9 +98,12 @@ flutter:
     - assets/splash/Logo1 1.png
     - assets/kiblat/masjid.png
     - assets/pp.jpeg
-    - assets/notification.mp3
-    - assets/adzansubuh_mansour.mp3
-    - assets/adzan_mansour.mp3
+    - assets/sound/notification.mp3
+    - assets/sound/adzansubuh.mp3
+    - assets/sound/adzan.mp3
+    - android\app\src\main\res\raw\adzan.aac
+    - android\app\src\main\res\raw\adzansubuh.aac
+    - android\app\src\main\res\raw\notification.mp3
 
 flutter_launcher_icons:
   android: true
