@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = "http://139.59.100.62:5000/";
+  final String baseUrl = "http://159.203.89.57:5000/";
   final String artikelBaseUrl =
       'https://artikel-islam.netlify.app/.netlify/functions/api/ms/detail/:id_article';
   final String groqApiKey =

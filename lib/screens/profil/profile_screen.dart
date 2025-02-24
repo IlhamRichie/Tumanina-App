@@ -170,13 +170,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       _buildProfileOption(
-                        icon: Icons.notification_important,
-                        text: 'Test Notifikasi',
+                        icon: Icons.phone_android_rounded,
+                        text: 'Tentang Aplikasi',
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TestNotificationScreen(),
+                              builder: (context) => TentangScreen(),
                             ),
                           );
                         },
